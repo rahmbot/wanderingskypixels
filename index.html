@@ -324,6 +324,83 @@
   </div>
 </section>
 
+
+<!-- WEEKLY SPOTLIGHT -->
+<section class="spotlight-section">
+  <div class="section-inner">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:0.5rem;">
+      <div>
+        <div class="section-label">Weekly Spotlight</div>
+        <h2 class="section-title">This week's <em>featured frame</em></h2>
+      </div>
+      <a href="archive/index.html" class="btn-outline" style="font-size:0.8rem;">View All Archive &rarr;</a>
+    </div>
+
+    <div class="spotlight-card">
+      <div class="spotlight-img-wrap" onclick="window.open('https://www.instagram.com/wanderingskypixels/','_blank')">
+        <img src="images/spotlight/week-2026-05-week1.jpg" alt="The Moon & The Pyramid">
+        <div class="spotlight-img-overlay">
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.12em;color:var(--star);">View on Instagram &rarr;</span>
+        </div>
+      </div>
+      <div class="spotlight-content">
+        <div>
+          <div class="spotlight-week">Week 1 — May 2026 &nbsp;&#183;&nbsp; May 2, 2026</div>
+          <div class="spotlight-title">The Moon & The Pyramid — <em>Atlanta</em></div>
+          <div class="spotlight-story">I had been watching the lunar calendar for weeks — waiting for the precise alignment of a full moon rising directly behind the Bank of America Plaza's illuminated copper pyramid. May 2nd gave me the window I needed. I set up about two miles east of the building, the Sigma 150-600mm pulled tight at 550mm on the Sony A7RV, and waited. The moon rose faster than you'd expect at that focal length — a glowing amber disc climbing through Atlanta's skyline, the atmospheric haze turning it the color of hammered copper against the night sky. For about eleven minutes, the moon sat perfectly nested behind the pyramid's lattice structure. This is the shot I'd been planning for months. Some frames you calculate. Some you stumble into. This one was both.</div>
+          <div class="spotlight-meta">
+            <div class="spotlight-meta-item">
+              <span class="spotlight-meta-label">Camera</span>
+              <span class="spotlight-meta-value">Sony A7RV</span>
+            </div>
+            <div class="spotlight-meta-item">
+              <span class="spotlight-meta-label">Lens</span>
+              <span class="spotlight-meta-value">Sigma 150-600mm</span>
+            </div>
+            <div class="spotlight-meta-item">
+              <span class="spotlight-meta-label">Location</span>
+              <span class="spotlight-meta-value">Atlanta, Georgia</span>
+            </div>
+            <div class="spotlight-meta-item">
+              <span class="spotlight-meta-label">Date</span>
+              <span class="spotlight-meta-value">May 2, 2026</span>
+            </div>
+          </div>
+          <a href="https://www.instagram.com/wanderingskypixels/" target="_blank" rel="noopener" class="spotlight-ig-btn">
+            &#128247; Follow @wanderingskypixels
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SPOTLIGHT CSS (injected inline for homepage) -->
+<style>
+  .spotlight-section{background:var(--deep);border-top:1px solid var(--dim);border-bottom:1px solid var(--dim);position:relative;z-index:2;}
+  .spotlight-card{display:grid;grid-template-columns:1fr 1fr;gap:0;background:var(--card);border:1px solid var(--dim);overflow:hidden;margin-top:2.5rem;}
+  .spotlight-img-wrap{position:relative;overflow:hidden;min-height:480px;cursor:pointer;}
+  .spotlight-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform 0.5s;}
+  .spotlight-img-wrap:hover img{transform:scale(1.03);}
+  .spotlight-img-overlay{position:absolute;inset:0;background:rgba(5,11,24,0.4);display:flex;align-items:flex-end;padding:1.5rem;opacity:0;transition:opacity 0.3s;}
+  .spotlight-img-wrap:hover .spotlight-img-overlay{opacity:1;}
+  .spotlight-content{padding:3rem;display:flex;flex-direction:column;justify-content:space-between;border-left:1px solid var(--dim);}
+  .spotlight-week{font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.22em;color:var(--aurora);text-transform:uppercase;margin-bottom:0.8rem;}
+  .spotlight-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;line-height:1.2;margin-bottom:1.2rem;}
+  .spotlight-title em{font-style:italic;color:var(--gold);}
+  .spotlight-story{font-size:0.9rem;color:var(--muted);line-height:1.85;}
+  .spotlight-meta{margin-top:1.8rem;padding-top:1.5rem;border-top:1px solid var(--dim);display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
+  .spotlight-meta-item{display:flex;flex-direction:column;gap:0.2rem;}
+  .spotlight-meta-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.16em;color:var(--muted);text-transform:uppercase;}
+  .spotlight-meta-value{font-size:0.82rem;color:var(--star);}
+  .spotlight-ig-btn{display:inline-flex;align-items:center;gap:0.5rem;margin-top:1.5rem;padding:0.65rem 1.4rem;border:1px solid rgba(200,169,110,0.4);color:var(--gold);font-size:0.8rem;letter-spacing:0.08em;border-radius:2px;text-decoration:none;transition:background 0.2s,color 0.2s;width:fit-content;}
+  .spotlight-ig-btn:hover{background:var(--gold);color:var(--night);}
+  @media(max-width:900px){
+    .spotlight-card{grid-template-columns:1fr;}
+    .spotlight-img-wrap{min-height:320px;}
+    .spotlight-content{border-left:none;border-top:1px solid var(--dim);padding:2rem;}
+  }
+</style>
 <!-- NEWSLETTER -->
 <section style="background:var(--mid);border-top:1px solid var(--dim);position:relative;z-index:2;">
   <div style="max-width:640px;margin:0 auto;text-align:center;padding:5rem 2rem;">
