@@ -954,10 +954,20 @@ Respond ONLY with valid JSON in this exact structure, no markdown, no extra text
       })
     });
 
-    var data = await response.json();
-    var text = data.content && data.content[0] ? data.content[0].text : '';
-    text = text.replace(/```json|```/g, '').trim();
-    var result = JSON.parse(text);
+    var rawText = await response.text();
+    console.log('Status:', response.status, 'Raw:', rawText.substring(0, 300));
+
+    var data;
+    try { data = JSON.parse(rawText); }
+    catch(e) { throw new Error('Worker returned: ' + rawText.substring(0, 150)); }
+
+    if (data.error) { throw new Error('API error: ' + (data.error.message || JSON.stringify(data.error))); }
+    if (!data.content || !data.content[0]) { throw new Error('No content in response: ' + JSON.stringify(data).substring(0,150)); }
+
+    var text = data.content[0].text.replace(/```json|```/g, '').trim();
+    var result;
+    try { result = JSON.parse(text); }
+    catch(e) { throw new Error('Bad JSON from Claude: ' + text.substring(0, 150)); }
 
     // Populate results
     document.getElementById('scene-badge').textContent = result.scene_summary;
