@@ -543,7 +543,7 @@
     <div class="tab-panel" id="tab-events">
       <div class="m-section-head">
         <h2>Event Management</h2>
-        <p>All events for Hope Foundation — including events connected from GiveSmart campaigns.</p>
+        <p>Events for Hope Foundation — including those connected from your GiveSmart campaigns.</p>
       </div>
       <div class="em-grid">
         <div class="em-card">
@@ -551,17 +551,26 @@
           <div class="em-card-body">
             <div class="event-item">
               <div class="event-dot" style="background:var(--m-teal);"></div>
-              <div class="event-info"><div class="en">Hope Gala 2025 <span class="c-chip chip-teal" style="margin-left:6px;">Synced from GiveSmart</span></div><div class="ed">Oct 18, 2025 · The Georgian Terrace, Atlanta · 287 registered</div></div>
+              <div class="event-info">
+                <div class="en">Hope Gala 2025 <span class="c-chip chip-teal" style="margin-left:6px;">Synced from GiveSmart</span></div>
+                <div class="ed">Oct 18, 2025 · The Georgian Terrace, Atlanta · 287 registered</div>
+              </div>
               <div class="event-stat">82%</div>
             </div>
             <div class="event-item">
               <div class="event-dot" style="background:var(--m-orange);"></div>
-              <div class="event-info"><div class="en">Spring 5K Run for Hope</div><div class="ed">Apr 12, 2025 · Piedmont Park · 142 registered</div></div>
+              <div class="event-info">
+                <div class="en">Spring 5K Run for Hope <span class="c-chip chip-teal" style="margin-left:6px;">Synced from GiveSmart</span></div>
+                <div class="ed">Apr 12, 2025 · Piedmont Park, Atlanta · 142 registered</div>
+              </div>
               <div class="event-stat">40%</div>
             </div>
             <div class="event-item">
               <div class="event-dot" style="background:var(--m-purple);"></div>
-              <div class="event-info"><div class="en">Annual Board Luncheon</div><div class="ed">Mar 3, 2025 · Virtual · 48 registered</div></div>
+              <div class="event-info">
+                <div class="en">Annual Board Luncheon</div>
+                <div class="ed">Mar 3, 2025 · Virtual · 48 registered</div>
+              </div>
               <div class="event-stat">96%</div>
             </div>
           </div>
@@ -571,8 +580,8 @@
           <div class="em-card-body">
             <div class="dash-row"><span class="lbl">Check-in mode</span><span class="val green">QR ready</span></div>
             <div class="dash-row"><span class="lbl">Seats assigned</span><span class="val">287 / 350</span></div>
-            <div class="dash-row"><span class="lbl">VIP tables</span><span class="val">12 / 15</span></div>
-            <div class="dash-row"><span class="lbl">Dietary flags</span><span class="val">34 guests</span></div>
+            <div class="dash-row"><span class="lbl">VIP tables</span><span class="val">12 / 15 filled</span></div>
+            <div class="dash-row"><span class="lbl">Dietary flags</span><span class="val">34 guests noted</span></div>
             <div class="dash-row"><span class="lbl">Auction display</span><span class="val green">Live screen ready</span></div>
             <div class="dash-row"><span class="lbl">Last GiveSmart sync</span><span class="val">Just now</span></div>
           </div>
@@ -580,18 +589,18 @@
       </div>
       <div style="background:var(--m-purple-lt);border:1px solid rgba(107,79,187,0.2);border-radius:6px;padding:0.9rem 1.2rem;font-size:0.82rem;color:var(--m-purple);display:flex;align-items:center;gap:0.6rem;">
         <span>✦</span>
-        <span><strong>Integration active:</strong> New GiveSmart registrations sync to this event automatically — seating, check-in, and donor records update in real time.</span>
+        <span><strong>Integration active:</strong> New GiveSmart registrations sync here automatically — seating, check-in, and donor records update in real time. No manual imports needed.</span>
       </div>
     </div>
 
     <!-- ══ Integrations Tab ══ -->
     <div class="tab-panel" id="tab-integrations">
-      <div class="m-section-head" style="display:flex;align-items:flex-start;justify-content:space-between;">
-        <div><h2>Your Integrations</h2><p>All active and configured connections for Hope Foundation.</p></div>
-        <button class="int-add-btn">+ Add Integration</button>
+      <div class="m-section-head">
+        <h2>Your Momentive Integrations</h2>
+        <p>Active connections between your Momentive products. When products share data automatically, your team spends less time on manual updates.</p>
       </div>
       <table class="int-table">
-        <thead><tr><th>Integration</th><th>From</th><th>To</th><th>Trigger</th><th>Status</th><th>Last Sync</th></tr></thead>
+        <thead><tr><th>Connection</th><th>From</th><th>To</th><th>Trigger</th><th>Status</th><th>Last Sync</th></tr></thead>
         <tbody>
           <tr>
             <td><strong>Gala Campaign → Event</strong></td>
@@ -610,48 +619,50 @@
             <td>2 hrs ago</td>
           </tr>
           <tr>
-            <td><strong>Donor → Accounting</strong></td>
+            <td><strong>Donations → Fund Accounting</strong></td>
             <td><span class="c-chip chip-purple">GiveSmart</span></td>
             <td><span class="c-chip chip-teal">MIP Accounting</span></td>
             <td>On donation received</td>
-            <td><span class="int-status draft">○ Draft</span></td>
+            <td><span class="int-status draft">○ Not yet active</span></td>
             <td>—</td>
-          </tr>
-          <tr>
-            <td><strong>Salesforce CRM Sync</strong></td>
-            <td><span class="c-chip chip-teal">Salesforce</span></td>
-            <td><span class="c-chip chip-purple">GiveSmart</span></td>
-            <td>On donor record update</td>
-            <td><span class="int-status error">✕ Error</span></td>
-            <td>Failed 6 hrs ago</td>
           </tr>
         </tbody>
       </table>
+      <div style="background:var(--m-gray);border:1px solid var(--m-border);border-radius:6px;padding:0.85rem 1.1rem;margin-top:1rem;display:flex;align-items:flex-start;gap:0.7rem;">
+        <span style="font-size:1rem;margin-top:0.1rem;">💡</span>
+        <div style="font-size:0.78rem;color:var(--m-muted);line-height:1.6;">
+          <strong style="color:var(--m-text);">Have more Momentive products?</strong> When you subscribe to additional products in the suite — like Donor Management or MIP Accounting — a setup wizard will appear here to connect them to your existing workflows with a few clicks.
+        </div>
+      </div>
     </div>
 
     <!-- ══ Analytics Tab ══ -->
     <div class="tab-panel" id="tab-analytics">
-      <div class="m-section-head"><h2>Platform Analytics</h2><p>Cross-product performance since integrations went live.</p></div>
+      <div class="m-section-head">
+        <h2>Campaign & Event Summary</h2>
+        <p>A unified view of Hope Foundation's fundraising and event activity across your connected Momentive products.</p>
+      </div>
       <div class="analytics-kpis">
-        <div class="kpi-card"><div class="kpi-label">Total Raised</div><div class="kpi-val">$34,250</div><div class="kpi-delta up">↑ 23% vs last gala</div></div>
-        <div class="kpi-card"><div class="kpi-label">Registered Donors</div><div class="kpi-val">287</div><div class="kpi-delta up">↑ 41 since integration</div></div>
-        <div class="kpi-card"><div class="kpi-label">Event Seats Filled</div><div class="kpi-val">82%</div><div class="kpi-delta up">↑ 350 capacity</div></div>
-        <div class="kpi-card"><div class="kpi-label">Products Used</div><div class="kpi-val">2</div><div class="kpi-delta up">↑ from 1 (GiveSmart only)</div></div>
+        <div class="kpi-card"><div class="kpi-label">Raised — Hope Gala</div><div class="kpi-val">$34,250</div><div class="kpi-delta up">↑ 23% vs last year's gala</div></div>
+        <div class="kpi-card"><div class="kpi-label">Goal Remaining</div><div class="kpi-val">$15,750</div><div class="kpi-delta" style="color:var(--m-muted);">68% of $50,000 reached</div></div>
+        <div class="kpi-card"><div class="kpi-label">Registered Donors</div><div class="kpi-val">287</div><div class="kpi-delta up">↑ 41 in the last 2 weeks</div></div>
+        <div class="kpi-card"><div class="kpi-label">Seats Still Available</div><div class="kpi-val">63</div><div class="kpi-delta" style="color:var(--m-orange);">Venue fills Oct 18</div></div>
       </div>
       <div class="bar-chart">
-        <h3>Weekly Registrations — Since Integration Live</h3>
+        <h3>Weekly Donor Registrations — Hope Gala 2025</h3>
         <div class="bars">
-          <div class="bar-col"><div class="bar" style="height:30%;background:var(--m-purple);"></div><span class="bar-lbl">Wk1</span></div>
-          <div class="bar-col"><div class="bar" style="height:48%;background:var(--m-purple);"></div><span class="bar-lbl">Wk2</span></div>
-          <div class="bar-col"><div class="bar" style="height:55%;background:var(--m-purple);"></div><span class="bar-lbl">Wk3</span></div>
-          <div class="bar-col"><div class="bar" style="height:72%;background:var(--m-orange);"></div><span class="bar-lbl">Wk4</span></div>
-          <div class="bar-col"><div class="bar" style="height:65%;background:var(--m-orange);"></div><span class="bar-lbl">Wk5</span></div>
-          <div class="bar-col"><div class="bar" style="height:85%;background:var(--m-teal);"></div><span class="bar-lbl">Wk6</span></div>
-          <div class="bar-col"><div class="bar" style="height:100%;background:var(--m-teal);"></div><span class="bar-lbl">Wk7</span></div>
+          <div class="bar-col"><div class="bar" style="height:22%;background:var(--m-purple);"></div><span class="bar-lbl">Aug W1</span></div>
+          <div class="bar-col"><div class="bar" style="height:35%;background:var(--m-purple);"></div><span class="bar-lbl">Aug W2</span></div>
+          <div class="bar-col"><div class="bar" style="height:44%;background:var(--m-purple);"></div><span class="bar-lbl">Aug W3</span></div>
+          <div class="bar-col"><div class="bar" style="height:38%;background:var(--m-purple);"></div><span class="bar-lbl">Aug W4</span></div>
+          <div class="bar-col"><div class="bar" style="height:60%;background:var(--m-orange);"></div><span class="bar-lbl">Sep W1</span></div>
+          <div class="bar-col"><div class="bar" style="height:78%;background:var(--m-orange);"></div><span class="bar-lbl">Sep W2</span></div>
+          <div class="bar-col"><div class="bar" style="height:100%;background:var(--m-teal);"></div><span class="bar-lbl">Sep W3</span></div>
         </div>
       </div>
-      <div style="background:var(--m-teal-lt);border:1px solid rgba(26,155,138,0.2);border-radius:6px;padding:0.9rem 1.2rem;font-size:0.82rem;color:var(--m-teal);">
-        <strong>Platform insight:</strong> Registrations increased 41% in the 3 weeks after the GiveSmart ↔ Event Management integration went live. Donors who received an auto-generated event confirmation email converted at 2.3× the rate of those who didn't.
+      <div style="background:var(--m-teal-lt);border:1px solid rgba(26,155,138,0.2);border-radius:6px;padding:0.9rem 1.2rem;font-size:0.82rem;color:var(--m-teal);display:flex;align-items:flex-start;gap:0.6rem;">
+        <span>✦</span>
+        <div><strong>MomentiveIQ notice:</strong> At the current registration pace, Hope Gala 2025 will sell out approximately 3 weeks before the event date. 12 guests from last year's Table tier have not yet registered — a targeted email nudge could recover up to $7,500 in donations.</div>
       </div>
     </div>
 
@@ -675,9 +686,9 @@
   <div class="fd-inner">
     <div class="analytics-kpis" style="margin-bottom:1.2rem;">
       <div class="kpi-card"><div class="kpi-label">Total Raised (YTD)</div><div class="kpi-val">$34,250</div><div class="kpi-delta up">↑ 23% vs last year</div></div>
-      <div class="kpi-card"><div class="kpi-label">Active Donors</div><div class="kpi-val">429</div><div class="kpi-delta up">↑ 18% since integration</div></div>
-      <div class="kpi-card"><div class="kpi-label">Events Running</div><div class="kpi-val">3</div><div class="kpi-delta up">2 synced from GiveSmart</div></div>
-      <div class="kpi-card"><div class="kpi-label">Products Active</div><div class="kpi-val">2 of 9</div><div class="kpi-delta up">↑ from 1 product</div></div>
+      <div class="kpi-card"><div class="kpi-label">Goal Remaining</div><div class="kpi-val">$15,750</div><div class="kpi-delta" style="color:var(--m-muted);">68% of $50,000 reached</div></div>
+      <div class="kpi-card"><div class="kpi-label">Registered Donors</div><div class="kpi-val">287</div><div class="kpi-delta up">↑ 41 in last 2 weeks</div></div>
+      <div class="kpi-card"><div class="kpi-label">Seats Available</div><div class="kpi-val">63</div><div class="kpi-delta" style="color:var(--m-orange);">Venue fills Oct 18</div></div>
     </div>
     <div class="dashboard-grid" style="margin-bottom:1.2rem;">
       <div class="dash-card">
