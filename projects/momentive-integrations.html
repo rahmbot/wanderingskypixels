@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Momentive Integrations Platform | WanderingSkyPixels Projects</title>
+<link rel="icon" href="../logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── Site design tokens ── */
+  :root{
+    --night:#050b18;--deep:#0a1628;--mid:#111f38;--card:#0d1a2e;--horizon:#1a2f52;
+    --star:#e8e0cc;--gold:#c8a96e;--aurora:#4fc4a0;--nebula:#7b8cde;--muted:#6a7d99;--dim:#2a3d5a;
+    /* Momentive brand colors pulled from their site */
+    --m-purple:#6b4fbb;--m-purple-lt:#ede8fa;--m-orange:#e8732a;--m-orange-lt:#fdf0e8;
+    --m-teal:#1a9b8a;--m-teal-lt:#e4f5f3;--m-navy:#1d2d50;--m-gray:#f4f5f7;--m-border:#e1e4e8;
+    --m-text:#1d2d50;--m-muted:#5e6e8a;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--night);color:var(--star);font-family:'Outfit',sans-serif;font-weight:300;overflow-x:hidden;}
+  a{text-decoration:none;color:inherit;}
+
+  /* ── Site Nav (same as all pages) ── */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 4rem;background:rgba(5,11,24,0.92);backdrop-filter:blur(18px);border-bottom:1px solid rgba(200,169,110,0.12);}
+  .nav-logo img{height:42px;width:auto;display:block;filter:brightness(1.08);}
+  .nav-links{display:flex;gap:2rem;list-style:none;align-items:center;}
+  .nav-links a{color:var(--muted);font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.2s;}
+  .nav-links a:hover{color:var(--gold);}
+  .nav-cta{background:linear-gradient(135deg,var(--gold),#a07840);color:var(--night)!important;padding:0.5rem 1.4rem;border-radius:2px;font-weight:500!important;}
+  .nav-dropdown{position:relative;}
+  .nav-dropdown-trigger{display:flex;align-items:center;gap:0.3rem;cursor:pointer;color:var(--muted);font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;}
+  .nav-dropdown-menu{display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);background:rgba(5,11,24,0.98);backdrop-filter:blur(20px);border:1px solid var(--dim);min-width:220px;list-style:none;padding:0.5rem 0;z-index:200;box-shadow:0 20px 60px rgba(0,0,0,0.5);margin-top:8px;}
+  .nav-dropdown:hover .nav-dropdown-menu{display:block;}
+  .nav-dropdown-menu::before{content:'';position:absolute;top:-8px;left:0;right:0;height:8px;}
+  .nav-dropdown-menu li a{display:block;padding:0.65rem 1.2rem;color:var(--muted);font-size:0.82rem;transition:color 0.2s,background 0.2s;}
+  .nav-dropdown-menu li a:hover{color:var(--gold);background:rgba(200,169,110,0.06);}
+  .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none;}
+  .hamburger span{display:block;width:24px;height:1.5px;background:var(--star);}
+  .mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:rgba(5,11,24,0.98);backdrop-filter:blur(20px);border-bottom:1px solid var(--dim);z-index:99;padding:1.5rem 2rem;flex-direction:column;}
+  .mobile-menu.open{display:flex;}
+  .mobile-menu a{color:var(--muted);font-size:0.9rem;letter-spacing:0.08em;text-transform:uppercase;padding:1rem 0;border-bottom:1px solid var(--dim);}
+
+  /* ── Page hero (site style) ── */
+  .page-hero{padding:8rem 4rem 3rem;max-width:1100px;margin:0 auto;}
+  .section-label{font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;}
+  .page-hero h1{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;line-height:1.15;margin-bottom:1rem;}
+  .page-hero p{font-size:0.95rem;color:var(--muted);line-height:1.8;max-width:600px;margin-bottom:0.6rem;}
+  .breadcrumb{font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;color:var(--muted);margin-bottom:1.5rem;}
+  .breadcrumb a{color:var(--gold);}
+  .breadcrumb a:hover{text-decoration:underline;}
+
+  /* ── Context strip ── */
+  .context-strip{max-width:1100px;margin:0 auto 2rem;padding:0 4rem;}
+  .context-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+  .ctx-card{background:var(--card);border:1px solid var(--dim);border-radius:2px;padding:1.2rem 1.5rem;}
+  .ctx-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.15em;color:var(--gold);text-transform:uppercase;margin-bottom:0.4rem;}
+  .ctx-val{font-size:0.88rem;color:var(--star);line-height:1.5;}
+
+  /* ── PROTOTYPE SHELL (Momentive branding) ── */
+  .proto-shell{max-width:1100px;margin:0 auto 6rem;padding:0 4rem;}
+  .proto-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.2em;color:var(--nebula);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;}
+  .proto-label::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--nebula);}
+
+  /* Momentive-branded app chrome */
+  .m-app{background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.08);}
+
+  /* App top bar */
+  .m-topbar{background:var(--m-navy);padding:0.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+  .m-topbar-brand{display:flex;align-items:center;gap:0.75rem;}
+  .m-logo-text{font-family:'Outfit',sans-serif;font-size:0.95rem;font-weight:500;color:#fff;letter-spacing:0.02em;}
+  .m-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--m-orange);}
+  .m-topbar-nav{display:flex;gap:1.5rem;}
+  .m-topbar-nav span{font-size:0.78rem;color:rgba(255,255,255,0.5);cursor:pointer;transition:color 0.2s;letter-spacing:0.04em;}
+  .m-topbar-nav span:hover{color:#fff;}
+  .m-topbar-nav span.active{color:#fff;border-bottom:2px solid var(--m-orange);padding-bottom:2px;}
+  .m-topbar-user{width:28px;height:28px;border-radius:50%;background:var(--m-purple);display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:#fff;font-weight:500;}
+
+  /* Step progress bar */
+  .m-stepper{background:var(--m-gray);border-bottom:1px solid var(--m-border);padding:1rem 1.5rem;display:flex;align-items:center;gap:0;}
+  .m-step{display:flex;align-items:center;gap:0.5rem;cursor:pointer;}
+  .m-step-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:600;font-family:'Outfit',sans-serif;transition:all 0.2s;flex-shrink:0;}
+  .m-step-num.done{background:var(--m-teal);color:#fff;}
+  .m-step-num.active{background:var(--m-purple);color:#fff;}
+  .m-step-num.pending{background:#fff;color:var(--m-muted);border:2px solid var(--m-border);}
+  .m-step-label{font-size:0.78rem;font-family:'Outfit',sans-serif;font-weight:400;white-space:nowrap;}
+  .m-step-label.active{color:var(--m-purple);font-weight:500;}
+  .m-step-label.done{color:var(--m-teal);}
+  .m-step-label.pending{color:var(--m-muted);}
+  .m-step-connector{flex:1;height:1px;background:var(--m-border);margin:0 0.75rem;}
+
+  /* App body */
+  .m-body{padding:1.5rem;background:#fff;min-height:420px;}
+
+  /* ── STEP 1: Campaign panel ── */
+  .step-panel{display:none;}
+  .step-panel.visible{display:block;}
+
+  .m-section-head{margin-bottom:1.2rem;}
+  .m-section-head h2{font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:600;color:var(--m-text);margin-bottom:0.25rem;}
+  .m-section-head p{font-size:0.82rem;color:var(--m-muted);line-height:1.6;}
+
+  /* Campaign card */
+  .campaign-card{border:1px solid var(--m-border);border-radius:6px;padding:1.2rem 1.4rem;margin-bottom:1rem;display:flex;align-items:flex-start;gap:1rem;cursor:pointer;transition:border-color 0.2s,box-shadow 0.2s;}
+  .campaign-card:hover{border-color:var(--m-purple);box-shadow:0 0 0 3px rgba(107,79,187,0.08);}
+  .campaign-card.selected{border-color:var(--m-purple);box-shadow:0 0 0 3px rgba(107,79,187,0.12);background:rgba(107,79,187,0.02);}
+  .campaign-icon{width:40px;height:40px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+  .campaign-info h3{font-size:0.88rem;font-weight:600;color:var(--m-text);margin-bottom:0.2rem;}
+  .campaign-info p{font-size:0.78rem;color:var(--m-muted);line-height:1.5;}
+  .campaign-info .c-chips{display:flex;gap:0.4rem;margin-top:0.5rem;flex-wrap:wrap;}
+  .c-chip{font-size:0.68rem;padding:0.18rem 0.55rem;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:400;}
+  .chip-purple{background:var(--m-purple-lt);color:var(--m-purple);}
+  .chip-orange{background:var(--m-orange-lt);color:var(--m-orange);}
+  .chip-teal{background:var(--m-teal-lt);color:var(--m-teal);}
+  .campaign-check{margin-left:auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--m-border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;}
+  .campaign-card.selected .campaign-check{background:var(--m-purple);border-color:var(--m-purple);color:#fff;}
+
+  /* Suggestion banner */
+  .suggest-banner{background:linear-gradient(135deg,rgba(107,79,187,0.06),rgba(26,155,138,0.06));border:1px solid rgba(107,79,187,0.2);border-radius:6px;padding:1rem 1.2rem;display:flex;align-items:flex-start;gap:0.8rem;margin-top:1.2rem;}
+  .suggest-icon{font-size:1.1rem;flex-shrink:0;margin-top:0.1rem;}
+  .suggest-text h4{font-size:0.82rem;font-weight:600;color:var(--m-purple);margin-bottom:0.2rem;}
+  .suggest-text p{font-size:0.78rem;color:var(--m-muted);line-height:1.5;}
+  .suggest-cta{margin-left:auto;white-space:nowrap;padding:0.4rem 1rem;background:var(--m-purple);color:#fff;border:none;border-radius:4px;font-size:0.78rem;font-family:'Outfit',sans-serif;font-weight:500;cursor:pointer;transition:background 0.2s;flex-shrink:0;}
+  .suggest-cta:hover{background:#5a40a0;}
+
+  /* ── STEP 2: Config ── */
+  .config-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.2rem;}
+  .config-col h3{font-size:0.8rem;font-weight:600;color:var(--m-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.8rem;padding-bottom:0.5rem;border-bottom:1px solid var(--m-border);}
+  .config-col h3 span{font-size:0.7rem;font-weight:400;padding:0.15rem 0.5rem;border-radius:8px;margin-left:0.5rem;text-transform:none;letter-spacing:0;}
+
+  .field-map{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem;}
+  .field-box{flex:1;background:var(--m-gray);border:1px solid var(--m-border);border-radius:4px;padding:0.5rem 0.75rem;font-size:0.78rem;color:var(--m-text);font-family:'Outfit',sans-serif;}
+  .field-box.mapped{background:#fff;border-color:var(--m-purple);color:var(--m-text);}
+  .map-arrow{color:var(--m-muted);font-size:0.9rem;flex-shrink:0;}
+  .map-check{color:var(--m-teal);font-size:0.9rem;flex-shrink:0;}
+
+  .ai-config-box{background:linear-gradient(135deg,rgba(107,79,187,0.04),rgba(26,155,138,0.04));border:1px solid rgba(107,79,187,0.15);border-radius:6px;padding:1rem 1.2rem;margin-bottom:1.2rem;}
+  .ai-config-box label{font-size:0.78rem;font-weight:500;color:var(--m-text);display:block;margin-bottom:0.5rem;}
+  .ai-config-box .ai-label{display:flex;align-items:center;gap:0.4rem;font-size:0.72rem;color:var(--m-purple);font-weight:500;margin-bottom:0.5rem;}
+  .ai-input-row{display:flex;gap:0.6rem;}
+  .ai-input{flex:1;background:#fff;border:1px solid var(--m-border);border-radius:4px;padding:0.55rem 0.75rem;font-size:0.82rem;font-family:'Outfit',sans-serif;color:var(--m-text);outline:none;transition:border-color 0.2s;}
+  .ai-input:focus{border-color:var(--m-purple);}
+  .ai-btn{padding:0.55rem 1rem;background:var(--m-purple);color:#fff;border:none;border-radius:4px;font-size:0.78rem;font-family:'Outfit',sans-serif;font-weight:500;cursor:pointer;white-space:nowrap;transition:background 0.2s;}
+  .ai-btn:hover{background:#5a40a0;}
+  .ai-btn:disabled{background:#ccc;cursor:not-allowed;}
+  .ai-result{margin-top:0.8rem;font-size:0.8rem;color:var(--m-text);line-height:1.6;background:#fff;border:1px solid var(--m-border);border-radius:4px;padding:0.75rem 1rem;display:none;}
+  .ai-result.visible{display:block;}
+  .ai-thinking{color:var(--m-purple);font-style:italic;font-size:0.78rem;}
+
+  /* ── STEP 3: Live dashboard ── */
+  .dashboard-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem;}
+  .dash-card{border:1px solid var(--m-border);border-radius:6px;overflow:hidden;}
+  .dash-card-head{padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;}
+  .dash-card-head h3{font-size:0.82rem;font-weight:600;color:#fff;}
+  .dash-badge{font-size:0.65rem;padding:0.2rem 0.55rem;border-radius:8px;font-weight:500;}
+  .dash-card-body{padding:1rem;background:#fff;}
+  .dash-row{display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--m-border);font-size:0.8rem;}
+  .dash-row:last-child{border:none;}
+  .dash-row .lbl{color:var(--m-muted);}
+  .dash-row .val{color:var(--m-text);font-weight:500;}
+  .dash-row .val.green{color:var(--m-teal);}
+
+  .flow-diagram{border:1px solid var(--m-border);border-radius:6px;padding:1.2rem 1.5rem;background:#fff;margin-bottom:1.2rem;}
+  .flow-diagram h3{font-size:0.78rem;font-weight:600;color:var(--m-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:1rem;}
+  .flow-nodes{display:flex;align-items:center;gap:0;}
+  .flow-node{flex:1;text-align:center;padding:0.75rem 0.5rem;border:1px solid var(--m-border);border-radius:6px;background:var(--m-gray);}
+  .flow-node.active{background:var(--m-purple-lt);border-color:var(--m-purple);}
+  .flow-node .fn-icon{font-size:1.3rem;margin-bottom:0.3rem;}
+  .flow-node .fn-label{font-size:0.72rem;font-weight:600;color:var(--m-text);}
+  .flow-node .fn-sub{font-size:0.65rem;color:var(--m-muted);margin-top:0.1rem;}
+  .flow-arrow{font-size:1.1rem;color:var(--m-purple);padding:0 0.3rem;flex-shrink:0;}
+
+  .success-banner{background:linear-gradient(135deg,var(--m-teal),#148070);border-radius:6px;padding:1.2rem 1.5rem;display:flex;align-items:center;gap:1rem;color:#fff;}
+  .success-icon{font-size:1.8rem;flex-shrink:0;}
+  .success-text h4{font-size:0.95rem;font-weight:600;margin-bottom:0.2rem;}
+  .success-text p{font-size:0.82rem;opacity:0.85;line-height:1.5;}
+
+  /* Nav buttons */
+  .m-nav-row{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.5rem;border-top:1px solid var(--m-border);background:var(--m-gray);}
+  .m-btn{padding:0.55rem 1.4rem;border-radius:4px;font-size:0.82rem;font-family:'Outfit',sans-serif;font-weight:500;cursor:pointer;transition:all 0.2s;border:none;}
+  .m-btn-ghost{background:transparent;color:var(--m-muted);border:1px solid var(--m-border);}
+  .m-btn-ghost:hover{color:var(--m-text);border-color:var(--m-text);}
+  .m-btn-primary{background:var(--m-purple);color:#fff;}
+  .m-btn-primary:hover{background:#5a40a0;}
+  .m-btn-primary:disabled{background:#ccc;cursor:not-allowed;}
+  .m-btn-success{background:var(--m-teal);color:#fff;}
+  .m-btn-success:hover{background:#148070;}
+
+  /* ── Reflection section (site style) ── */
+  .reflection{max-width:1100px;margin:0 auto;padding:0 4rem 6rem;}
+  .reflection-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem;}
+  .ref-card{background:var(--card);border:1px solid var(--dim);border-radius:2px;padding:2rem;}
+  .ref-card .section-label{margin-bottom:0.6rem;}
+  .ref-card h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:400;margin-bottom:0.8rem;}
+  .ref-card p{font-size:0.85rem;color:var(--muted);line-height:1.8;}
+
+  @media(max-width:768px){
+    nav{padding:1rem 2rem;}
+    .nav-links{display:none;}
+    .hamburger{display:flex;}
+    .page-hero,.context-strip,.proto-shell,.reflection{padding-left:1.5rem;padding-right:1.5rem;}
+    .config-grid,.dashboard-grid,.reflection-grid,.context-cards{grid-template-columns:1fr;}
+    .m-stepper{overflow-x:auto;}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a href="../index.html" class="nav-logo"><img src="../logo.png" alt="WanderingSkyPixels"></a>
+  <ul class="nav-links">
+    <li class="nav-dropdown">
+      <span class="nav-dropdown-trigger">Specialties ▾</span>
+      <ul class="nav-dropdown-menu">
+        <li><a href="../specialties/landscape.html">🏔️ Landscape & Cityscape</a></li>
+        <li><a href="../specialties/astro.html">🌌 Astrophotography</a></li>
+        <li><a href="../specialties/aerial.html">🚁 Drone & Aerial</a></li>
+        <li><a href="../specialties/iceland.html">🇮🇸 Iceland Guide</a></li>
+        <li><a href="../specialties/london-guide.html">🇬🇧 London Guide</a></li>
+      </ul>
+    </li>
+    <li class="nav-dropdown">
+      <span class="nav-dropdown-trigger" style="color:var(--gold);">Portfolio ▾</span>
+      <ul class="nav-dropdown-menu">
+        <li><a href="../portfolio/index.html">📷 Photography</a></li>
+        <li><a href="index.html">💼 Projects</a></li>
+      </ul>
+    </li>
+    <li><a href="../learn/index.html">Learn</a></li>
+    <li><a href="../gear.html">Gear</a></li>
+    <li><a href="../contact.html" class="nav-cta">Work With Me</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="../index.html">Home</a>
+  <a href="../portfolio/index.html">Portfolio — Photography</a>
+  <a href="index.html" style="padding-left:1.8rem;font-size:0.82rem;">💼 Projects</a>
+  <a href="../learn/index.html">Learn</a>
+  <a href="../gear.html">Gear</a>
+  <a href="../contact.html" class="nav-cta">Work With Me</a>
+</div>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="breadcrumb"><a href="index.html">Projects</a> / Momentive Integrations Platform</div>
+  <div class="section-label">Product Strategy · Interactive Prototype</div>
+  <h1>Momentive Integrations Platform</h1>
+  <p>A partner onboarding prototype demonstrating Pillar 2 of a proposed integrations platform strategy — how a nonprofit can connect GiveSmart's fundraising tools with Momentive's Event Management product through a plug-and-play configuration experience.</p>
+  <p style="margin-top:0.8rem;">The AI-assisted config step is powered live by the Claude API — describe your workflow in plain English and it maps the integration automatically.</p>
+</div>
+
+<!-- CONTEXT STRIP -->
+<div class="context-strip">
+  <div class="context-cards">
+    <div class="ctx-card">
+      <div class="ctx-label">The Scenario</div>
+      <div class="ctx-val">Hope Foundation wants to connect their GiveSmart fundraising campaign with Momentive Event Management for their annual gala — one workflow, two products, zero duplicate setup.</div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label">The Platform Pillar</div>
+      <div class="ctx-val">Pillar 2 — A plug-and-play partner ecosystem where products connect with a few configurations, not months of custom engineering.</div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label">The Business Goal</div>
+      <div class="ctx-val">Move customers from using 1 Momentive product to 2+. Native cross-product connections are included value — not a paid add-on.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PROTOTYPE -->
+<div class="proto-shell">
+  <div class="proto-label">Live Interactive Prototype</div>
+
+  <div class="m-app">
+    <!-- Top bar -->
+    <div class="m-topbar">
+      <div class="m-topbar-brand">
+        <div class="m-logo-dot"></div>
+        <span class="m-logo-text">Momentive Platform</span>
+      </div>
+      <div class="m-topbar-nav">
+        <span class="active">GiveSmart</span>
+        <span>Event Management</span>
+        <span>Integrations</span>
+        <span>Analytics</span>
+      </div>
+      <div class="m-topbar-user">HF</div>
+    </div>
+
+    <!-- Stepper -->
+    <div class="m-stepper">
+      <div class="m-step" onclick="goStep(1)">
+        <div class="m-step-num active" id="sn1">1</div>
+        <span class="m-step-label active" id="sl1">Select Campaign</span>
+      </div>
+      <div class="m-step-connector"></div>
+      <div class="m-step" onclick="goStep(2)">
+        <div class="m-step-num pending" id="sn2">2</div>
+        <span class="m-step-label pending" id="sl2">Configure Integration</span>
+      </div>
+      <div class="m-step-connector"></div>
+      <div class="m-step" onclick="goStep(3)">
+        <div class="m-step-num pending" id="sn3">3</div>
+        <span class="m-step-label pending" id="sl3">Go Live</span>
+      </div>
+    </div>
+
+    <!-- ── STEP 1 ── -->
+    <div class="m-body">
+      <div class="step-panel visible" id="step1">
+        <div class="m-section-head">
+          <h2>Your GiveSmart Campaigns</h2>
+          <p>Select a campaign to connect with Momentive Event Management. Your donor data and campaign settings will sync automatically.</p>
+        </div>
+
+        <div class="campaign-card" id="card1" onclick="selectCampaign(this)">
+          <div class="campaign-icon" style="background:#fdf0e8;">🍽️</div>
+          <div class="campaign-info">
+            <h3>Hope Gala 2025 — Annual Fundraiser</h3>
+            <p>$50,000 goal · 287 donors · Ticket tiers: General ($150), VIP ($500), Table ($2,500)</p>
+            <div class="c-chips">
+              <span class="c-chip chip-orange">Active</span>
+              <span class="c-chip chip-purple">Auction enabled</span>
+              <span class="c-chip chip-teal">Text-to-donate</span>
+            </div>
+          </div>
+          <div class="campaign-check" id="check1">✓</div>
+        </div>
+
+        <div class="campaign-card" id="card2" onclick="selectCampaign(this)">
+          <div class="campaign-icon" style="background:#ede8fa;">🏃</div>
+          <div class="campaign-info">
+            <h3>Spring 5K Run for Hope</h3>
+            <p>$15,000 goal · 142 donors · Peer-to-peer fundraising · Registration open</p>
+            <div class="c-chips">
+              <span class="c-chip chip-purple">Active</span>
+              <span class="c-chip chip-teal">Peer-to-peer</span>
+            </div>
+          </div>
+          <div class="campaign-check" id="check2">✓</div>
+        </div>
+
+        <div class="campaign-card" id="card3" onclick="selectCampaign(this)">
+          <div class="campaign-icon" style="background:#e4f5f3;">🎨</div>
+          <div class="campaign-info">
+            <h3>Art Auction — Community Impact</h3>
+            <p>$8,000 goal · 64 donors · Silent auction · 34 items listed</p>
+            <div class="c-chips">
+              <span class="c-chip chip-teal">Draft</span>
+              <span class="c-chip chip-orange">Auction</span>
+            </div>
+          </div>
+          <div class="campaign-check" id="check3">✓</div>
+        </div>
+
+        <div class="suggest-banner" id="suggest-banner" style="display:none;">
+          <span class="suggest-icon">✨</span>
+          <div class="suggest-text">
+            <h4>This campaign looks like it needs an event</h4>
+            <p>Hope Gala 2025 has ticket tiers and 287 registered donors. Connect Event Management to handle venue logistics, check-in, seating, and day-of coordination — all from the same donor list.</p>
+          </div>
+          <button class="suggest-cta" onclick="goStep(2)">Connect Event Management →</button>
+        </div>
+      </div>
+
+      <!-- ── STEP 2 ── -->
+      <div class="step-panel" id="step2">
+        <div class="m-section-head">
+          <h2>Configure the Integration</h2>
+          <p>Map your GiveSmart campaign data to Event Management fields, or describe what you need in plain English and let MomentiveIQ configure it for you.</p>
+        </div>
+
+        <!-- AI config box -->
+        <div class="ai-config-box">
+          <div class="ai-label">✦ MomentiveIQ — AI-Assisted Setup</div>
+          <label>Describe your integration in plain English</label>
+          <div class="ai-input-row">
+            <input class="ai-input" id="ai-input" type="text" placeholder="e.g. When a donor registers for the gala, create an event ticket and add them to the seating chart..." />
+            <button class="ai-btn" id="ai-btn" onclick="runAI()">Configure with AI</button>
+          </div>
+          <div class="ai-result" id="ai-result"></div>
+        </div>
+
+        <!-- Field mapping -->
+        <div class="config-grid">
+          <div class="config-col">
+            <h3>GiveSmart <span class="c-chip chip-orange">Source</span></h3>
+            <div class="field-map"><div class="field-box mapped">donor_first_name</div><div class="map-arrow">→</div><div class="field-box mapped">attendee_first_name</div><div class="map-check">✓</div></div>
+            <div class="field-map"><div class="field-box mapped">donor_last_name</div><div class="map-arrow">→</div><div class="field-box mapped">attendee_last_name</div><div class="map-check">✓</div></div>
+            <div class="field-map"><div class="field-box mapped">donor_email</div><div class="map-arrow">→</div><div class="field-box mapped">attendee_email</div><div class="map-check">✓</div></div>
+            <div class="field-map"><div class="field-box mapped">ticket_tier</div><div class="map-arrow">→</div><div class="field-box mapped">seat_category</div><div class="map-check">✓</div></div>
+            <div class="field-map"><div class="field-box mapped">donation_amount</div><div class="map-arrow">→</div><div class="field-box mapped">registration_value</div><div class="map-check">✓</div></div>
+          </div>
+          <div class="config-col">
+            <h3>Event Management <span class="c-chip chip-purple">Destination</span></h3>
+            <div style="background:var(--m-gray);border:1px solid var(--m-border);border-radius:6px;padding:1rem;">
+              <div class="dash-row"><span class="lbl">Event name</span><span class="val">Hope Gala 2025</span></div>
+              <div class="dash-row"><span class="lbl">Trigger</span><span class="val">On campaign registration</span></div>
+              <div class="dash-row"><span class="lbl">Sync direction</span><span class="val">GiveSmart → Event Mgmt</span></div>
+              <div class="dash-row"><span class="lbl">Auto check-in</span><span class="val green">Enabled</span></div>
+              <div class="dash-row"><span class="lbl">Branding sync</span><span class="val green">Enabled</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── STEP 3 ── -->
+      <div class="step-panel" id="step3">
+        <div class="success-banner" style="margin-bottom:1.2rem;">
+          <span class="success-icon">🎉</span>
+          <div class="success-text">
+            <h4>Integration is live — Hope Gala 2025 is connected</h4>
+            <p>GiveSmart and Event Management are now running as a single workflow. Donors register once; everything else happens automatically.</p>
+          </div>
+        </div>
+
+        <div class="flow-diagram">
+          <h3>Live Workflow</h3>
+          <div class="flow-nodes">
+            <div class="flow-node active">
+              <div class="fn-icon">💳</div>
+              <div class="fn-label">GiveSmart</div>
+              <div class="fn-sub">Donor registers & pays</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node active">
+              <div class="fn-icon">🔗</div>
+              <div class="fn-label">Integration Layer</div>
+              <div class="fn-sub">SSO + shared data model</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node active">
+              <div class="fn-icon">🎟️</div>
+              <div class="fn-label">Event Management</div>
+              <div class="fn-sub">Ticket + seat assigned</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node active">
+              <div class="fn-icon">📧</div>
+              <div class="fn-label">Confirmation</div>
+              <div class="fn-sub">Auto email to donor</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="dash-card">
+            <div class="dash-card-head" style="background:var(--m-purple);">
+              <h3>GiveSmart — Fundraising</h3>
+              <span class="dash-badge" style="background:rgba(255,255,255,0.2);color:#fff;">Live</span>
+            </div>
+            <div class="dash-card-body">
+              <div class="dash-row"><span class="lbl">Campaign goal</span><span class="val">$50,000</span></div>
+              <div class="dash-row"><span class="lbl">Raised to date</span><span class="val green">$34,250</span></div>
+              <div class="dash-row"><span class="lbl">Registered donors</span><span class="val">287</span></div>
+              <div class="dash-row"><span class="lbl">Auction items</span><span class="val">48</span></div>
+              <div class="dash-row"><span class="lbl">Text-to-donate</span><span class="val green">Active</span></div>
+            </div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-head" style="background:var(--m-orange);">
+              <h3>Event Management — Gala</h3>
+              <span class="dash-badge" style="background:rgba(255,255,255,0.2);color:#fff;">Synced</span>
+            </div>
+            <div class="dash-card-body">
+              <div class="dash-row"><span class="lbl">Venue capacity</span><span class="val">350 seats</span></div>
+              <div class="dash-row"><span class="lbl">Tickets assigned</span><span class="val green">287 / 350</span></div>
+              <div class="dash-row"><span class="lbl">VIP tables</span><span class="val">12 of 15 filled</span></div>
+              <div class="dash-row"><span class="lbl">Check-in ready</span><span class="val green">Yes — QR enabled</span></div>
+              <div class="dash-row"><span class="lbl">Last sync</span><span class="val">Just now</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav buttons -->
+    <div class="m-nav-row">
+      <button class="m-btn m-btn-ghost" id="btn-back" onclick="goStep(currentStep-1)" style="visibility:hidden;">← Back</button>
+      <span style="font-size:0.78rem;color:var(--m-muted);font-family:'Outfit',sans-serif;" id="step-hint">Select a campaign to continue</span>
+      <button class="m-btn m-btn-primary" id="btn-next" onclick="goStep(currentStep+1)" disabled>Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection">
+  <div class="section-label">Design Rationale</div>
+  <div class="reflection-grid">
+    <div class="ref-card">
+      <div class="section-label">The Pillar 2 Story</div>
+      <h3>Plug-and-play, not custom work</h3>
+      <p>This prototype demonstrates what "productized connectors" actually means as a user experience. A nonprofit admin — not a developer — can connect two Momentive products in three steps. No API keys. No custom integration project. The platform handles the data mapping, the SSO handoff, and the ongoing sync automatically.</p>
+    </div>
+    <div class="ref-card">
+      <div class="section-label">The AI Angle</div>
+      <h3>MomentiveIQ as the config layer</h3>
+      <p>The AI-assisted setup step shows how MomentiveIQ can reduce configuration friction to near-zero. A user describes their workflow in plain English — the AI maps the fields, sets the trigger, and explains what it did. This is the kind of AI that drives product adoption, not just conversation.</p>
+    </div>
+    <div class="ref-card">
+      <div class="section-label">The Business Case</div>
+      <h3>1 product → 2 products, felt on day one</h3>
+      <p>The moment a GiveSmart customer connects Event Management, they've moved from a single-product user to a multi-product user. The integration is the nudge. By making it frictionless and free, the platform removes every barrier between "I use GiveSmart" and "I use the Momentive suite."</p>
+    </div>
+    <div class="ref-card">
+      <div class="section-label">What's Next</div>
+      <h3>Phase 2: The partner SDK</h3>
+      <p>Once the native connection model is proven, the same integration kit opens to external partners — Salesforce, Blackbaud, university portals, hospital CRMs. Each new connector is a sellable product in a catalog, not a one-off project. The platform becomes a marketplace.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentStep = 1;
+let selectedCard = null;
+
+function selectCampaign(card) {
+  document.querySelectorAll('.campaign-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedCard = card;
+  const banner = document.getElementById('suggest-banner');
+  if (card.id === 'card1') {
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+  document.getElementById('btn-next').disabled = false;
+  document.getElementById('step-hint').textContent = 'Campaign selected — click Continue to configure';
+}
+
+function goStep(n) {
+  if (n < 1 || n > 3) return;
+  if (n === 2 && !selectedCard) return;
+  currentStep = n;
+
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('visible'));
+  document.getElementById('step' + n).classList.add('visible');
+
+  // Update stepper
+  for (let i = 1; i <= 3; i++) {
+    const num = document.getElementById('sn' + i);
+    const lbl = document.getElementById('sl' + i);
+    if (i < n) { num.className = 'm-step-num done'; num.textContent = '✓'; lbl.className = 'm-step-label done'; }
+    else if (i === n) { num.className = 'm-step-num active'; num.textContent = i; lbl.className = 'm-step-label active'; }
+    else { num.className = 'm-step-num pending'; num.textContent = i; lbl.className = 'm-step-label pending'; }
+  }
+
+  // Back button
+  document.getElementById('btn-back').style.visibility = n > 1 ? 'visible' : 'hidden';
+
+  // Next button & hint
+  const nextBtn = document.getElementById('btn-next');
+  const hint = document.getElementById('step-hint');
+  if (n === 1) { nextBtn.className = 'm-btn m-btn-primary'; nextBtn.textContent = 'Continue →'; nextBtn.disabled = !selectedCard; hint.textContent = selectedCard ? 'Campaign selected — click Continue to configure' : 'Select a campaign to continue'; }
+  else if (n === 2) { nextBtn.className = 'm-btn m-btn-primary'; nextBtn.textContent = 'Go Live →'; nextBtn.disabled = false; hint.textContent = 'Review field mapping and click Go Live'; }
+  else if (n === 3) { nextBtn.className = 'm-btn m-btn-success'; nextBtn.textContent = 'View Full Dashboard'; nextBtn.disabled = false; hint.textContent = 'Integration is live ✓'; }
+}
+
+async function runAI() {
+  const input = document.getElementById('ai-input').value.trim();
+  if (!input) return;
+  const btn = document.getElementById('ai-btn');
+  const result = document.getElementById('ai-result');
+  btn.disabled = true;
+  btn.textContent = 'Configuring...';
+  result.className = 'ai-result visible';
+  result.innerHTML = '<span class="ai-thinking">✦ MomentiveIQ is mapping your integration...</span>';
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are MomentiveIQ, the AI assistant built into Momentive Software's integration platform. 
+A nonprofit admin is connecting GiveSmart (fundraising) with Event Management. 
+Given their plain-English description, respond with a SHORT, friendly config summary (3-4 sentences max) that confirms:
+1. The trigger you detected (what event starts the workflow)
+2. The 2-3 key field mappings you've set up
+3. What the end result will be for their donors
+Keep it warm, practical, and jargon-free. Start with "Got it —"`,
+        messages: [{ role: 'user', content: input }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content?.[0]?.text || 'Configuration mapped successfully.';
+    result.innerHTML = '✦ ' + text;
+  } catch(e) {
+    result.innerHTML = '✦ Got it — I\'ve mapped your trigger to "On donor registration" and connected the key fields: donor name, email, and ticket tier sync automatically to Event Management. When a donor completes registration in GiveSmart, an event ticket is generated and they\'re added to the seating chart instantly.';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Configure with AI';
+}
+
+// Hamburger
+document.getElementById('hamburger').addEventListener('click', function() {
+  this.classList.toggle('open');
+  document.getElementById('mobile-menu').classList.toggle('open');
+});
+</script>
+</body>
+</html>

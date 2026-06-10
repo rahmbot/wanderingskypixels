@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Projects | WanderingSkyPixels</title>
+<link rel="icon" href="../logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--night:#050b18;--deep:#0a1628;--mid:#111f38;--card:#0d1a2e;--horizon:#1a2f52;--star:#e8e0cc;--gold:#c8a96e;--aurora:#4fc4a0;--nebula:#7b8cde;--muted:#6a7d99;--dim:#2a3d5a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--night);color:var(--star);font-family:'Outfit',sans-serif;font-weight:300;overflow-x:hidden;}
+  a{text-decoration:none;color:inherit;}
+
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 4rem;background:rgba(5,11,24,0.92);backdrop-filter:blur(18px);border-bottom:1px solid rgba(200,169,110,0.12);transition:background 0.3s;}
+  .nav-logo{text-decoration:none;display:flex;align-items:center;line-height:1;flex-shrink:0;}
+  .nav-logo img{height:42px;width:auto;display:block;filter:brightness(1.08);transition:opacity 0.2s;}
+  .nav-logo:hover img{opacity:0.85;}
+  .nav-links{display:flex;gap:2rem;list-style:none;align-items:center;}
+  .nav-links a{color:var(--muted);font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.2s;}
+  .nav-links a:hover{color:var(--gold);}
+  .nav-cta{background:linear-gradient(135deg,var(--gold),#a07840);color:var(--night)!important;padding:0.5rem 1.4rem;border-radius:2px;font-weight:500!important;}
+  .nav-dropdown{position:relative;}
+  .nav-dropdown-trigger{display:flex;align-items:center;gap:0.3rem;cursor:pointer;}
+  .nav-dropdown-menu{display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);background:rgba(5,11,24,0.98);backdrop-filter:blur(20px);border:1px solid var(--dim);min-width:230px;list-style:none;padding:0.5rem 0;z-index:200;box-shadow:0 20px 60px rgba(0,0,0,0.5);margin-top:8px;}
+  .nav-dropdown:hover .nav-dropdown-menu{display:block;}
+  .nav-dropdown-menu::before{content:'';position:absolute;top:-8px;left:0;right:0;height:8px;background:transparent;}
+  .nav-dropdown-menu li a{display:block;padding:0.65rem 1.2rem;color:var(--muted);font-size:0.82rem;letter-spacing:0.06em;transition:color 0.2s,background 0.2s;white-space:nowrap;}
+  .nav-dropdown-menu li a:hover{color:var(--gold);background:rgba(200,169,110,0.06);}
+  .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none;}
+  .hamburger span{display:block;width:24px;height:1.5px;background:var(--star);transition:transform 0.3s,opacity 0.3s;}
+  .hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+  .hamburger.open span:nth-child(2){opacity:0;}
+  .hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+  .mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:rgba(5,11,24,0.98);backdrop-filter:blur(20px);border-bottom:1px solid var(--dim);z-index:99;padding:1.5rem 2rem;flex-direction:column;gap:0;}
+  .mobile-menu.open{display:flex;}
+  .mobile-menu a{color:var(--muted);font-size:0.9rem;letter-spacing:0.08em;text-transform:uppercase;padding:1rem 0;border-bottom:1px solid var(--dim);transition:color 0.2s;}
+  .mobile-menu a:hover{color:var(--gold);}
+  .mobile-menu .nav-cta{background:linear-gradient(135deg,var(--gold),#a07840);color:var(--night)!important;text-align:center;padding:0.8rem;border-radius:2px;border-bottom:none!important;margin-top:0.5rem;}
+
+  /* PAGE */
+  .page-hero{padding:9rem 4rem 4rem;max-width:1100px;margin:0 auto;}
+  .section-label{font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;}
+  h1{font-family:'Cormorant Garamond',serif;font-size:3.5rem;font-weight:300;line-height:1.15;margin-bottom:1.2rem;}
+  .hero-sub{font-size:1rem;color:var(--muted);line-height:1.8;max-width:580px;}
+
+  .projects-grid{max-width:1100px;margin:0 auto;padding:3rem 4rem 6rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.5rem;}
+
+  .project-card{background:var(--card);border:1px solid var(--dim);border-radius:2px;padding:2.5rem;text-decoration:none;color:inherit;transition:border-color 0.2s,background 0.2s;display:block;position:relative;overflow:hidden;}
+  .project-card:hover{border-color:var(--gold);background:var(--mid);}
+  .project-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent);transform:scaleX(0);transform-origin:left;transition:transform 0.3s;}
+  .project-card:hover::before{transform:scaleX(1);}
+  .card-tag{font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.18em;color:var(--aurora);text-transform:uppercase;margin-bottom:1rem;}
+  .card-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:400;margin-bottom:0.8rem;line-height:1.25;}
+  .card-desc{font-size:0.88rem;color:var(--muted);line-height:1.75;margin-bottom:1.5rem;}
+  .card-meta{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;}
+  .card-chip{font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.1em;padding:0.25rem 0.6rem;border:1px solid var(--dim);color:var(--muted);border-radius:2px;text-transform:uppercase;}
+  .card-arrow{position:absolute;top:2.5rem;right:2.5rem;color:var(--gold);opacity:0;transition:opacity 0.2s,transform 0.2s;font-size:1.2rem;}
+  .project-card:hover .card-arrow{opacity:1;transform:translateX(4px);}
+
+  .coming-soon{opacity:0.45;cursor:default;pointer-events:none;}
+
+  @media(max-width:768px){
+    nav{padding:1rem 2rem;}
+    .nav-links{display:none;}
+    .hamburger{display:flex;}
+    .page-hero,.projects-grid{padding-left:1.5rem;padding-right:1.5rem;}
+    h1{font-size:2.4rem;}
+  }
+</style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <a href="../index.html" class="nav-logo" aria-label="WanderingSkyPixels Home">
+    <img src="../logo.png" alt="WanderingSkyPixels">
+  </a>
+  <ul class="nav-links">
+    <li class="nav-dropdown">
+      <span class="nav-dropdown-trigger nav-links a" style="color:var(--muted);cursor:pointer;font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;">Specialties ▾</span>
+      <ul class="nav-dropdown-menu">
+        <li><a href="../specialties/landscape.html">🏔️ Landscape & Cityscape</a></li>
+        <li><a href="../specialties/astro.html">🌌 Astrophotography</a></li>
+        <li><a href="../specialties/aerial.html">🚁 Drone & Aerial</a></li>
+        <li><a href="../specialties/iceland.html">🇮🇸 Iceland Guide</a></li>
+        <li><a href="../specialties/london-guide.html">🇬🇧 London Guide</a></li>
+      </ul>
+    </li>
+    <li class="nav-dropdown">
+      <span class="nav-dropdown-trigger nav-links a" style="color:var(--gold);cursor:pointer;font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;">Portfolio ▾</span>
+      <ul class="nav-dropdown-menu">
+        <li><a href="../portfolio/index.html">📷 Photography</a></li>
+        <li><a href="index.html" style="color:var(--gold);">💼 Projects</a></li>
+      </ul>
+    </li>
+    <li><a href="../learn/index.html">Learn</a></li>
+    <li><a href="../gear.html">Gear</a></li>
+    <li><a href="../contact.html" class="nav-cta">Work With Me</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <a href="../index.html">Home</a>
+  <a href="../specialties/landscape.html" style="padding-left:1.8rem;font-size:0.82rem;">🏔️ Landscape & Cityscape</a>
+  <a href="../specialties/astro.html" style="padding-left:1.8rem;font-size:0.82rem;">🌌 Astrophotography</a>
+  <a href="../specialties/aerial.html" style="padding-left:1.8rem;font-size:0.82rem;">🚁 Drone & Aerial</a>
+  <a href="../portfolio/index.html">Portfolio — Photography</a>
+  <a href="index.html" style="padding-left:1.8rem;font-size:0.82rem;">💼 Projects</a>
+  <a href="../learn/index.html">Learn</a>
+  <a href="../gear.html">Gear</a>
+  <a href="../contact.html" class="nav-cta">Work With Me</a>
+</div>
+
+<div class="page-hero">
+  <div class="section-label">Selected Work</div>
+  <h1>Projects</h1>
+  <p class="hero-sub">Product strategy, platform design, and interactive prototypes — work beyond the lens that explores how technology solves real problems.</p>
+</div>
+
+<div class="projects-grid">
+
+  <!-- Momentive Project -->
+  <a href="momentive-integrations.html" class="project-card">
+    <div class="card-arrow">→</div>
+    <div class="card-tag">Product Strategy · Prototype</div>
+    <div class="card-title">Momentive Integrations Platform</div>
+    <div class="card-desc">A strategic proposal and interactive prototype for Momentive Software — demonstrating how a plug-and-play partner integration model turns a product portfolio into a connected platform.</div>
+    <div class="card-meta">
+      <span class="card-chip">GiveSmart</span>
+      <span class="card-chip">Event Management</span>
+      <span class="card-chip">Partner Onboarding</span>
+    </div>
+  </a>
+
+  <!-- Placeholder -->
+  <div class="project-card coming-soon">
+    <div class="card-tag">Coming Soon</div>
+    <div class="card-title">Astrophotography App</div>
+    <div class="card-desc">A stargazing and deep sky planning app concept — from audience segmentation to AR sky overlay. Early-stage product roadmap and design exploration.</div>
+    <div class="card-meta">
+      <span class="card-chip">Mobile</span>
+      <span class="card-chip">AR</span>
+      <span class="card-chip">Product Design</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const h = document.getElementById('hamburger');
+  const m = document.getElementById('mobile-menu');
+  h.addEventListener('click', () => { h.classList.toggle('open'); m.classList.toggle('open'); });
+</script>
+</body>
+</html>
