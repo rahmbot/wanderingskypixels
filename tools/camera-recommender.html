@@ -847,18 +847,23 @@ function resetForm() {
 
 // ── RENDER GEAR CARD ──
 function renderGearCard(item, index, type) {
-  var owned = item.owned ? '<div class="owned-badge">IN YOUR KIT</div>' : '';
   var ownedClass = item.owned ? ' owned' : '';
+  var badge = item.owned
+    ? '<div class="owned-badge">IN YOUR KIT</div>'
+    : '<div class="owned-badge" style="background:rgba(79,127,232,0.12);border-color:rgba(79,127,232,0.3);color:#7b9de8;">SONY UPGRADE</div>';
+  var priceTag = (!item.owned && item.price_est)
+    ? '<span class="spec-tag" style="background:rgba(79,127,232,0.1);border-color:rgba(79,127,232,0.25);color:#7b9de8;">~' + item.price_est + '</span>'
+    : '';
   var specs = item.specs ? item.specs.map(function(s) {
     return '<span class="spec-tag">' + s + '</span>';
   }).join('') : '';
   return '<div class="gear-result-card' + ownedClass + '">' +
-    owned +
+    badge +
     '<div class="gear-result-rank">0' + (index+1) + '</div>' +
     '<div class="gear-result-type">' + type + '</div>' +
     '<div class="gear-result-name">' + item.name + '</div>' +
     '<div class="gear-result-why">' + item.why + '</div>' +
-    '<div class="gear-result-specs">' + specs + '</div>' +
+    '<div class="gear-result-specs">' + priceTag + specs + '</div>' +
     '</div>';
 }
 
@@ -896,8 +901,9 @@ async function getRecommendation() {
 
 Rahm's personal kit:
 - Cameras: Sony A7RV (61MP full-frame, primary), Astro-modified Sony A7RII (astrophotography)
-- Lenses: Sony FE 14mm f/1.8 GM (wide/astro), Tamron 17-28mm f/2.8 (versatile wide), Sony FE 70-200mm f/4 G (telephoto), Sigma 150-600mm f/5-6.3 DG DN Sports (super telephoto/moon)
+- Lenses: Sony FE 14mm f/1.8 GM (wide/astro), Tamron 17-28mm f/2.8 Di III-A VC VXD (versatile wide), Sony FE 70-200mm f/4 G (telephoto), Sigma 150-600mm f/5-6.3 DG DN Sports (super telephoto/moon)
 - Drone: DJI Mavic 3 Pro
+- Smart telescope: Dwarf 3 (deep sky objects)
 
 The user has described their photography scenario:
 - Scene: ${scene}
@@ -910,10 +916,12 @@ The user has described their photography scenario:
 - Additional Context: ${context || 'None'}
 
 INSTRUCTIONS:
-1. First check if ANY of Rahm's kit is suitable for this scenario. If yes, prioritise it in your recommendations and mark it as owned:true.
-2. Recommend exactly 2 cameras and exactly 2 lenses (can be a mix of owned + general market).
-3. Provide 4 specific suggested camera settings.
-4. Write a short personal note from Rahm's perspective (first person, warm, specific to the scenario).
+1. First check if ANY of Rahm's kit is suitable for this scenario. If yes, prioritise it and mark owned:true.
+2. Recommend exactly 3 cameras total: prioritise Rahm's owned gear first, then fill remaining slots with Sony Alpha system bodies (Sony only — no Canon, Nikon, Fuji etc). Mark non-owned as owned:false and flag them as upgrade suggestions.
+3. Recommend exactly 3 lenses total: prioritise Rahm's owned lenses first, then fill remaining slots with Sony native E-mount lenses OR Sony-compatible third-party lenses (Tamron E-mount, Sigma DN series, Zeiss FE only). No Canon/Nikon mount lenses.
+4. For non-owned gear, be specific — include current market price estimate and one sentence on why it's worth adding to a Sony kit.
+5. Provide 4 specific suggested camera settings for this exact scenario.
+6. Write a short personal note from Rahm's perspective (first person, warm, specific to the scenario and his Sony kit).
 
 Respond ONLY with valid JSON in this exact structure, no markdown, no extra text:
 {
@@ -923,15 +931,17 @@ Respond ONLY with valid JSON in this exact structure, no markdown, no extra text
       "name": "full camera name",
       "type": "Mirrorless Full-Frame / APS-C / etc",
       "owned": true or false,
+      "price_est": "approx price if not owned, else null",
       "why": "2-3 sentence explanation specific to this scene",
       "specs": ["key spec 1", "key spec 2", "key spec 3"]
     }
   ],
   "lenses": [
     {
-      "name": "full lens name",
-      "type": "Wide Angle / Telephoto / etc",
+      "name": "full lens name with mount",
+      "type": "Wide Angle / Telephoto / Macro / etc",
       "owned": true or false,
+      "price_est": "approx price if not owned, else null",
       "why": "2-3 sentence explanation specific to this scene",
       "specs": ["focal length", "max aperture", "key feature"]
     }
@@ -942,7 +952,7 @@ Respond ONLY with valid JSON in this exact structure, no markdown, no extra text
     "ISO": "value",
     "White Balance": "value"
   },
-  "wsp_note": "Personal note from Rahm in first person, 2-3 sentences, specific to this scene and how he'd approach it with his kit."
+  "wsp_note": "Personal note from Rahm in first person, 2-3 sentences, specific to this scene and his Sony kit."
 }`;
 
   try {
