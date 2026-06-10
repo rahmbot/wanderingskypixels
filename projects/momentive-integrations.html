@@ -683,6 +683,13 @@
       <button class="m-btn m-btn-primary" id="btn-next" onclick="handleNext()" disabled>Continue →</button>
     </div>
   </div>
+
+  <!-- Admin reset bar -->
+  <div style="margin-top:0.75rem;display:flex;justify-content:flex-end;">
+    <button id="reset-btn" onclick="resetDemo()" style="background:transparent;border:1px dashed var(--dim);color:var(--muted);font-size:0.72rem;font-family:'DM Mono',monospace;letter-spacing:0.08em;padding:0.35rem 0.9rem;border-radius:2px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--dim)';this.style.color='var(--muted)'">
+      ↺ &nbsp;Reset Demo
+    </button>
+  </div>
 </div>
 
 <!-- Full Dashboard Overlay -->
@@ -890,6 +897,63 @@ async function runAI() {
   }
   btn.disabled = false;
   btn.textContent = 'Configure with AI';
+}
+
+function resetDemo() {
+  // Reset step
+  currentStep = 1;
+  selectedCard = null;
+
+  // Deselect all campaigns
+  document.querySelectorAll('.campaign-card').forEach(c => c.classList.remove('selected'));
+
+  // Hide all suggest banners
+  ['suggest-banner','suggest-banner-2','suggest-banner-3'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+
+  // Reset step panels — show step 1 only
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('visible'));
+  document.getElementById('step1').classList.add('visible');
+
+  // Reset stepper indicators
+  for (let i = 1; i <= 3; i++) {
+    const num = document.getElementById('sn' + i);
+    const lbl = document.getElementById('sl' + i);
+    if (i === 1) { num.className = 'm-step-num active'; num.textContent = '1'; lbl.className = 'm-step-label active'; }
+    else { num.className = 'm-step-num pending'; num.textContent = i; lbl.className = 'm-step-label pending'; }
+  }
+
+  // Reset nav buttons
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.className = 'm-btn m-btn-primary';
+  nextBtn.textContent = 'Continue →';
+  nextBtn.disabled = true;
+  document.getElementById('btn-back').style.visibility = 'hidden';
+  document.getElementById('step-hint').textContent = 'Select a campaign to continue';
+
+  // Reset AI input
+  const aiInput = document.getElementById('ai-input');
+  if (aiInput) aiInput.value = '';
+  const aiResult = document.getElementById('ai-result');
+  if (aiResult) { aiResult.className = 'ai-result'; aiResult.innerHTML = ''; }
+
+  // Close full dashboard if open
+  document.getElementById('full-dash').classList.remove('visible');
+
+  // Switch back to GiveSmart tab
+  switchTab('givesmart');
+
+  // Brief flash on reset button to confirm
+  const btn = document.getElementById('reset-btn');
+  btn.textContent = '✓  Reset';
+  btn.style.color = 'var(--aurora)';
+  btn.style.borderColor = 'var(--aurora)';
+  setTimeout(() => {
+    btn.innerHTML = '↺ &nbsp;Reset Demo';
+    btn.style.color = 'var(--muted)';
+    btn.style.borderColor = 'var(--dim)';
+  }, 1200);
 }
 
 // Hamburger
