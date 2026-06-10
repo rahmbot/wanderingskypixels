@@ -148,7 +148,9 @@
   .m-step-connector{flex:1;height:1px;background:var(--m-border);margin:0 0.75rem;}
 
   /* App body */
-  .m-body{padding:1.5rem;background:#fff;min-height:420px;}
+  .m-body{padding:1.5rem;background:#fff;}
+  .m-stepper.hidden{display:none!important;}
+  #step-nav-row.hidden{display:none!important;}
 
   /* ── STEP 1: Campaign panel ── */
   .step-panel{display:none;}
@@ -422,6 +424,24 @@
           <div class="suggest-text">
             <h4>This campaign looks like it needs an event</h4>
             <p>Hope Gala 2025 has ticket tiers and 287 registered donors. Connect Event Management to handle venue logistics, check-in, seating, and day-of coordination — all from the same donor list.</p>
+          </div>
+          <button class="suggest-cta" onclick="goStep(2)">Connect Event Management →</button>
+        </div>
+
+        <div class="suggest-banner" id="suggest-banner-2" style="display:none;">
+          <span class="suggest-icon">✨</span>
+          <div class="suggest-text">
+            <h4>Peer-to-peer campaigns work great with Event Management</h4>
+            <p>Spring 5K Run for Hope has 142 peer-to-peer fundraisers. Connect Event Management to handle race-day registration, participant check-in, and real-time fundraising totals on a live display board.</p>
+          </div>
+          <button class="suggest-cta" onclick="goStep(2)">Connect Event Management →</button>
+        </div>
+
+        <div class="suggest-banner" id="suggest-banner-3" style="display:none;">
+          <span class="suggest-icon">✨</span>
+          <div class="suggest-text">
+            <h4>Auctions run better with a dedicated event setup</h4>
+            <p>Art Auction has 34 items ready to go. Connect Event Management to manage bidder check-in, display live auction results on a venue screen, and handle item pickup coordination after the event.</p>
           </div>
           <button class="suggest-cta" onclick="goStep(2)">Connect Event Management →</button>
         </div>
@@ -753,18 +773,64 @@ function switchTab(tab) {
   });
   // Show/hide stepper and nav row for non-GiveSmart tabs
   const isGS = tab === 'givesmart';
-  document.querySelector('.m-stepper').style.display = isGS ? 'flex' : 'none';
-  document.getElementById('step-nav-row').style.display = isGS ? 'flex' : 'none';
+  document.querySelector('.m-stepper').classList.toggle('hidden', !isGS);
+  document.getElementById('step-nav-row').classList.toggle('hidden', !isGS);
 }
+
+const campaignData = {
+  card1: {
+    name: 'Hope Gala 2025',
+    trigger: 'On donor registration',
+    field1: 'donor_name → attendee_name',
+    field2: 'ticket_tier → seat_category',
+    field3: 'donation_amount → registration_value',
+    event: 'Hope Gala 2025',
+    banner: 'suggest-banner'
+  },
+  card2: {
+    name: 'Spring 5K Run for Hope',
+    trigger: 'On peer-to-peer signup',
+    field1: 'participant_name → attendee_name',
+    field2: 'fundraising_goal → participant_target',
+    field3: 'signup_date → registration_date',
+    event: 'Spring 5K Run for Hope',
+    banner: 'suggest-banner-2'
+  },
+  card3: {
+    name: 'Art Auction',
+    trigger: 'On bidder registration',
+    field1: 'bidder_name → attendee_name',
+    field2: 'bidder_email → attendee_email',
+    field3: 'auction_item → lot_assignment',
+    event: 'Community Art Auction',
+    banner: 'suggest-banner-3'
+  }
+};
 
 function selectCampaign(card) {
   document.querySelectorAll('.campaign-card').forEach(c => c.classList.remove('selected'));
   card.classList.add('selected');
   selectedCard = card;
-  const banner = document.getElementById('suggest-banner');
-  banner.style.display = card.id === 'card1' ? 'flex' : 'none';
+
+  // Hide all banners, show the right one
+  ['suggest-banner','suggest-banner-2','suggest-banner-3'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  const data = campaignData[card.id];
+  document.getElementById(data.banner).style.display = 'flex';
+
+  // Update the config step to reflect the selected campaign
+  const configHead = document.querySelector('#step2 .m-section-head p');
+  if (configHead) configHead.textContent = `Connecting ${data.name} to Momentive Event Management. Review the field mapping below or use MomentiveIQ to configure it in plain English.`;
+
+  // Update the event name and trigger in config panel
+  const eventNameRow = document.querySelector('#step2 .dash-row:nth-child(1) .val');
+  const triggerRow = document.querySelector('#step2 .dash-row:nth-child(2) .val');
+  if (eventNameRow) eventNameRow.textContent = data.event;
+  if (triggerRow) triggerRow.textContent = data.trigger;
+
   document.getElementById('btn-next').disabled = false;
-  document.getElementById('step-hint').textContent = 'Campaign selected — click Continue to configure';
+  document.getElementById('step-hint').textContent = `${data.name} selected — click Continue to configure`;
 }
 
 function goStep(n) {
