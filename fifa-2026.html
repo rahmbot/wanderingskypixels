@@ -953,65 +953,65 @@ function drawLines() {
 // LIVE FEED
 // ─────────────────────────────────────────────────────────────
 
-const EVENT_ICONS = {
-  goal: '⚽', yellow: '🟨', red: '🟥', sub: '🔄',
-  penalty: '⚽', owngoal: '😬', var: '📺', default: '📋'
+let feedEvents = [];
+const seenUids = new Set();
+
+const TYPE_MAP = {
+  'goal':           { icon: '⚽', label: 'GOAL' },
+  'goal---header':  { icon: '⚽', label: 'GOAL' },
+  'goal---penalty': { icon: '⚽', label: 'PENALTY GOAL' },
+  'own-goal':       { icon: '😬', label: 'OWN GOAL' },
+  'yellow-card':    { icon: '🟨', label: 'YELLOW CARD' },
+  'red-card':       { icon: '🟥', label: 'RED CARD' },
+  'yellow-red-card':{ icon: '🟥', label: '2ND YELLOW' },
+  'substitution':   { icon: '🔄', label: 'SUB' },
+  'var':            { icon: '📺', label: 'VAR' },
+  'halftime':       { icon: '🔔', label: 'HALF TIME' },
+  'fulltime':       { icon: '🔔', label: 'FULL TIME' },
 };
 
-let feedEvents = [];   // accumulated across refreshes, newest first
-let seenEventIds = new Set();
+const NOTABLE = new Set(['goal','goal---header','goal---penalty','own-goal','yellow-card','red-card','yellow-red-card','substitution','var','halftime','fulltime']);
 
-async function fetchFeed(espnEventIds) {
+async function fetchFeed(eventIds) {
   const summaries = await Promise.all(
-    espnEventIds.map(id =>
+    eventIds.map(id =>
       fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary?event=${id}`)
         .then(r => r.ok ? r.json() : null).catch(() => null)
     )
   );
 
-  summaries.forEach((data, i) => {
+  summaries.forEach(data => {
     if (!data) return;
-    const eventId = espnEventIds[i];
-
-    // Game header for context
     const comp = data.header?.competitions?.[0];
-    const teamNames = (comp?.competitors || []).map(c => canonicalize(c.team?.displayName || c.team?.name || '')).filter(Boolean);
-    const matchLabel = teamNames.join(' vs ');
+    const teams = (comp?.competitors || []).map(c =>
+      canonicalize(c.team?.displayName || c.team?.name || '')
+    ).filter(Boolean);
+    const matchLabel = teams.length === 2
+      ? `${FLAGS[teams[0]]||''}${teams[0]} vs ${FLAGS[teams[1]]||''}${teams[1]}`
+      : teams[0] || '';
 
-    // plays / key events
-    const plays = data.plays || [];
-    plays.forEach(play => {
-      const uid = `${eventId}-${play.id || play.sequenceNumber || Math.random()}`;
-      if (seenEventIds.has(uid)) return;
-      seenEventIds.add(uid);
+    (data.keyEvents || []).forEach(ev => {
+      const typeKey = ev.type?.type || '';
+      if (!NOTABLE.has(typeKey)) return;
+      const uid = ev.id || (typeKey + ev.clock?.displayValue + matchLabel);
+      if (seenUids.has(uid)) return;
+      seenUids.add(uid);
 
-      const text = (play.text || play.shortText || '').toLowerCase();
-      const type = play.type?.text?.toLowerCase() || '';
+      const { icon, label } = TYPE_MAP[typeKey] || { icon: '📋', label: typeKey };
+      const minute = ev.clock?.displayValue || '';
+      const text = ev.text || '';
+      // Extract player name: ESPN puts it in text like "Harry Kane (England) ..."
+      const playerMatch = text.match(/^([^(]+)\s*\(/);
+      const player = playerMatch ? playerMatch[1].trim() : '';
+      const team = canonicalize(ev.team?.displayName || '');
 
-      let icon = EVENT_ICONS.default;
-      let isGoal = false;
-      if (text.includes('goal') || type.includes('goal')) { icon = '⚽'; isGoal = true; }
-      else if (text.includes('own goal'))                  { icon = '😬'; isGoal = true; }
-      else if (text.includes('penalty') && text.includes('goal')) { icon = '⚽'; isGoal = true; }
-      else if (text.includes('red card') || type.includes('red')) icon = '🟥';
-      else if (text.includes('yellow card') || type.includes('yellow')) icon = '🟨';
-      else if (text.includes('substitut') || type.includes('sub')) icon = '🔄';
-      else if (text.includes('var'))   icon = '📺';
-      else return; // skip non-notable plays
-
-      const minute = play.clock?.displayValue || play.period?.displayValue || '';
-      const playerRaw = play.participants?.[0]?.athlete?.displayName
-                     || play.athletesInvolved?.[0]?.displayName
-                     || '';
-      const player = playerRaw || (play.shortText || play.text || '').split(' ')[0];
-      const team = play.team?.displayName ? canonicalize(play.team.displayName) : (teamNames[0] || '');
-
-      feedEvents.unshift({ uid, icon, minute, player, team, matchLabel, isGoal, ts: Date.now() });
+      feedEvents.push({ uid, icon, label, minute, player, team, matchLabel, text, wallclock: ev.wallclock || '' });
     });
   });
 
-  // Keep latest 40, dedupe
-  feedEvents = feedEvents.slice(0, 40);
+  // Sort newest first by wallclock, keep top 50
+  feedEvents.sort((a,b) => (b.wallclock > a.wallclock ? 1 : -1));
+  feedEvents = feedEvents.slice(0, 50);
   renderFeed();
 }
 
@@ -1019,18 +1019,21 @@ function renderFeed() {
   const body = document.getElementById('feed-body');
   if (!body) return;
 
-  if (!feedEvents.length) {
+  const notable = feedEvents.filter(e => !['halftime','fulltime'].includes(e.label.toLowerCase().replace(' ','')));
+
+  if (!notable.length && !feedEvents.length) {
     body.innerHTML = '<div class="feed-empty">No match events yet.<br>Check back during a game!</div>';
     return;
   }
 
-  body.innerHTML = feedEvents.map(ev => `
+  const items = feedEvents.slice(0, 30);
+  body.innerHTML = items.map(ev => `
     <div class="feed-event">
       <span class="feed-icon">${ev.icon}</span>
       <div class="feed-info">
-        <div class="feed-minute">${ev.minute ? ev.minute + "'" : ''} ${ev.matchLabel ? '· ' + ev.matchLabel : ''}</div>
-        <div class="feed-player">${ev.player || '—'}</div>
-        <div class="feed-team">${FLAGS[ev.team] || ''} ${ev.team}</div>
+        <div class="feed-minute">${ev.minute ? ev.minute + "'" : ev.label}</div>
+        <div class="feed-player">${ev.player || ev.label}</div>
+        <div class="feed-team">${ev.matchLabel}</div>
       </div>
     </div>`).join('');
 }
@@ -1039,34 +1042,9 @@ function renderFeed() {
 // AUTO-REFRESH
 // ─────────────────────────────────────────────────────────────
 
-// Store ESPN event IDs seen during fetchAll for feed use
-let liveEventIds = [];
-
-const _origFetchESPN = fetchESPN;
-async function fetchESPNAndCollect(date) {
-  const evs = await _origFetchESPN(date);
-  evs.forEach(ev => {
-    if (ev.id && !liveEventIds.includes(ev.id)) liveEventIds.push(ev.id);
-  });
-  return evs;
-}
-
-async function refreshAll() {
-  await fetchAll();
-  if (liveEventIds.length) await fetchFeed(liveEventIds.slice(-20)); // latest 20 events
-}
-
-// Monkey-patch fetchESPN to also collect IDs
-window.__fetchESPN = fetchESPN;
-(function() {
-  const orig = fetchESPN;
-  // We redefine fetchAll's internal loop to collect IDs
-})();
-
-// Simpler: just re-fetch today + yesterday for feed after bracket loads
 async function refreshWithFeed() {
   await fetchAll();
-  // Grab today's and yesterday's event IDs from ESPN scoreboard
+  // Fetch today + past 2 days to catch all knockout matches
   const today = new Date();
   const dates = [0,1,2].map(offset => {
     const d = new Date(today); d.setDate(d.getDate() - offset);
