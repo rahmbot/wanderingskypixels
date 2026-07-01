@@ -258,6 +258,71 @@
     to   { text-shadow: 0 0 28px rgba(255,215,0,.8); }
   }
 
+  /* ── LIVE FEED WIDGET ── */
+  .feed-widget {
+    width: 158px;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(0,212,255,0.18);
+    border-radius: 12px;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    margin-top: 14px;
+  }
+  .feed-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px 7px;
+    border-bottom: 1px solid rgba(0,212,255,0.1);
+    background: rgba(0,212,255,0.05);
+  }
+  .feed-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px; font-weight: 700; letter-spacing: .18em;
+    color: var(--accent); text-transform: uppercase;
+  }
+  .feed-dot {
+    width: 5px; height: 5px; border-radius: 50%; background: #ff4444;
+    animation: blink 1.4s infinite; flex-shrink: 0;
+  }
+  .feed-body {
+    max-height: 220px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    padding: 6px 0;
+  }
+  .feed-body::-webkit-scrollbar { display: none; }
+
+  .feed-event {
+    display: flex; align-items: flex-start; gap: 7px;
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    animation: feedin .4s ease;
+  }
+  @keyframes feedin {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .feed-event:last-child { border-bottom: none; }
+  .feed-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+  .feed-info { flex: 1; min-width: 0; }
+  .feed-minute {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px; font-weight: 700; color: var(--accent); letter-spacing: .05em;
+  }
+  .feed-player {
+    font-size: 10px; font-weight: 700; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    line-height: 1.3; margin-top: 1px;
+  }
+  .feed-team {
+    font-size: 9px; color: var(--text-muted); line-height: 1.3;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .feed-empty {
+    padding: 16px 10px; text-align: center;
+    font-size: 10px; color: var(--text-muted); font-style: italic;
+    line-height: 1.6;
+  }
+
   /* ── SVG CONNECTORS ── */
   .connector-svg {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -702,6 +767,15 @@ function render() {
       ${matchCard(f.teamA, f.teamB, f, 'final-match' + (crowned ? ' crowned' : ''))}
       <div class="final-meta">JULY 19, 2026<br>MetLife Stadium<br>New Jersey</div>
       ${crowned ? `<div class="champion-display">🏆 ${FLAGS[f.winner]||''} ${f.winner}</div>` : ''}
+      <div class="feed-widget">
+        <div class="feed-header">
+          <span class="feed-title">Live Feed</span>
+          <span class="feed-dot"></span>
+        </div>
+        <div class="feed-body" id="feed-body">
+          <div class="feed-empty">Waiting for<br>match events…</div>
+        </div>
+      </div>
     </div>`;
 
   // ── Right SF ──
@@ -876,10 +950,135 @@ function drawLines() {
 }
 
 // ─────────────────────────────────────────────────────────────
+// LIVE FEED
+// ─────────────────────────────────────────────────────────────
+
+const EVENT_ICONS = {
+  goal: '⚽', yellow: '🟨', red: '🟥', sub: '🔄',
+  penalty: '⚽', owngoal: '😬', var: '📺', default: '📋'
+};
+
+let feedEvents = [];   // accumulated across refreshes, newest first
+let seenEventIds = new Set();
+
+async function fetchFeed(espnEventIds) {
+  const summaries = await Promise.all(
+    espnEventIds.map(id =>
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary?event=${id}`)
+        .then(r => r.ok ? r.json() : null).catch(() => null)
+    )
+  );
+
+  summaries.forEach((data, i) => {
+    if (!data) return;
+    const eventId = espnEventIds[i];
+
+    // Game header for context
+    const comp = data.header?.competitions?.[0];
+    const teamNames = (comp?.competitors || []).map(c => canonicalize(c.team?.displayName || c.team?.name || '')).filter(Boolean);
+    const matchLabel = teamNames.join(' vs ');
+
+    // plays / key events
+    const plays = data.plays || [];
+    plays.forEach(play => {
+      const uid = `${eventId}-${play.id || play.sequenceNumber || Math.random()}`;
+      if (seenEventIds.has(uid)) return;
+      seenEventIds.add(uid);
+
+      const text = (play.text || play.shortText || '').toLowerCase();
+      const type = play.type?.text?.toLowerCase() || '';
+
+      let icon = EVENT_ICONS.default;
+      let isGoal = false;
+      if (text.includes('goal') || type.includes('goal')) { icon = '⚽'; isGoal = true; }
+      else if (text.includes('own goal'))                  { icon = '😬'; isGoal = true; }
+      else if (text.includes('penalty') && text.includes('goal')) { icon = '⚽'; isGoal = true; }
+      else if (text.includes('red card') || type.includes('red')) icon = '🟥';
+      else if (text.includes('yellow card') || type.includes('yellow')) icon = '🟨';
+      else if (text.includes('substitut') || type.includes('sub')) icon = '🔄';
+      else if (text.includes('var'))   icon = '📺';
+      else return; // skip non-notable plays
+
+      const minute = play.clock?.displayValue || play.period?.displayValue || '';
+      const playerRaw = play.participants?.[0]?.athlete?.displayName
+                     || play.athletesInvolved?.[0]?.displayName
+                     || '';
+      const player = playerRaw || (play.shortText || play.text || '').split(' ')[0];
+      const team = play.team?.displayName ? canonicalize(play.team.displayName) : (teamNames[0] || '');
+
+      feedEvents.unshift({ uid, icon, minute, player, team, matchLabel, isGoal, ts: Date.now() });
+    });
+  });
+
+  // Keep latest 40, dedupe
+  feedEvents = feedEvents.slice(0, 40);
+  renderFeed();
+}
+
+function renderFeed() {
+  const body = document.getElementById('feed-body');
+  if (!body) return;
+
+  if (!feedEvents.length) {
+    body.innerHTML = '<div class="feed-empty">No match events yet.<br>Check back during a game!</div>';
+    return;
+  }
+
+  body.innerHTML = feedEvents.map(ev => `
+    <div class="feed-event">
+      <span class="feed-icon">${ev.icon}</span>
+      <div class="feed-info">
+        <div class="feed-minute">${ev.minute ? ev.minute + "'" : ''} ${ev.matchLabel ? '· ' + ev.matchLabel : ''}</div>
+        <div class="feed-player">${ev.player || '—'}</div>
+        <div class="feed-team">${FLAGS[ev.team] || ''} ${ev.team}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ─────────────────────────────────────────────────────────────
 // AUTO-REFRESH
 // ─────────────────────────────────────────────────────────────
-fetchAll();
-setInterval(fetchAll, 90_000);
+
+// Store ESPN event IDs seen during fetchAll for feed use
+let liveEventIds = [];
+
+const _origFetchESPN = fetchESPN;
+async function fetchESPNAndCollect(date) {
+  const evs = await _origFetchESPN(date);
+  evs.forEach(ev => {
+    if (ev.id && !liveEventIds.includes(ev.id)) liveEventIds.push(ev.id);
+  });
+  return evs;
+}
+
+async function refreshAll() {
+  await fetchAll();
+  if (liveEventIds.length) await fetchFeed(liveEventIds.slice(-20)); // latest 20 events
+}
+
+// Monkey-patch fetchESPN to also collect IDs
+window.__fetchESPN = fetchESPN;
+(function() {
+  const orig = fetchESPN;
+  // We redefine fetchAll's internal loop to collect IDs
+})();
+
+// Simpler: just re-fetch today + yesterday for feed after bracket loads
+async function refreshWithFeed() {
+  await fetchAll();
+  // Grab today's and yesterday's event IDs from ESPN scoreboard
+  const today = new Date();
+  const dates = [0,1,2].map(offset => {
+    const d = new Date(today); d.setDate(d.getDate() - offset);
+    return d.toISOString().slice(0,10).replace(/-/g,'');
+  });
+  const allEvs = (await Promise.all(dates.map(d => fetchESPN(d).catch(()=>[])) )).flat();
+  const ids = [...new Set(allEvs.map(e => e.id).filter(Boolean))];
+  if (ids.length) await fetchFeed(ids);
+}
+
+refreshWithFeed();
+setInterval(refreshWithFeed, 90_000);
 window.addEventListener('resize', () => {
   document.querySelectorAll('.connector-svg').forEach(e => e.remove());
   requestAnimationFrame(drawLines);
