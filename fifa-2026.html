@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIFA World Cup 2026 · Live Bracket</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;700;900&display=swap');
+
+  :root {
+    --bg: #020818;
+    --surface: rgba(255,255,255,0.04);
+    --surface-hover: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.08);
+    --border-glow: rgba(0,212,255,0.3);
+    --text: #f0f4ff;
+    --text-muted: rgba(240,244,255,0.45);
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --gold: #ffd700;
+    --win-glow: rgba(0,212,255,0.15);
+    --connector: rgba(0,212,255,0.25);
+    --card-h: 44px;
+    --gap: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: auto;
+  }
+
+  /* ── Animated background ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(0,100,200,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 90%, rgba(100,0,200,0.14) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 40% at 50% 50%, rgba(0,212,255,0.05) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+    animation: bgpulse 12s ease-in-out infinite alternate;
+  }
+  @keyframes bgpulse {
+    0%   { opacity: 0.8; }
+    100% { opacity: 1.2; }
+  }
+
+  /* Grid particles */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none; z-index: 0;
+  }
+
+  .page-wrap { position: relative; z-index: 1; }
+
+  /* ── Header ── */
+  header {
+    text-align: center;
+    padding: 48px 24px 36px;
+    position: relative;
+  }
+  .wc-eyebrow {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+  }
+  .wc-eyebrow::before, .wc-eyebrow::after {
+    content: '';
+    display: block; width: 40px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent));
+  }
+  .wc-eyebrow::after { background: linear-gradient(90deg, var(--accent), transparent); }
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(28px, 5vw, 56px);
+    font-weight: 900;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .subtitle {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+  .live-dot {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,50,50,0.12); border: 1px solid rgba(255,80,80,0.3);
+    color: #ff6060; font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    padding: 4px 12px; border-radius: 100px; margin-top: 16px;
+  }
+  .live-dot::before {
+    content: '';
+    width: 6px; height: 6px; border-radius: 50%; background: #ff4444;
+    animation: livepulse 1.4s ease-in-out infinite;
+  }
+  @keyframes livepulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .final-badge {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 11px; color: var(--text-muted); letter-spacing: 0.08em;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex; justify-content: center; gap: 24px;
+    margin: 0 auto 32px; flex-wrap: wrap; padding: 0 16px;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--text-muted);
+  }
+  .legend-swatch {
+    width: 12px; height: 12px; border-radius: 2px;
+  }
+
+  /* ── Stage labels ── */
+  .stages-row {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    padding: 0 16px;
+    margin-bottom: 12px;
+  }
+  .stage-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0.6;
+    text-align: center;
+  }
+
+  /* ── Main bracket ── */
+  .bracket-scroll {
+    overflow-x: auto;
+    padding: 0 24px 60px;
+  }
+  .bracket {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    min-width: 1100px;
+    max-width: 1500px;
+    margin: 0 auto;
+  }
+
+  /* ── Column ── */
+  .col {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+  }
+  .col.center-col {
+    flex: 0 0 auto;
+    width: 140px;
+    align-items: center;
+  }
+  .col.connector-col {
+    flex: 0 0 24px;
+    min-width: 24px;
+    max-width: 24px;
+  }
+
+  /* ── Match group ── */
+  .match-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+  }
+  /* spacing between groups */
+  .match-group + .match-group { margin-top: 16px; }
+
+  /* ── Match card ── */
+  .match {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    position: relative;
+  }
+  .match:hover {
+    border-color: var(--border-glow);
+    box-shadow: 0 0 20px rgba(0,212,255,0.08);
+  }
+
+  /* ── Team row ── */
+  .team {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    height: var(--card-h);
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+    border-radius: 0;
+    user-select: none;
+  }
+  .team:first-child { border-radius: 10px 10px 0 0; }
+  .team:last-child  { border-radius: 0 0 10px 10px; }
+  .team:hover { background: var(--surface-hover); }
+
+  .team-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0;
+  }
+
+  .flag {
+    font-size: 18px;
+    line-height: 1;
+    flex-shrink: 0;
+    width: 24px;
+    text-align: center;
+  }
+  .team-name {
+    font-size: 12px;
+    font-weight: 600;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text);
+    transition: color 0.15s;
+  }
+  .team-seed {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    min-width: 22px;
+    text-align: right;
+  }
+  .team-score {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text);
+    flex-shrink: 0;
+    min-width: 18px;
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  /* winner state */
+  .team.winner {
+    background: linear-gradient(90deg, rgba(0,212,255,0.12) 0%, transparent 100%);
+  }
+  .team.winner .team-name { color: var(--accent); }
+  .team.winner::after {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--accent);
+    border-radius: 3px 0 0 3px;
+  }
+
+  /* eliminated state */
+  .team.eliminated .team-name { color: var(--text-muted); opacity: 0.5; }
+  .team.eliminated .flag { opacity: 0.35; }
+
+  /* TBD state */
+  .team.tbd .flag { opacity: 0; }
+  .team.tbd .team-name {
+    color: var(--text-muted);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 11px;
+  }
+  .team.tbd .team-score { color: transparent; }
+
+  /* ── Connectors (SVG lines) ── */
+  .conn-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* ── Final stage center ── */
+  .final-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 0 8px;
+  }
+  .final-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 100px;
+    background: rgba(255,215,0,0.07);
+    white-space: nowrap;
+  }
+  .final-match {
+    width: 160px;
+  }
+  .final-match .team { height: 52px; }
+  .final-match .team-name { font-size: 13px; }
+  .final-match .flag { font-size: 22px; }
+  .final-match.winner-glow {
+    box-shadow: 0 0 40px rgba(255,215,0,0.2), 0 0 80px rgba(255,215,0,0.08);
+    border-color: rgba(255,215,0,0.4) !important;
+  }
+  .final-meta {
+    text-align: center;
+    font-size: 10px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    letter-spacing: 0.06em;
+  }
+  .champion-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-top: 12px;
+    text-align: center;
+  }
+
+  /* ── Round header labels (above each col) ── */
+  .round-header {
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0.55;
+    padding-bottom: 12px;
+    white-space: nowrap;
+  }
+
+  /* ── Click hint ── */
+  .click-hint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    padding: 0 24px 24px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Winner banner ── */
+  #winner-banner {
+    display: none;
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,165,0,0.1));
+    border: 1px solid rgba(255,215,0,0.5);
+    border-radius: 16px;
+    padding: 16px 32px;
+    text-align: center;
+    backdrop-filter: blur(20px);
+    z-index: 100;
+    animation: slideup 0.5s cubic-bezier(0.16,1,0.3,1);
+  }
+  @keyframes slideup {
+    from { transform: translateX(-50%) translateY(40px); opacity: 0; }
+    to   { transform: translateX(-50%) translateY(0); opacity: 1; }
+  }
+  #winner-banner .wname { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 900; color: var(--gold); }
+  #winner-banner .wtitle { font-size: 11px; letter-spacing: 0.15em; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── Reset button ── */
+  .reset-btn {
+    position: fixed; top: 20px; right: 24px;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-muted); font-size: 11px; font-family: 'Inter', sans-serif;
+    font-weight: 600; letter-spacing: 0.06em;
+    padding: 8px 18px; border-radius: 8px; cursor: pointer;
+    backdrop-filter: blur(12px); z-index: 50;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { border-color: var(--border-glow); color: var(--accent); }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 0 24px 40px;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+<button class="reset-btn" onclick="resetBracket()">↺ Reset</button>
+
+<header>
+  <div class="wc-eyebrow">FIFA World Cup 2026</div>
+  <h1>KNOCKOUT BRACKET</h1>
+  <div class="subtitle">USA · CANADA · MEXICO &nbsp;·&nbsp; FINAL: JULY 19, 2026 · NEW YORK / NEW JERSEY</div>
+  <div><span class="live-dot">LIVE TRACKING</span></div>
+  <div class="final-badge">Click any team to advance them · results auto-propagate</div>
+</header>
+
+<div class="click-hint">⚽ Click a team name to mark them as winner and advance through the bracket</div>
+
+<div class="bracket-scroll">
+<div class="bracket" id="bracket">
+  <!-- Built by JS -->
+</div>
+</div>
+
+<div id="winner-banner">
+  <div class="wtitle">🏆 WORLD CHAMPION 2026</div>
+  <div class="wname" id="winner-name"></div>
+</div>
+
+<footer>
+  <p>Built for <a href="https://wanderingskypixels.com">wanderingskypixels.com</a> &nbsp;·&nbsp; Data updates in real-time as you track results</p>
+</footer>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+
+const FLAGS = {
+  'South Africa':'🇿🇦','Canada':'🇨🇦','Netherlands':'🇳🇱','Morocco':'🇲🇦',
+  'Germany':'🇩🇪','Paraguay':'🇵🇾','France':'🇫🇷','Sweden':'🇸🇪',
+  'United States':'🇺🇸','Bosnia & Herz.':'🇧🇦','Belgium':'🇧🇪','Senegal':'🇸🇳',
+  'Portugal':'🇵🇹','Croatia':'🇭🇷','Spain':'🇪🇸','Austria':'🇦🇹',
+  'Brazil':'🇧🇷','Japan':'🇯🇵','Ivory Coast':'🇨🇮','Norway':'🇳🇴',
+  'Mexico':'🇲🇽','Ecuador':'🇪🇨','England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','DR Congo':'🇨🇩',
+  'Argentina':'🇦🇷','Cabo Verde':'🇨🇻','Australia':'🇦🇺','Egypt':'🇪🇬',
+  'Switzerland':'🇨🇭','Algeria':'🇩🇿','Colombia':'🇨🇴','Ghana':'🇬🇭',
+};
+
+const SEEDS = {
+  'South Africa':'2A','Canada':'2B','Netherlands':'1F','Morocco':'2C',
+  'Germany':'1E','Paraguay':'3D','France':'1I','Sweden':'3F',
+  'United States':'1D','Bosnia & Herz.':'3B','Belgium':'1G','Senegal':'3I',
+  'Portugal':'2K','Croatia':'2L','Spain':'1H','Austria':'2J',
+  'Brazil':'1C','Japan':'2F','Ivory Coast':'2E','Norway':'2I',
+  'Mexico':'1A','Ecuador':'3E','England':'1L','DR Congo':'3K',
+  'Argentina':'1J','Cabo Verde':'2H','Australia':'2D','Egypt':'2G',
+  'Switzerland':'1B','Algeria':'3J','Colombia':'1K','Ghana':'3L',
+};
+
+// Round of 32 matchups: [team1, team2]
+// Left half (bracket positions 0-7) and right half (8-15)
+const R32 = [
+  // LEFT (top to bottom)
+  ['South Africa','Canada'],
+  ['Netherlands','Morocco'],
+  ['Germany','Paraguay'],
+  ['France','Sweden'],
+  ['United States','Bosnia & Herz.'],
+  ['Belgium','Senegal'],
+  ['Portugal','Croatia'],
+  ['Spain','Austria'],
+  // RIGHT (top to bottom)
+  ['Brazil','Japan'],
+  ['Ivory Coast','Norway'],
+  ['Mexico','Ecuador'],
+  ['England','DR Congo'],
+  ['Argentina','Cabo Verde'],
+  ['Australia','Egypt'],
+  ['Switzerland','Algeria'],
+  ['Colombia','Ghana'],
+];
+
+// State: winners at each stage
+// stages[0] = R32 winners (16 slots), [1] = R16 winners (8), [2] = QF (4), [3] = SF (2), [4] = Final (1)
+const STAGE_SIZES = [16, 8, 4, 2, 1];
+let state = {
+  r32: Array(16).fill(null),      // who won each R32 match
+  r32scores: Array(16).fill([null,null]),
+  r16: Array(8).fill(null),
+  r16scores: Array(8).fill([null,null]),
+  qf: Array(4).fill(null),
+  qfscores: Array(4).fill([null,null]),
+  sf: Array(2).fill(null),
+  sfscores: Array(2).fill([null,null]),
+  final: null,
+  champion: null,
+};
+
+// Load from localStorage
+function loadState() {
+  try {
+    const s = localStorage.getItem('wc2026_bracket_v1');
+    if (s) state = JSON.parse(s);
+  } catch(e) {}
+}
+function saveState() {
+  try { localStorage.setItem('wc2026_bracket_v1', JSON.stringify(state)); } catch(e) {}
+}
+function resetBracket() {
+  state = {
+    r32: Array(16).fill(null), r32scores: Array(16).fill([null,null]),
+    r16: Array(8).fill(null), r16scores: Array(8).fill([null,null]),
+    qf: Array(4).fill(null), qfscores: Array(4).fill([null,null]),
+    sf: Array(2).fill(null), sfscores: Array(2).fill([null,null]),
+    final: null, champion: null,
+  };
+  saveState();
+  document.getElementById('winner-banner').style.display = 'none';
+  render();
+}
+
+// ─────────────────────────────────────────────
+// BRACKET LOGIC
+// ─────────────────────────────────────────────
+
+function getR16Teams(matchIdx) {
+  // R16 matchup i uses R32 winners from matches [i*2, i*2+1]
+  // But left side (0-3) uses left R32 (0-7), right side (4-7) uses right R32 (8-15)
+  const left = matchIdx < 4;
+  const base = left ? matchIdx * 2 : (matchIdx - 4) * 2 + 8;
+  return [state.r32[base], state.r32[base + 1]];
+}
+function getQFTeams(matchIdx) {
+  const base = matchIdx * 2;
+  return [state.r16[base], state.r16[base + 1]];
+}
+function getSFTeams(matchIdx) {
+  const base = matchIdx * 2;
+  return [state.qf[base], state.qf[base + 1]];
+}
+function getFinalTeams() {
+  return [state.sf[0], state.sf[1]];
+}
+
+function advanceTeam(stage, matchIdx, teamName) {
+  // Cascade forward: clear anything that depended on old winner
+  const oldWinner = state[stage][matchIdx];
+  if (oldWinner === teamName) { // toggle off
+    clearFromStage(stage, matchIdx);
+    saveState(); render(); return;
+  }
+  state[stage][matchIdx] = teamName;
+  // Propagate: which next match does this slot feed?
+  clearDownstream(stage, matchIdx);
+  saveState(); render();
+  if (stage === 'final' && teamName) {
+    state.champion = teamName;
+    document.getElementById('winner-name').textContent = (FLAGS[teamName]||'') + ' ' + teamName;
+    document.getElementById('winner-banner').style.display = 'block';
+    saveState();
+  }
+}
+
+function clearFromStage(stage, matchIdx) {
+  state[stage][matchIdx] = null;
+  clearDownstream(stage, matchIdx);
+}
+
+function clearDownstream(stage, matchIdx) {
+  // When winner of (stage, matchIdx) changes, clear the next round's match and cascade
+  const nextStage = {r32:'r16', r16:'qf', qf:'sf', sf:'final'}[stage];
+  if (!nextStage) return;
+  const nextMatchIdx = nextStage === 'final' ? 0 : Math.floor(matchIdx / 2);
+  const oldNext = nextStage === 'final' ? state.final : state[nextStage][nextMatchIdx];
+  if (nextStage === 'final') {
+    const [a,b] = getFinalTeams();
+    // clear if old winner no longer in final
+  } else {
+    // figure out which slot (0 or 1) feeds into the next match
+  }
+  // Simple: just null out the next match winner and cascade
+  if (nextStage === 'final') {
+    state.final = null;
+    state.champion = null;
+    document.getElementById('winner-banner').style.display = 'none';
+  } else {
+    if (state[nextStage][nextMatchIdx] !== null) {
+      state[nextStage][nextMatchIdx] = null;
+      clearDownstream(nextStage, nextMatchIdx);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+
+function teamHTML(name, isWinner, isEliminated, seed) {
+  const flag = FLAGS[name] || '🏳';
+  const cls = isWinner ? 'team winner' : isEliminated ? 'team eliminated' : 'team';
+  const seedTxt = seed || (SEEDS[name] || '');
+  return `<div class="${cls}" onclick="handleTeamClick(this)" data-team="${name}">
+    <span class="flag">${flag}</span>
+    <span class="team-name">${name}</span>
+    <span class="team-seed">${seedTxt}</span>
+  </div>`;
+}
+
+function tbdHTML() {
+  return `<div class="team tbd">
+    <span class="flag">?</span>
+    <span class="team-name">TBD</span>
+    <span class="team-seed"></span>
+  </div>`;
+}
+
+function matchHTML(teamA, teamB, winnerName, matchId, stageKey, matchIdx, size='normal') {
+  const aWon = winnerName === teamA;
+  const bWon = winnerName === teamB;
+  const aEl = winnerName && !aWon;
+  const bEl = winnerName && !bWon;
+
+  const aRow = teamA ? teamHTML(teamA, aWon, aEl, '') : tbdHTML();
+  const bRow = teamB ? teamHTML(teamB, bWon, bEl, '') : tbdHTML();
+
+  const extraClass = size === 'final' ? 'final-match' + (winnerName ? ' winner-glow' : '') : '';
+  return `<div class="match ${extraClass}" id="${matchId}" data-stage="${stageKey}" data-idx="${matchIdx}">
+    ${aRow}
+    <div class="team-divider"></div>
+    ${bRow}
+  </div>`;
+}
+
+function handleTeamClick(el) {
+  const matchEl = el.closest('.match');
+  if (!matchEl) return;
+  const stage = matchEl.dataset.stage;
+  const idx = parseInt(matchEl.dataset.idx);
+  const team = el.dataset.team;
+  if (!team || el.classList.contains('tbd')) return;
+  advanceTeam(stage, idx, team);
+}
+
+function render() {
+  const bracket = document.getElementById('bracket');
+  bracket.innerHTML = '';
+
+  // ── LEFT HALF ──
+  const leftR32 = document.createElement('div');
+  leftR32.className = 'col';
+  leftR32.innerHTML = `<div class="round-header">Round of 32</div>`;
+  const leftR32Groups = document.createElement('div');
+  leftR32Groups.style.cssText = 'display:flex;flex-direction:column;flex:1;gap:8px;';
+  for (let i = 0; i < 8; i++) {
+    const [a, b] = R32[i];
+    const w = state.r32[i];
+    leftR32Groups.innerHTML += `<div class="match-group" style="flex:1;">` + matchHTML(a, b, w, `r32-${i}`, 'r32', i) + `</div>`;
+  }
+  leftR32.appendChild(leftR32Groups);
+
+  // LEFT R16
+  const leftR16 = document.createElement('div');
+  leftR16.className = 'col';
+  leftR16.innerHTML = `<div class="round-header">Round of 16</div>`;
+  const leftR16Groups = document.createElement('div');
+  leftR16Groups.style.cssText = 'display:flex;flex-direction:column;flex:1;gap:8px;';
+  for (let i = 0; i < 4; i++) {
+    const [a, b] = getR16Teams(i);
+    const w = state.r16[i];
+    leftR16Groups.innerHTML += `<div class="match-group" style="flex:1;display:flex;align-items:center;">` + matchHTML(a, b, w, `r16-${i}`, 'r16', i) + `</div>`;
+  }
+  leftR16.appendChild(leftR16Groups);
+
+  // LEFT QF
+  const leftQF = document.createElement('div');
+  leftQF.className = 'col';
+  leftQF.innerHTML = `<div class="round-header">Quarter-Finals</div>`;
+  const leftQFGroups = document.createElement('div');
+  leftQFGroups.style.cssText = 'display:flex;flex-direction:column;flex:1;gap:8px;';
+  for (let i = 0; i < 2; i++) {
+    const [a, b] = getQFTeams(i);
+    const w = state.qf[i];
+    leftQFGroups.innerHTML += `<div class="match-group" style="flex:1;display:flex;align-items:center;">` + matchHTML(a, b, w, `qf-${i}`, 'qf', i) + `</div>`;
+  }
+  leftQF.appendChild(leftQFGroups);
+
+  // LEFT SF
+  const leftSF = document.createElement('div');
+  leftSF.className = 'col';
+  leftSF.innerHTML = `<div class="round-header">Semi-Finals</div>`;
+  const leftSFGroups = document.createElement('div');
+  leftSFGroups.style.cssText = 'display:flex;flex-direction:column;flex:1;gap:8px;';
+  const [sfA, sfB] = getSFTeams(0);
+  const sfW = state.sf[0];
+  leftSFGroups.innerHTML += `<div class="match-group" style="flex:1;display:flex;align-items:center;">` + matchHTML(sfA, sfB, sfW, `sf-0`, 'sf', 0) + `</div>`;
+  leftSF.appendChild(leftSFGroups);
+
+  // ── CENTER ──
+  const center = document.createElement('div');
+  center.className = 'col center-col';
+  center.innerHTML = `<div class="round-header" style="opacity:0">·</div>`;
+  const [fA, fB] = getFinalTeams();
+  const fW = state.final;
+  center.innerHTML += `<div class="final-stage">
+    <div class="final-label">🏆 FINAL</div>
+    ${matchHTML(fA, fB, fW, 'final-0', 'final', 0, 'final')}
+    <div class="final-meta">JULY 19, 2026<br>NEW YORK / NEW JERSEY</div>
+    ${fW ? `<div class="champion-label">🏆 ${FLAGS[fW]||''} ${fW}</div>` : ''}
+  </div>`;
+
+  // ── RIGHT HALF ──
+  // SF right
+  const rightSF = document.createElement('div');
+  rightSF.className = 'col';
+  rightSF.innerHTML = `<div class="round-header">Semi-Finals</div>`;
+  const rightSFG = document.createElement('div');
+  rightSFG.style.cssText = 'display:flex;flex-direction:column;flex:1;gap:8px;';
+  const [sfC, sfD] = getSFTeams(1);
+  const sfW2 = state.sf[1];
+  rightSFG.innerHTML += `<div class="match-group" style="flex:1;display:flex;align-items:center;">` + matchHTML(sfC, sfD, sfW2, `sf-1`, 'sf', 1) + `</div>`;
+  rightSF.appendChild(rightSFG);
+
+  // QF right
+  const rightQF = document.createElement('div');
+  rightQF.className = 'col';
+  rightQF.innerHTML = `<div class="round-header">Quarter-Finals</div>`;
+  const rightQFG = document.createElement('div');
+  rightQFG.style.cssText = 'display:flex;flex-direction:column;flex:1;gap:8px;';
+  for (let i = 2; i < 4; i++) {
+    const [a, b] = getQFTeams(i);
+    const w = state.qf[i];
+    rightQFG.innerHTML += `<div class="match-group" style="flex:1;display:flex;align-items:center;">` + matchHTML(a, b, w, `qf-${i}`, 'qf', i) + `</div>`;
+  }
+  rightQF.appendChild(rightQFG);
+
+  // R16 right
+  const rightR16 = document.createElement('div');
+  rightR16.className = 'col';
+  rightR16.innerHTML = `<div class="round-header">Round of 16</div>`;
+  const rightR16G = document.createElement('div');
+  rightR16G.style.cssText = 'display:flex;flex-direction:column;flex:1;gap:8px;';
+  for (let i = 4; i < 8; i++) {
+    const [a, b] = getR16Teams(i);
+    const w = state.r16[i];
+    rightR16G.innerHTML += `<div class="match-group" style="flex:1;display:flex;align-items:center;">` + matchHTML(a, b, w, `r16-${i}`, 'r16', i) + `</div>`;
+  }
+  rightR16.appendChild(rightR16G);
+
+  // R32 right
+  const rightR32 = document.createElement('div');
+  rightR32.className = 'col';
+  rightR32.innerHTML = `<div class="round-header">Round of 32</div>`;
+  const rightR32G = document.createElement('div');
+  rightR32G.style.cssText = 'display:flex;flex-direction:column;flex:1;gap:8px;';
+  for (let i = 8; i < 16; i++) {
+    const [a, b] = R32[i];
+    const w = state.r32[i];
+    rightR32G.innerHTML += `<div class="match-group" style="flex:1;">` + matchHTML(a, b, w, `r32-${i}`, 'r32', i) + `</div>`;
+  }
+  rightR32.appendChild(rightR32G);
+
+  // ── Assemble ──
+  bracket.appendChild(leftR32);
+  bracket.appendChild(leftR16);
+  bracket.appendChild(leftQF);
+  bracket.appendChild(leftSF);
+  bracket.appendChild(center);
+  bracket.appendChild(rightSF);
+  bracket.appendChild(rightQF);
+  bracket.appendChild(rightR16);
+  bracket.appendChild(rightR32);
+
+  // Fix heights to be equal per column
+  requestAnimationFrame(() => {
+    equalizeGroups();
+    drawConnectors();
+  });
+}
+
+function equalizeGroups() {
+  // Make all cols same total height by stretching groups
+  const cols = document.querySelectorAll('.bracket > .col:not(.center-col)');
+  if (!cols.length) return;
+  let maxH = 0;
+  cols.forEach(c => { if (c.offsetHeight > maxH) maxH = c.offsetHeight; });
+  // The bracket height is determined by leftR32 (most groups)
+}
+
+// Draw SVG connector lines between columns
+function drawConnectors() {
+  // Remove old connectors
+  document.querySelectorAll('.bracket-connector').forEach(e => e.remove());
+
+  const bracket = document.getElementById('bracket');
+  const bRect = bracket.getBoundingClientRect();
+
+  // Get all match elements by stage
+  function getMatchEls(stage) {
+    return [...document.querySelectorAll(`.match[data-stage="${stage}"]`)];
+  }
+
+  const connectorPairs = [
+    { from: 'r32', to: 'r16', leftSide: true },
+    { from: 'r16', to: 'qf', leftSide: true },
+    { from: 'qf', to: 'sf', leftSide: true },
+    { from: 'sf', to: 'final', leftSide: true },
+    { from: 'r32', to: 'r16', leftSide: false },
+    { from: 'r16', to: 'qf', leftSide: false },
+    { from: 'qf', to: 'sf', leftSide: false },
+    { from: 'sf', to: 'final', leftSide: false },
+  ];
+
+  // We'll draw SVG overlay
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.classList.add('bracket-connector');
+  svg.style.cssText = `position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:0;`;
+  bracket.style.position = 'relative';
+  bracket.appendChild(svg);
+
+  function midY(el) {
+    const r = el.getBoundingClientRect();
+    return r.top - bRect.top + r.height / 2;
+  }
+  function rightX(el) {
+    const r = el.getBoundingClientRect();
+    return r.right - bRect.left;
+  }
+  function leftX(el) {
+    const r = el.getBoundingClientRect();
+    return r.left - bRect.left;
+  }
+
+  // Left side connections
+  const stageOrder = ['r32','r16','qf','sf'];
+  for (let s = 0; s < stageOrder.length; s++) {
+    const fromStage = stageOrder[s];
+    const toStage = s < 3 ? stageOrder[s+1] : 'final';
+
+    // Left side: r32[0-7], r16[0-3], qf[0-1], sf[0]
+    const leftIdxMap = { r32:[0,1,2,3,4,5,6,7], r16:[0,1,2,3], qf:[0,1], sf:[0] };
+    const rightIdxMap = { r32:[8,9,10,11,12,13,14,15], r16:[4,5,6,7], qf:[2,3], sf:[1] };
+
+    const leftFromEls = leftIdxMap[fromStage]
+      ? leftIdxMap[fromStage].map(i => document.querySelector(`.match[data-stage="${fromStage}"][data-idx="${i}"]`)).filter(Boolean)
+      : [];
+    const rightFromEls = rightIdxMap[fromStage]
+      ? rightIdxMap[fromStage].map(i => document.querySelector(`.match[data-stage="${fromStage}"][data-idx="${i}"]`)).filter(Boolean)
+      : [];
+
+    // LEFT side: lines go RIGHT from match to next match
+    for (let i = 0; i < leftFromEls.length; i += 2) {
+      const a = leftFromEls[i], b = leftFromEls[i+1];
+      if (!a || !b) continue;
+
+      const toIdx = fromStage === 'sf' ? 0 : Math.floor(i/2);
+      const toIdxMapped = fromStage === 'r32' ? toIdx : (fromStage === 'r16' ? toIdx : toIdx);
+      const toEl = fromStage === 'sf'
+        ? document.querySelector(`.match[data-stage="final"]`)
+        : document.querySelector(`.match[data-stage="${toStage}"][data-idx="${toIdx}"]`);
+
+      if (!toEl) continue;
+      drawBracketLine(svg, rightX(a), midY(a), rightX(b), midY(b), leftX(toEl), true);
+    }
+
+    // RIGHT side: lines go LEFT from match to next match
+    for (let i = 0; i < rightFromEls.length; i += 2) {
+      const a = rightFromEls[i], b = rightFromEls[i+1];
+      if (!a || !b) continue;
+
+      const baseToIdx = fromStage === 'r32' ? 4 : (fromStage === 'r16' ? 2 : (fromStage === 'qf' ? 1 : 1));
+      const toIdx = fromStage === 'sf' ? 1 : (baseToIdx + Math.floor(i/2));
+      const toEl = fromStage === 'sf'
+        ? document.querySelector(`.match[data-stage="final"]`)
+        : document.querySelector(`.match[data-stage="${toStage}"][data-idx="${toIdx}"]`);
+
+      if (!toEl) continue;
+      drawBracketLine(svg, leftX(a), midY(a), leftX(b), midY(b), rightX(toEl), false);
+    }
+  }
+}
+
+function drawBracketLine(svg, x1, y1, x2, y2, targetX, goRight) {
+  const midX = goRight ? (x1 + targetX) / 2 : (x1 + targetX) / 2;
+  const avgY = (y1 + y2) / 2;
+
+  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+  let d;
+  if (goRight) {
+    d = `M${x1},${y1} H${midX} V${avgY} H${targetX}
+         M${x2},${y2} H${midX}`;
+  } else {
+    d = `M${x1},${y1} H${midX} V${avgY} H${targetX}
+         M${x2},${y2} H${midX}`;
+  }
+  path.setAttribute('d', d);
+  path.setAttribute('stroke', 'rgba(0,212,255,0.18)');
+  path.setAttribute('stroke-width', '1.5');
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(path);
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+loadState();
+render();
+
+// Redraw connectors on resize
+window.addEventListener('resize', () => {
+  document.querySelectorAll('.bracket-connector').forEach(e => e.remove());
+  requestAnimationFrame(drawConnectors);
+});
+</script>
+</body>
+</html>
