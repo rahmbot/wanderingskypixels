@@ -409,6 +409,7 @@ const ESPN_ALIAS = {
   'United States of America':'United States',
   'Bosnia and Herzegovina':'Bosnia & Herz.',
   'Bosnia & Herzegovina':'Bosnia & Herz.',
+  'Bosnia-Herzegovina':'Bosnia & Herz.',
   'Côte d\'Ivoire':'Ivory Coast',
   "Cote d'Ivoire":'Ivory Coast',
   'Ivory Coast':'Ivory Coast',
@@ -417,6 +418,8 @@ const ESPN_ALIAS = {
   'Democratic Republic of Congo':'DR Congo',
   'Cape Verde':'Cabo Verde',
   'Cabo Verde':'Cabo Verde',
+  'Korea Republic':'South Korea',
+  'Republic of Ireland':'Ireland',
 };
 
 function canonicalize(name) {
@@ -542,8 +545,10 @@ function parseEvent(ev) {
   const scoreB = c1.score != null ? parseInt(c1.score) : null;
 
   const statusType = comp.status?.type?.name || ev.status?.type?.name || '';
-  const status = statusType.includes('STATUS_FINAL') ? 'post'
-               : statusType.includes('STATUS_IN_PROGRESS') ? 'in'
+  const FINISHED = ['STATUS_FINAL','STATUS_FULL_TIME','STATUS_FINAL_AET','STATUS_FINAL_PEN','STATUS_FINAL_EXTRA_TIME'];
+  const LIVE     = ['STATUS_IN_PROGRESS','STATUS_FIRST_HALF','STATUS_SECOND_HALF','STATUS_HALFTIME','STATUS_EXTRA_TIME','STATUS_PENALTY'];
+  const status = FINISHED.some(s => statusType.includes(s)) ? 'post'
+               : LIVE.some(s => statusType.includes(s)) ? 'in'
                : 'pre';
 
   let winner = null;
