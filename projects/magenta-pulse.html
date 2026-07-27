@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Magenta Pulse — AI Employee Experience Platform | WanderingSkyPixels Projects</title>
+<link rel="icon" href="../logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── Site design tokens ── */
+  :root{
+    --night:#050b18;--deep:#0a1628;--mid:#111f38;--card:#0d1a2e;--horizon:#1a2f52;
+    --star:#e8e0cc;--gold:#c8a96e;--aurora:#4fc4a0;--nebula:#7b8cde;--muted:#6a7d99;--dim:#2a3d5a;
+    --mp-magenta:#E20074;--mp-berry:#861B54;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--night);color:var(--star);font-family:'Outfit',sans-serif;font-weight:300;overflow-x:hidden;}
+  a{text-decoration:none;color:inherit;}
+
+  /* ── Site Nav (same as all pages) ── */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 4rem;background:rgba(5,11,24,0.92);backdrop-filter:blur(18px);border-bottom:1px solid rgba(200,169,110,0.12);}
+  .nav-logo img{height:42px;width:auto;display:block;filter:brightness(1.08);}
+  .nav-links{display:flex;gap:2rem;list-style:none;align-items:center;}
+  .nav-links a{color:var(--muted);font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.2s;}
+  .nav-links a:hover{color:var(--gold);}
+  .nav-cta{background:linear-gradient(135deg,var(--gold),#a07840);color:var(--night)!important;padding:0.5rem 1.4rem;border-radius:2px;font-weight:500!important;}
+  .nav-dropdown{position:relative;}
+  .nav-dropdown-trigger{display:flex;align-items:center;gap:0.3rem;cursor:pointer;color:var(--muted);font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;}
+  .nav-dropdown-menu{display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);background:rgba(5,11,24,0.98);backdrop-filter:blur(20px);border:1px solid var(--dim);min-width:220px;list-style:none;padding:0.5rem 0;z-index:200;box-shadow:0 20px 60px rgba(0,0,0,0.5);margin-top:8px;}
+  .nav-dropdown:hover .nav-dropdown-menu{display:block;}
+  .nav-dropdown-menu::before{content:'';position:absolute;top:-8px;left:0;right:0;height:8px;}
+  .nav-dropdown-menu li a{display:block;padding:0.65rem 1.2rem;color:var(--muted);font-size:0.82rem;transition:color 0.2s,background 0.2s;}
+  .nav-dropdown-menu li a:hover{color:var(--gold);background:rgba(200,169,110,0.06);}
+  .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none;}
+  .hamburger span{display:block;width:24px;height:1.5px;background:var(--star);}
+  .mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:rgba(5,11,24,0.98);backdrop-filter:blur(20px);border-bottom:1px solid var(--dim);z-index:99;padding:1.5rem 2rem;flex-direction:column;}
+  .mobile-menu.open{display:flex;}
+  .mobile-menu a{color:var(--muted);font-size:0.9rem;letter-spacing:0.08em;text-transform:uppercase;padding:1rem 0;border-bottom:1px solid var(--dim);}
+
+  /* ── Page hero ── */
+  .page-hero{padding:8rem 4rem 3rem;max-width:1100px;margin:0 auto;}
+  .section-label{font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;}
+  .page-hero h1{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;line-height:1.15;margin-bottom:1rem;}
+  .page-hero p{font-size:0.95rem;color:var(--muted);line-height:1.8;max-width:640px;margin-bottom:0.6rem;}
+  .breadcrumb{font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;color:var(--muted);margin-bottom:1.5rem;}
+  .breadcrumb a{color:var(--gold);}
+  .breadcrumb a:hover{text-decoration:underline;}
+
+  /* ── Context strip ── */
+  .context-strip{max-width:1100px;margin:0 auto 2rem;padding:0 4rem;}
+  .context-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+  .ctx-card{background:var(--card);border:1px solid var(--dim);border-radius:2px;padding:1.2rem 1.5rem;}
+  .ctx-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.15em;color:var(--gold);text-transform:uppercase;margin-bottom:0.4rem;}
+  .ctx-val{font-size:0.88rem;color:var(--star);line-height:1.5;}
+
+  /* ── Prototype shell ── */
+  .proto-shell{max-width:1160px;margin:0 auto 4rem;padding:0 4rem;}
+  .proto-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.2em;color:var(--nebula);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;}
+  .proto-label::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--nebula);}
+  .proto-note{font-size:0.82rem;color:var(--muted);margin-bottom:1.2rem;line-height:1.6;max-width:70ch;}
+  .proto-note a{color:var(--gold);}
+  .proto-note a:hover{text-decoration:underline;}
+
+  .mp-app{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.08);}
+  .mp-chrome{background:#1a1424;padding:0.65rem 1rem;display:flex;align-items:center;gap:0.6rem;}
+  .mp-dot{width:10px;height:10px;border-radius:50%;}
+  .mp-dot.r{background:#ff5f57;} .mp-dot.y{background:#febc2e;} .mp-dot.g{background:#28c840;}
+  .mp-chrome-label{margin-left:auto;font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.08em;color:rgba(255,255,255,0.5);}
+  .mp-frame{width:100%;height:920px;border:0;display:block;background:#fff;}
+
+  /* ── Reflection ── */
+  .reflection{max-width:1100px;margin:0 auto;padding:0 4rem 6rem;}
+  .reflection-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem;}
+  .ref-card{background:var(--card);border:1px solid var(--dim);border-radius:2px;padding:1.6rem 1.8rem;}
+  .ref-card h3{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:400;margin:0.5rem 0 0.7rem;color:var(--star);}
+  .ref-card p{font-size:0.88rem;color:var(--muted);line-height:1.75;}
+
+  @media(max-width:768px){
+    nav{padding:1rem 2rem;}
+    .nav-links{display:none;}
+    .hamburger{display:flex;}
+    .page-hero,.context-strip,.proto-shell,.reflection{padding-left:1.5rem;padding-right:1.5rem;}
+    .context-cards,.reflection-grid{grid-template-columns:1fr;}
+    .page-hero h1{font-size:2.2rem;}
+    .mp-frame{height:720px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a href="../index.html" class="nav-logo"><img src="../logo.png" alt="WanderingSkyPixels"></a>
+  <ul class="nav-links">
+    <li class="nav-dropdown">
+      <span class="nav-dropdown-trigger">Specialties ▾</span>
+      <ul class="nav-dropdown-menu">
+        <li><a href="../specialties/landscape.html">🏔️ Landscape & Cityscape</a></li>
+        <li><a href="../specialties/astro.html">🌌 Astrophotography</a></li>
+        <li><a href="../specialties/aerial.html">🚁 Drone & Aerial</a></li>
+        <li><a href="../specialties/iceland.html">🇮🇸 Iceland Guide</a></li>
+        <li><a href="../specialties/london-guide.html">🇬🇧 London Guide</a></li>
+      </ul>
+    </li>
+    <li class="nav-dropdown">
+      <span class="nav-dropdown-trigger" style="color:var(--gold);">Portfolio ▾</span>
+      <ul class="nav-dropdown-menu">
+        <li><a href="../portfolio/index.html">📷 Photography</a></li>
+        <li><a href="index.html">💼 Projects</a></li>
+      </ul>
+    </li>
+    <li><a href="../learn/index.html">Learn</a></li>
+    <li><a href="../gear.html">Gear</a></li>
+    <li><a href="../contact.html" class="nav-cta">Work With Me</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="../index.html">Home</a>
+  <a href="../portfolio/index.html">Portfolio — Photography</a>
+  <a href="index.html" style="padding-left:1.8rem;font-size:0.82rem;">💼 Projects</a>
+  <a href="../learn/index.html">Learn</a>
+  <a href="../gear.html">Gear</a>
+  <a href="../contact.html" class="nav-cta">Work With Me</a>
+</div>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="breadcrumb"><a href="index.html">Projects</a> / Magenta Pulse</div>
+  <div class="section-label">Product Strategy · Interactive Prototype</div>
+  <h1>Magenta Pulse</h1>
+  <p>A concept for the next generation of employee experience at T-Mobile — exploring what an AI-native Employee Experience Platform could look like across onboarding, day-to-day support, and retention. Rather than pitch a feature list, the idea is built around three moments in an employee's life: getting help in the moment, ramping up faster, and catching disengagement while it's still cheap to fix.</p>
+  <p style="margin-top:0.8rem;">This is a working, interactive prototype — not slides. The assistant and career coach are backed by a real LLM call (Claude), with a graceful local fallback so the demo stays reliable even offline.</p>
+</div>
+
+<!-- CONTEXT STRIP -->
+<div class="context-strip">
+  <div class="context-cards">
+    <div class="ctx-card">
+      <div class="ctx-label">The Problem</div>
+      <div class="ctx-val">Employees lose real time every week chasing answers across disconnected HR, IT, and payroll systems — and companies usually only learn someone's struggling once it's already expensive to fix.</div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label">The Approach</div>
+      <div class="ctx-val">Three pillars across the employee lifecycle — Help Me, Guide Me, Grow Me — as one continuous platform, not three disconnected tools bolted together.</div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label">The Business Case</div>
+      <div class="ctx-val">Fewer HR/IT tickets, faster time-to-productivity, and an earlier retention signal — catching the trend line before it becomes a resignation.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PROTOTYPE -->
+<div class="proto-shell">
+  <div class="proto-label">Live Interactive Prototype</div>
+  <p class="proto-note">Fully interactive — click through Home, the AI assistant, onboarding, and pulse/career coaching, then switch personas in the sidebar to see the same platform reconfigure for a Product Manager, a Data Analyst, and a Software Engineer. Feeling cramped in the frame? <a href="magenta-pulse-app.html" target="_blank" rel="noopener">Open it in its own tab →</a></p>
+
+  <div class="mp-app">
+    <div class="mp-chrome">
+      <span class="mp-dot r"></span><span class="mp-dot y"></span><span class="mp-dot g"></span>
+      <span class="mp-chrome-label">magenta pulse — employee experience</span>
+    </div>
+    <iframe class="mp-frame" src="magenta-pulse-app.html" title="Magenta Pulse interactive prototype" loading="lazy"></iframe>
+  </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection">
+  <div class="section-label">Design Rationale</div>
+  <div class="reflection-grid">
+    <div class="ref-card">
+      <div class="section-label">Why This Problem</div>
+      <h3>Leading signal, not hindsight</h3>
+      <p>Companies typically only learn something's wrong once it's already too late to act cheaply — a resignation, someone quietly checked out while still on payroll, or performance that's already visibly slipped. Grow Me exists to catch the leading indicator — workload and mood trending down — while the fix is still a 1:1, not a backfill.</p>
+    </div>
+    <div class="ref-card">
+      <div class="section-label">One Platform, Every Role</div>
+      <h3>Not three products wearing one skin</h3>
+      <p>The same platform reconfigures for a Product Manager, a Data Analyst, and a Software Engineer — different onboarding tasks, different assistant vocabulary, different career paths — proving the platform adapts to the person, rather than the person adapting to the platform.</p>
+    </div>
+    <div class="ref-card">
+      <div class="section-label">AI That Acts</div>
+      <h3>Not a FAQ bot</h3>
+      <p>The assistant resets access, files tickets, and books time — real actions with a reference ID, not just answers. Anything that would touch a production system stays held for approval, a deliberate governance choice for an AI agent operating on day one of a rollout.</p>
+    </div>
+    <div class="ref-card">
+      <div class="section-label">Built to Be Demoed</div>
+      <h3>A prototype, not a deck</h3>
+      <p>Every screen here is real and clickable, built specifically to be shown rather than described. It's the same instinct that drives the rest of this portfolio: show the thinking, don't just narrate it.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('hamburger').addEventListener('click', function() {
+    this.classList.toggle('open');
+    document.getElementById('mobile-menu').classList.toggle('open');
+  });
+</script>
+</body>
+</html>

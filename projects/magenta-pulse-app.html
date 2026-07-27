@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Magenta Pulse — Prototype</title>
+<script src="./react.production.min.js"></script>
+<script src="./react-dom.production.min.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<style>
+  :root{--tmo-magenta:#E20074;--tmo-black:#000;--tmo-white:#fff;--tmo-berry:#861B54;--tmo-gray-dark:#6A6A6A;--tmo-gray-light:#E8E8E8;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:#fff;color:#000;font-family:Manrope,system-ui,-apple-system,sans-serif;font-style:normal;-webkit-font-smoothing:antialiased;}
+  i,em{font-style:normal;}
+  a{color:#E20074;text-decoration:none;}
+  a:hover{color:#861B54;text-decoration:underline;}
+  input[type=range]{accent-color:#E20074;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @keyframes popIn{from{opacity:0;transform:translateY(6px) scale(.98);}to{opacity:1;transform:none;}}
+  @keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(226,0,116,.35);}50%{box-shadow:0 0 26px 4px rgba(226,0,116,.35);}}
+  @keyframes blink{0%,60%{opacity:.25;}30%{opacity:1;}}
+</style>
+</helmet>
+<div style="display:grid;grid-template-columns:248px 1fr;min-height:100vh;background:#fff">
+
+  <aside style="background:#000;color:#fff;display:flex;flex-direction:column;gap:28px;padding:26px 18px;position:sticky;top:0;height:100vh">
+    <div style="display:flex;align-items:center;gap:11px">
+      <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#E20074,#861B54);animation:glow 3.4s ease-in-out infinite"></div>
+      <div style="display:flex;flex-direction:column;line-height:1.1">
+        <span style="font-weight:800;font-size:17px;letter-spacing:-.2px">Magenta Pulse</span>
+        <span style="font-size:10px;letter-spacing:1.4px;color:#6A6A6A;font-weight:700">EMPLOYEE EXPERIENCE</span>
+      </div>
+    </div>
+
+    <nav style="display:flex;flex-direction:column;gap:6px">
+      <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="5">
+        <button onClick="{{ n.go }}" style="display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;cursor:pointer;padding:12px 13px;border-radius:12px;font-family:inherit;font-size:14px;font-weight:700;transition:background .18s,color .18s;background:{{ n.bg }};color:{{ n.fg }}">
+          <span style="width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:{{ n.dot }}"></span>
+          <span style="display:flex;flex-direction:column;gap:2px">
+            <span>{{ n.label }}</span>
+            <span style="font-size:11px;font-weight:500;opacity:.62">{{ n.sub }}</span>
+          </span>
+        </button>
+      </sc-for>
+    </nav>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:10px;letter-spacing:1.3px;font-weight:700;color:#6A6A6A">DEMO — VIEW AS</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <sc-for list="{{ personaOptions }}" as="po" hint-placeholder-count="3">
+          <button onClick="{{ po.pick }}" style="cursor:pointer;font-family:inherit;text-align:left;width:100%;border:1px solid {{ po.border }};background:{{ po.bg }};color:{{ po.fg }};border-radius:10px;padding:9px 11px;display:flex;flex-direction:column;gap:1px;transition:all .16s">
+            <span style="font-size:12.5px;font-weight:800">{{ po.label }}</span>
+            <span style="font-size:10.5px;opacity:.7">{{ po.sub }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="margin-top:auto;display:flex;flex-direction:column;gap:12px">
+      <div style="padding:14px;border-radius:14px;background:#111;border:1px solid #222">
+        <div style="font-size:10px;letter-spacing:1.3px;font-weight:700;color:#6A6A6A">SIGNED IN AS</div>
+        <div style="font-weight:800;margin-top:6px;font-size:14px">{{ user.name }}</div>
+        <div style="font-size:12px;color:#E8E8E8">{{ user.role }}</div>
+        <div style="font-size:11px;color:#6A6A6A;margin-top:2px">{{ user.location }}</div>
+      </div>
+      <div style="font-size:10px;color:#6A6A6A;line-height:1.5;font-family:'IBM Plex Mono',monospace">DEMO PROTOTYPE—ALL DATA SYNTHETIC AND ILLUSTRATIVE.</div>
+    </div>
+  </aside>
+
+  <main style="display:flex;flex-direction:column;min-width:0">
+    <header style="display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 34px;border-bottom:1px solid #E8E8E8;background:#fff;position:sticky;top:0;z-index:5">
+      <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+        <span style="font-size:10px;letter-spacing:1.5px;font-weight:700;color:#6A6A6A">{{ modeKicker }}</span>
+        <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">{{ modeTitle }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <span style="font-size:12px;font-weight:700;color:#6A6A6A">MANAGER VIEW</span>
+        <button onClick="{{ toggleManager }}" style="width:54px;height:28px;border-radius:999px;border:1px solid #E8E8E8;cursor:pointer;padding:3px;display:flex;justify-content:{{ managerJustify }};background:{{ managerTrackBg }};transition:background .2s">
+          <span style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:all .2s"></span>
+        </button>
+      </div>
+    </header>
+
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="Home" style="padding:30px 34px 56px;display:flex;flex-direction:column;gap:22px;max-width:1180px">
+
+        <section style="border-radius:22px;padding:32px 34px;background:linear-gradient(118deg,#E20074 0%,#C10064 58%,#861B54 100%);color:#fff;display:grid;grid-template-columns:1fr auto;gap:34px;align-items:center">
+          <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+            <span style="font-size:11px;letter-spacing:1.6px;font-weight:700;opacity:.85">ONE EMPLOYEE. ONE STORY. ONE PLATFORM.</span>
+            <h1 style="margin:0;font-size:38px;line-height:1.08;font-weight:800;letter-spacing:-1px;text-wrap:pretty">{{ heroLead }}</h1>
+            <p style="margin:0;font-size:15px;line-height:1.55;max-width:56ch;opacity:.92">Ask for anything across HR, IT, PTO, benefits, or payroll and Magenta Pulse will handle it end-to-end—no ticket queue, no runaround.</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+              <button onClick="{{ goHelp }}" style="border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:14px;padding:13px 22px;border-radius:999px;background:#fff;color:#E20074">Ask me anything</button>
+              <button onClick="{{ goGuide }}" style="cursor:pointer;font-family:inherit;font-weight:800;font-size:14px;padding:13px 22px;border-radius:999px;background:rgba(0,0,0,.22);color:#fff;border:1px solid rgba(255,255,255,.5)">See your journey</button>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+            <div style="position:relative;width:168px;height:168px">
+              <svg viewBox="0 0 120 120" style="width:168px;height:168px;transform:rotate(-90deg)">
+                <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="12"></circle>
+                <circle cx="60" cy="60" r="52" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="{{ ringOffset }}" style="transition:stroke-dashoffset .7s cubic-bezier(.4,0,.2,1)"></circle>
+              </svg>
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                <span style="font-size:40px;font-weight:800;letter-spacing:-1.5px">{{ progressPct }}%</span>
+                <span style="font-size:10px;letter-spacing:1.3px;font-weight:700;opacity:.85">ONBOARDED</span>
+              </div>
+            </div>
+            <span style="font-size:12px;opacity:.9;font-weight:600">{{ doneCount }} of {{ taskCount }} tasks complete</span>
+          </div>
+        </section>
+
+        <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="3">
+            <button onClick="{{ k.run }}" style="cursor:pointer;font-family:inherit;text-align:left;border:1px solid #E8E8E8;border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;gap:6px;background:#fff;transition:border-color .16s,transform .16s" style-hover="border-color:#E20074;transform:translateY(-2px)">
+              <span style="font-size:28px;font-weight:800;letter-spacing:-1px;color:#E20074">{{ k.value }}</span>
+              <span style="font-size:13px;font-weight:700;line-height:1.35">{{ k.label }}</span>
+              <span style="font-size:11px;color:#6A6A6A;line-height:1.4">{{ k.note }}</span>
+            </button>
+          </sc-for>
+        </section>
+
+        <section style="display:grid;grid-template-columns:1.35fr 1fr;gap:16px;align-items:start">
+          <div style="border:1px solid #E8E8E8;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+              <h2 style="margin:0;font-size:17px;font-weight:800">Quick actions</h2>
+              <span style="font-size:11px;color:#6A6A6A;font-weight:600">Handled by your assistant</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px">
+              <sc-for list="{{ quickActions }}" as="q" hint-placeholder-count="5">
+                <button onClick="{{ q.run }}" style="cursor:pointer;font-family:inherit;text-align:left;border:1px solid #E8E8E8;background:#fff;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;transition:border-color .16s,transform .16s" style-hover="border-color:#E20074;transform:translateY(-2px)">
+                  <span style="width:26px;height:26px;border-radius:8px;background:rgba(226,0,116,.1);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#E20074;font-family:'IBM Plex Mono',monospace">{{ q.tag }}</span>
+                  <span style="font-size:14px;font-weight:700;line-height:1.25">{{ q.label }}</span>
+                  <span style="font-size:11px;color:#6A6A6A">{{ q.sub }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="border:1px solid #E8E8E8;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:12px;background:#fff">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <h2 style="margin:0;font-size:17px;font-weight:800">Weekly pulse</h2>
+                <span style="font-size:10px;letter-spacing:1.2px;font-weight:700;padding:5px 10px;border-radius:999px;color:#fff;background:{{ riskColor }}">{{ riskLabel }}</span>
+              </div>
+              <p style="margin:0;font-size:13px;color:#6A6A6A;line-height:1.5">{{ pulsePrompt }}</p>
+              <button onClick="{{ goGrow }}" style="border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:13px;padding:12px 18px;border-radius:999px;background:#E20074;color:#fff;align-self:flex-start">{{ pulseCta }}</button>
+            </div>
+            <div style="border:1px solid #E8E8E8;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:10px">
+              <h2 style="margin:0;font-size:17px;font-weight:800">Next up in your journey</h2>
+              <sc-for list="{{ upNext }}" as="t" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600">
+                  <span style="width:16px;height:16px;border-radius:5px;border:2px solid #E20074;flex:0 0 auto"></span>
+                  <span>{{ t.label }}</span>
+                </div>
+              </sc-for>
+              <button onClick="{{ goGuide }}" style="cursor:pointer;font-family:inherit;font-weight:800;font-size:13px;padding:0;background:none;border:0;color:#E20074;align-self:flex-start;margin-top:4px">Open Guide Me →</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isHelp }}">
+      <div data-screen-label="Help Me" style="display:grid;grid-template-columns:1fr 300px;gap:0;flex:1;min-height:0">
+        <div style="display:flex;flex-direction:column;min-width:0;border-right:1px solid #E8E8E8">
+          <div style="flex:1;overflow-y:auto;padding:26px 30px;display:flex;flex-direction:column;gap:16px">
+            <sc-for list="{{ messages }}" as="m" hint-placeholder-count="2">
+              <div style="display:flex;flex-direction:column;gap:10px;align-items:{{ m.align }};animation:popIn .3s ease both">
+                <div style="max-width:70ch;padding:14px 17px;border-radius:{{ m.radius }};font-size:14.5px;line-height:1.55;white-space:pre-wrap;background:{{ m.bg }};color:{{ m.fg }};border:1px solid {{ m.border }}">{{ m.text }}</div>
+                <sc-if value="{{ m.hasAction }}">
+                  <div style="max-width:70ch;width:100%;border-radius:16px;border:1px solid #E8E8E8;overflow:hidden;background:#fff;animation:popIn .34s ease both">
+                    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#000;color:#fff">
+                      <span style="font-size:10px;letter-spacing:1.3px;font-weight:700;color:#E20074">ACTION</span>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:500">{{ m.action.tool }}()</span>
+                      <span style="margin-left:auto;font-size:11px;font-weight:700;color:{{ m.action.statusColor }}">{{ m.action.statusLabel }}</span>
+                    </div>
+                    <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+                      <div style="display:flex;flex-wrap:wrap;gap:8px">
+                        <sc-for list="{{ m.action.params }}" as="p" hint-placeholder-count="2">
+                          <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;padding:5px 9px;border-radius:7px;background:#F6F6F6;border:1px solid #E8E8E8"><b style="color:#6A6A6A;font-weight:500">{{ p.k }}:</b> {{ p.v }}</span>
+                        </sc-for>
+                      </div>
+                      <sc-if value="{{ m.action.pending }}">
+                        <div style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:#6A6A6A">
+                          <span style="width:15px;height:15px;border-radius:50%;border:2px solid #E8E8E8;border-top-color:#E20074;animation:spin .7s linear infinite"></span>
+                          <span>Working on it—connecting to the back office...</span>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ m.action.done }}">
+                        <div style="display:flex;flex-direction:column;gap:8px;animation:popIn .3s ease both">
+                          <div style="display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:700;color:#E20074">
+                            <span style="width:16px;height:16px;border-radius:50%;background:#E20074;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:800">✓</span>
+                            <span>{{ m.action.resultPreview }}</span>
+                          </div>
+                          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;padding:6px 10px;border-radius:8px;background:rgba(226,0,116,.08);color:#861B54">REF {{ m.action.refId }}</span>
+                            <span style="font-size:11px;color:#6A6A6A">Simulated result—nothing was sent to a real system.</span>
+                          </div>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+            <sc-if value="{{ thinking }}">
+              <div style="display:flex;gap:6px;align-items:center;padding:14px 17px;border-radius:16px 16px 16px 4px;border:1px solid #E8E8E8;align-self:flex-start">
+                <span style="width:7px;height:7px;border-radius:50%;background:#E20074;animation:blink 1.1s infinite"></span>
+                <span style="width:7px;height:7px;border-radius:50%;background:#E20074;animation:blink 1.1s .18s infinite"></span>
+                <span style="width:7px;height:7px;border-radius:50%;background:#E20074;animation:blink 1.1s .36s infinite"></span>
+              </div>
+            </sc-if>
+          </div>
+
+          <div style="border-top:1px solid #E8E8E8;padding:16px 30px 22px;display:flex;flex-direction:column;gap:12px;background:#fff">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <sc-for list="{{ chips }}" as="c" hint-placeholder-count="5">
+                <button onClick="{{ c.send }}" style="cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:700;padding:9px 14px;border-radius:999px;border:1px solid #E8E8E8;background:#fff;color:#000;transition:border-color .16s,color .16s" style-hover="border-color:#E20074;color:#E20074">{{ c.label }}</button>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-end">
+              <textarea rows="1" placeholder="Ask about HR, IT, PTO, benefits, payroll, or your career..." value="{{ draft }}" onChange="{{ onDraft }}" onKeyDown="{{ onKey }}" style="flex:1;resize:none;font-family:inherit;font-size:14.5px;padding:14px 16px;border-radius:14px;border:1px solid #E8E8E8;outline:none;line-height:1.5;max-height:120px" style-focus="border-color:#E20074"></textarea>
+              <button onClick="{{ sendDraft }}" style="border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:14px;padding:14px 22px;border-radius:14px;background:#E20074;color:#fff">Send</button>
+            </div>
+          </div>
+        </div>
+
+        <aside style="padding:26px 22px;display:flex;flex-direction:column;gap:18px;background:#FAFAFA">
+          <div>
+            <div style="font-size:10px;letter-spacing:1.4px;font-weight:700;color:#6A6A6A">CONNECTED SYSTEMS</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+              <sc-for list="{{ systems }}" as="s" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600">
+                  <span style="width:7px;height:7px;border-radius:50%;background:#E20074"></span>
+                  <span>{{ s.name }}</span>
+                  <span style="margin-left:auto;font-size:10px;color:#6A6A6A;font-family:'IBM Plex Mono',monospace">{{ s.status }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="height:1px;background:#E8E8E8"></div>
+          <div>
+            <div style="font-size:10px;letter-spacing:1.4px;font-weight:700;color:#6A6A6A">ACTION LOG</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+              <sc-for list="{{ actionLog }}" as="l" hint-placeholder-count="1">
+                <div style="border:1px solid #E8E8E8;border-radius:12px;padding:11px 12px;background:#fff">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#861B54">{{ l.refId }}</div>
+                  <div style="font-size:12.5px;font-weight:700;margin-top:3px;line-height:1.35">{{ l.tool }}</div>
+                  <div style="font-size:11px;color:#6A6A6A;margin-top:2px">{{ l.time }}</div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ noActions }}">
+                <div style="font-size:12px;color:#6A6A6A;line-height:1.5">No actions yet. Ask your assistant to do something—it'll show up here with a reference number.</div>
+              </sc-if>
+            </div>
+          </div>
+          <div style="margin-top:auto;font-size:11px;color:#6A6A6A;line-height:1.5">Anything that would be sent externally is held for your approval in the real product.</div>
+        </aside>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isGuide }}">
+      <div data-screen-label="Guide Me" style="padding:30px 34px 60px;max-width:1000px;display:flex;flex-direction:column;gap:24px">
+        <section style="border:1px solid #E8E8E8;border-radius:20px;padding:22px 24px;display:flex;align-items:center;gap:24px">
+          <div style="position:relative;width:92px;height:92px;flex:0 0 auto">
+            <svg viewBox="0 0 120 120" style="width:92px;height:92px;transform:rotate(-90deg)">
+              <circle cx="60" cy="60" r="52" fill="none" stroke="#E8E8E8" stroke-width="13"></circle>
+              <circle cx="60" cy="60" r="52" fill="none" stroke="#E20074" stroke-width="13" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="{{ ringOffset }}" style="transition:stroke-dashoffset .7s cubic-bezier(.4,0,.2,1)"></circle>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800">{{ progressPct }}%</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <h2 style="margin:0;font-size:22px;font-weight:800;letter-spacing:-.4px">Your first 90 days, built around your role</h2>
+            <p style="margin:0;font-size:14px;color:#6A6A6A;line-height:1.55;max-width:62ch">{{ journeyIntro }}</p>
+          </div>
+        </section>
+
+        <sc-for list="{{ milestones }}" as="ms" hint-placeholder-count="4">
+          <section style="display:grid;grid-template-columns:150px 1fr;gap:20px">
+            <div style="display:flex;flex-direction:column;gap:8px;padding-top:4px;border-right:2px solid #E8E8E8;padding-right:18px">
+              <span style="font-size:10px;letter-spacing:1.4px;font-weight:700;color:#6A6A6A">{{ ms.when }}</span>
+              <span style="font-size:18px;font-weight:800;letter-spacing:-.3px;line-height:1.2">{{ ms.title }}</span>
+              <span style="font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px;align-self:flex-start;color:#fff;background:{{ ms.badgeBg }}">{{ ms.badge }}</span>
+            </div>
+            <div style="border:1px solid #E8E8E8;border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px">
+              <p style="margin:0;font-size:13.5px;color:#6A6A6A;line-height:1.55">{{ ms.summary }}</p>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ ms.tasks }}" as="t" hint-placeholder-count="3">
+                  <button onClick="{{ t.toggle }}" style="cursor:pointer;font-family:inherit;text-align:left;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid {{ t.border }};background:{{ t.bg }};transition:background .18s,border-color .18s" style-hover="border-color:#E20074">
+                    <span style="width:20px;height:20px;border-radius:6px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;border:2px solid {{ t.boxBorder }};background:{{ t.boxBg }};transition:all .18s">{{ t.check }}</span>
+                    <span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                      <span style="font-size:14px;font-weight:700;text-decoration:{{ t.strike }};color:{{ t.color }}">{{ t.label }}</span>
+                      <span style="font-size:11.5px;color:#6A6A6A">{{ t.meta }}</span>
+                    </span>
+                    <span style="margin-left:auto;font-size:10px;letter-spacing:1.1px;font-weight:700;color:{{ t.stateColor }}">{{ t.state }}</span>
+                  </button>
+                </sc-for>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px">
+                <div style="flex:1;height:6px;border-radius:99px;background:#E8E8E8;overflow:hidden">
+                  <div style="height:100%;border-radius:99px;background:#E20074;transition:width .5s ease;width:{{ ms.pctCss }}"></div>
+                </div>
+                <span style="font-size:12px;font-weight:800;color:#E20074">{{ ms.pct }}%</span>
+              </div>
+            </div>
+          </section>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isGrow }}">
+      <div data-screen-label="Grow Me" style="padding:26px 34px 60px;max-width:1120px;display:flex;flex-direction:column;gap:22px">
+        <div style="display:flex;gap:8px;padding:5px;border-radius:999px;background:#F6F6F6;align-self:flex-start">
+          <button onClick="{{ showPulse }}" style="cursor:pointer;font-family:inherit;border:0;font-size:13px;font-weight:800;padding:10px 20px;border-radius:999px;transition:all .18s;background:{{ pulseTabBg }};color:{{ pulseTabFg }}">My Pulse</button>
+          <button onClick="{{ showCareer }}" style="cursor:pointer;font-family:inherit;border:0;font-size:13px;font-weight:800;padding:10px 20px;border-radius:999px;transition:all .18s;background:{{ careerTabBg }};color:{{ careerTabFg }}">Career Coach</button>
+        </div>
+
+        <sc-if value="{{ isPulseTab }}">
+          <div style="display:grid;grid-template-columns:1fr 1.15fr;gap:16px;align-items:start">
+            <section style="border:1px solid #E8E8E8;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:18px">
+              <div>
+                <h2 style="margin:0;font-size:19px;font-weight:800">This week's check-in</h2>
+                <p style="margin:6px 0 0;font-size:13px;color:#6A6A6A;line-height:1.5">Takes 15 seconds. Your answers stay aggregated—your manager sees trends, never individual entries.</p>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <span style="font-size:11px;letter-spacing:1.3px;font-weight:700;color:#6A6A6A">HOW ARE YOU FEELING?</span>
+                <div style="display:flex;gap:8px">
+                  <sc-for list="{{ moods }}" as="mo" hint-placeholder-count="5">
+                    <button onClick="{{ mo.pick }}" style="flex:1;cursor:pointer;font-family:inherit;border:1px solid {{ mo.border }};background:{{ mo.bg }};color:{{ mo.fg }};border-radius:14px;padding:14px 6px;display:flex;flex-direction:column;gap:5px;align-items:center;transition:all .18s">
+                      <span style="font-size:19px;font-weight:800">{{ mo.value }}</span>
+                      <span style="font-size:10.5px;font-weight:700;letter-spacing:.3px">{{ mo.label }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;justify-content:space-between;align-items:baseline">
+                  <span style="font-size:11px;letter-spacing:1.3px;font-weight:700;color:#6A6A6A">WORKLOAD RIGHT NOW</span>
+                  <span style="font-size:14px;font-weight:800;color:#E20074">{{ workload }}/10</span>
+                </div>
+                <input type="range" min="1" max="10" step="1" value="{{ workload }}" onChange="{{ onWorkload }}" style="width:100%" />
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#6A6A6A;font-weight:600">
+                  <span>Manageable</span><span>Underwater</span>
+                </div>
+              </div>
+              <button onClick="{{ submitPulse }}" style="border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:14px;padding:14px;border-radius:999px;background:#E20074;color:#fff">Submit check-in</button>
+              <sc-if value="{{ pulseSubmitted }}">
+                <div style="border-radius:14px;padding:14px 16px;background:rgba(226,0,116,.07);border:1px solid rgba(226,0,116,.25);animation:popIn .3s ease both">
+                  <div style="font-size:13.5px;font-weight:800;color:#861B54">Thanks—that's logged.</div>
+                  <div style="font-size:12.5px;color:#000;line-height:1.5;margin-top:4px">{{ pulseFeedback }}</div>
+                </div>
+              </sc-if>
+            </section>
+
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <section style="border:1px solid #E8E8E8;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                  <h2 style="margin:0;font-size:19px;font-weight:800">AI-scored sentiment trend</h2>
+                  <span style="font-size:11px;color:#6A6A6A;font-weight:700">{{ trendRange }}</span>
+                </div>
+                <svg viewBox="0 0 340 110" style="width:100%;height:120px;overflow:visible">
+                  <line x1="0" y1="92" x2="340" y2="92" stroke="#E8E8E8" stroke-width="1"></line>
+                  <line x1="0" y1="50" x2="340" y2="50" stroke="#E8E8E8" stroke-width="1" stroke-dasharray="4 5"></line>
+                  <polyline fill="none" stroke="#E20074" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="{{ sparkPoints }}"></polyline>
+                  <circle cx="{{ lastX }}" cy="{{ lastY }}" r="5.5" fill="#E20074"></circle>
+                </svg>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#6A6A6A;font-weight:600">
+                  <sc-for list="{{ trendLabels }}" as="tl" hint-placeholder-count="6"><span>{{ tl.label }}</span></sc-for>
+                </div>
+                <div style="font-size:12.5px;line-height:1.55;color:#000;border-top:1px solid #E8E8E8;padding-top:12px">{{ trendNote }}</div>
+              </section>
+
+              <section style="border-radius:20px;padding:24px;background:{{ riskPanelBg }};color:{{ riskPanelFg }};display:flex;flex-direction:column;gap:12px;border:1px solid #E8E8E8">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                  <h2 style="margin:0;font-size:19px;font-weight:800">Burnout risk</h2>
+                  <span style="font-size:11px;letter-spacing:1.3px;font-weight:800;padding:6px 12px;border-radius:999px;background:{{ riskChipBg }};color:{{ riskChipFg }}">{{ riskLabel }}</span>
+                </div>
+                <p style="margin:0;font-size:13.5px;line-height:1.6;opacity:.95">{{ riskCopy }}</p>
+                <sc-if value="{{ showRiskActions }}">
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <sc-for list="{{ riskActions }}" as="ra" hint-placeholder-count="2">
+                      <button onClick="{{ ra.run }}" style="cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:800;padding:10px 16px;border-radius:999px;border:1px solid {{ ra.border }};background:{{ ra.bg }};color:{{ ra.fg }}">{{ ra.label }}</button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ focusPicking }}">
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;animation:popIn .25s ease both">
+                    <span style="font-size:12.5px;font-weight:700">Block focus time for:</span>
+                    <sc-for list="{{ focusDurations }}" as="fd" hint-placeholder-count="2">
+                      <button onClick="{{ fd.run }}" style="cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:800;padding:10px 16px;border-radius:999px;border:1px solid {{ fd.border }};background:{{ fd.bg }};color:{{ fd.fg }}">{{ fd.label }}</button>
+                    </sc-for>
+                    <button onClick="{{ cancelFocusPicker }}" style="cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;padding:0;background:none;border:0;color:{{ focusCancelColor }}">Cancel</button>
+                  </div>
+                </sc-if>
+              </section>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isCareerTab }}">
+          <div style="display:flex;flex-direction:column;gap:18px">
+            <section style="border:1px solid #E8E8E8;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px">
+              <h2 style="margin:0;font-size:20px;font-weight:800">Where do you want to go next?</h2>
+              <p style="margin:0;font-size:13.5px;color:#6A6A6A;line-height:1.55;max-width:70ch">Tell your coach the role you're aiming for and it'll map your skill gaps to learning, mentors, stretch projects, and roles that are open right now.</p>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <input placeholder="{{ careerPlaceholder }}" value="{{ careerQ }}" onChange="{{ onCareerQ }}" onKeyDown="{{ onCareerKey }}" style="flex:1;min-width:260px;font-family:inherit;font-size:14.5px;padding:14px 16px;border-radius:14px;border:1px solid #E8E8E8;outline:none" style-focus="border-color:#E20074" />
+                <button onClick="{{ askCareer }}" style="border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:14px;padding:14px 24px;border-radius:14px;background:#E20074;color:#fff">Build my plan</button>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <sc-for list="{{ careerChips }}" as="cc" hint-placeholder-count="3">
+                  <button onClick="{{ cc.send }}" style="cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:700;padding:9px 14px;border-radius:999px;border:1px solid #E8E8E8;background:#fff;color:#000" style-hover="border-color:#E20074;color:#E20074">{{ cc.label }}</button>
+                </sc-for>
+              </div>
+            </section>
+
+            <sc-if value="{{ careerLoading }}">
+              <div style="border:1px solid #E8E8E8;border-radius:20px;padding:24px;display:flex;align-items:center;gap:12px">
+                <span style="width:17px;height:17px;border-radius:50%;border:2px solid #E8E8E8;border-top-color:#E20074;animation:spin .7s linear infinite"></span>
+                <span style="font-size:14px;font-weight:700;color:#6A6A6A">Reading your skills profile and open roles...</span>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ hasPlan }}">
+              <div style="display:flex;flex-direction:column;gap:16px;animation:popIn .35s ease both">
+                <section style="border-radius:20px;padding:26px;background:linear-gradient(115deg,#E20074,#861B54);color:#fff">
+                  <div style="font-size:10px;letter-spacing:1.5px;font-weight:700;opacity:.85">YOUR PATH</div>
+                  <h3 style="margin:8px 0 0;font-size:26px;font-weight:800;letter-spacing:-.6px">{{ plan.target }}</h3>
+                  <p style="margin:10px 0 0;font-size:14.5px;line-height:1.6;max-width:70ch;opacity:.95">{{ plan.summary }}</p>
+                  <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+                    <span style="font-size:12px;font-weight:800;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.22)">READINESS {{ plan.readiness }}%</span>
+                    <span style="font-size:12px;font-weight:800;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.22)">EST. {{ plan.timeline }}</span>
+                  </div>
+                </section>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
+                  <section style="border:1px solid #E8E8E8;border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:14px">
+                    <h3 style="margin:0;font-size:16px;font-weight:800">Skill gap map</h3>
+                    <sc-for list="{{ plan.gaps }}" as="g" hint-placeholder-count="4">
+                      <div style="display:flex;flex-direction:column;gap:6px">
+                        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700">
+                          <span>{{ g.skill }}</span><span style="color:#6A6A6A">{{ g.level }}</span>
+                        </div>
+                        <div style="height:7px;border-radius:99px;background:#E8E8E8;overflow:hidden">
+                          <div style="height:100%;background:#E20074;border-radius:99px;transition:width .6s ease;width:{{ g.pctCss }}"></div>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </section>
+
+                  <section style="border:1px solid #E8E8E8;border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:12px">
+                    <h3 style="margin:0;font-size:16px;font-weight:800">Learning plan</h3>
+                    <sc-for list="{{ plan.learning }}" as="l" hint-placeholder-count="3">
+                      <div style="display:flex;gap:11px;align-items:flex-start">
+                        <span style="width:22px;height:22px;border-radius:7px;flex:0 0 auto;background:rgba(226,0,116,.1);color:#E20074;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace">{{ l.n }}</span>
+                        <span style="display:flex;flex-direction:column;gap:2px">
+                          <span style="font-size:13.5px;font-weight:700;line-height:1.35">{{ l.title }}</span>
+                          <span style="font-size:11.5px;color:#6A6A6A">{{ l.meta }}</span>
+                        </span>
+                      </div>
+                    </sc-for>
+                  </section>
+
+                  <section style="border:1px solid #E8E8E8;border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:12px">
+                    <h3 style="margin:0;font-size:16px;font-weight:800">Mentors to meet</h3>
+                    <sc-for list="{{ plan.mentors }}" as="mt" hint-placeholder-count="2">
+                      <div style="display:flex;gap:11px;align-items:center">
+                        <span style="width:34px;height:34px;border-radius:50%;flex:0 0 auto;background:#000;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">{{ mt.initials }}</span>
+                        <span style="display:flex;flex-direction:column;gap:1px">
+                          <span style="font-size:13.5px;font-weight:700">{{ mt.name }}</span>
+                          <span style="font-size:11.5px;color:#6A6A6A">{{ mt.why }}</span>
+                        </span>
+                      </div>
+                    </sc-for>
+                  </section>
+
+                  <section style="border:1px solid #E8E8E8;border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:12px">
+                    <h3 style="margin:0;font-size:16px;font-weight:800">Stretch projects</h3>
+                    <sc-for list="{{ plan.projects }}" as="pr" hint-placeholder-count="2">
+                      <div style="border-radius:12px;background:#F6F6F6;padding:12px 14px">
+                        <div style="font-size:13.5px;font-weight:700;line-height:1.35">{{ pr.title }}</div>
+                        <div style="font-size:11.5px;color:#6A6A6A;margin-top:3px;line-height:1.45">{{ pr.detail }}</div>
+                      </div>
+                    </sc-for>
+                  </section>
+                </div>
+
+                <section style="border:1px solid #E8E8E8;border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:12px">
+                  <h3 style="margin:0;font-size:16px;font-weight:800">Open internal roles that fit</h3>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">
+                    <sc-for list="{{ plan.roles }}" as="r" hint-placeholder-count="3">
+                      <div style="border:1px solid #E8E8E8;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:7px">
+                        <span style="font-size:14.5px;font-weight:800;line-height:1.3">{{ r.title }}</span>
+                        <span style="font-size:12px;color:#6A6A6A">{{ r.team }}</span>
+                        <span style="font-size:11px;letter-spacing:1.1px;font-weight:800;color:#E20074">{{ r.match }} MATCH</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="font-size:11px;color:#6A6A6A;font-family:'IBM Plex Mono',monospace">ILLUSTRATIVE OPENINGS—DEMO DATA.</div>
+                </section>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isManager }}">
+      <div data-screen-label="Manager View" style="padding:28px 34px 60px;max-width:1160px;display:flex;flex-direction:column;gap:20px">
+        <section style="border-radius:20px;padding:24px 26px;background:#000;color:#fff;display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:10px;letter-spacing:1.5px;font-weight:700;color:#E20074">TEAM HEALTH—CONSUMER GROWTH</span>
+          <h2 style="margin:0;font-size:26px;font-weight:800;letter-spacing:-.5px">{{ managerHeadline }}</h2>
+          <p style="margin:4px 0 0;font-size:14px;line-height:1.55;color:#E8E8E8;max-width:72ch">Pulse scores are aggregated and AI-scored weekly. You see trends and risk—never individual survey answers.</p>
+        </section>
+
+        <section style="border:2px solid #E20074;border-radius:18px;padding:20px 22px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;animation:popIn .35s ease both">
+          <span style="width:40px;height:40px;border-radius:12px;background:#E20074;color:#fff;font-size:19px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto">!</span>
+          <div style="flex:1;min-width:240px">
+            <div style="font-size:16.5px;font-weight:800">{{ alertTitle }}</div>
+            <div style="font-size:13px;color:#6A6A6A;line-height:1.5;margin-top:3px">{{ alertBody }}</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ managerActions }}" as="ma" hint-placeholder-count="3">
+              <button onClick="{{ ma.run }}" style="cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:800;padding:11px 16px;border-radius:999px;border:1px solid {{ ma.border }};background:{{ ma.bg }};color:{{ ma.fg }}">{{ ma.label }}</button>
+            </sc-for>
+          </div>
+        </section>
+
+        <sc-if value="{{ nudgeSent }}">
+          <div style="border-radius:14px;padding:14px 18px;background:rgba(226,0,116,.07);border:1px solid rgba(226,0,116,.25);font-size:13.5px;font-weight:700;color:#861B54;animation:popIn .3s ease both">{{ nudgeMsg }}</div>
+        </sc-if>
+
+        <section style="border:1px solid #E8E8E8;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+            <h3 style="margin:0;font-size:17px;font-weight:800">Burnout-risk heat strip</h3>
+            <span style="font-size:11px;color:#6A6A6A;font-weight:700">LAST 8 WEEKS</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <sc-for list="{{ heat }}" as="h" hint-placeholder-count="5">
+              <div style="display:grid;grid-template-columns:130px 1fr;gap:14px;align-items:center">
+                <span style="font-size:12.5px;font-weight:700">{{ h.name }}</span>
+                <div style="display:flex;gap:4px">
+                  <sc-for list="{{ h.cells }}" as="c" hint-placeholder-count="8">
+                    <span style="flex:1;height:22px;border-radius:5px;background:{{ c.bg }}"></span>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:14px;align-items:center;font-size:11px;color:#6A6A6A;font-weight:700">
+            <span>LOW RISK</span>
+            <div style="flex:1;height:7px;border-radius:99px;background:linear-gradient(90deg,#E8E8E8,#F3A9CE,#E20074,#861B54)"></div>
+            <span>HIGH RISK</span>
+          </div>
+        </section>
+
+        <section style="border:1px solid #E8E8E8;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px">
+          <h3 style="margin:0;font-size:17px;font-weight:800">Team roster</h3>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="display:grid;grid-template-columns:1.6fr 1fr .8fr .8fr 1fr;gap:12px;padding:0 4px 10px;font-size:10px;letter-spacing:1.2px;font-weight:700;color:#6A6A6A;border-bottom:1px solid #E8E8E8">
+              <span>TEAMMATE</span><span>ROLE</span><span>PULSE</span><span>TREND</span><span>RISK</span>
+            </div>
+            <sc-for list="{{ roster }}" as="p" hint-placeholder-count="5">
+              <div style="display:grid;grid-template-columns:1.6fr 1fr .8fr .8fr 1fr;gap:12px;align-items:center;padding:13px 4px;border-bottom:1px solid #F0F0F0;background:{{ p.rowBg }}">
+                <span style="display:flex;align-items:center;gap:10px">
+                  <span style="width:30px;height:30px;border-radius:50%;background:#000;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto">{{ p.initials }}</span>
+                  <span style="font-size:13.5px;font-weight:700">{{ p.name }}</span>
+                </span>
+                <span style="font-size:12.5px;color:#6A6A6A">{{ p.role }}</span>
+                <span style="font-size:14px;font-weight:800">{{ p.pulse }}</span>
+                <span style="font-size:12.5px;font-weight:700;color:{{ p.trendColor }}">{{ p.trend }}</span>
+                <span style="font-size:11px;letter-spacing:1px;font-weight:800;padding:5px 10px;border-radius:999px;justify-self:start;color:{{ p.riskFg }};background:{{ p.riskBg }}">{{ p.risk }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-size:11px;color:#6A6A6A;font-family:'IBM Plex Mono',monospace">SYNTHETIC TEAM—ILLUSTRATIVE DEMO DATA.</div>
+        </section>
+      </div>
+    </sc-if>
+  </main>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:950}}">
+const MAG = '#E20074', BERRY = '#861B54', GRAY = '#6A6A6A', LINE = '#E8E8E8';
+const PTO_ACCRUAL_RATE = 5.8; // T-Mobile policy: hrs accrued per biweekly pay period
+
+const TOOL_META = {
+  resetVpnPassword: { prefix: 'VPN', label: 'VPN password reset' },
+  fileItTicket: { prefix: 'INC', label: 'IT ticket filed' },
+  requestPto: { prefix: 'PTO', label: 'PTO request submitted' },
+  expenseTravel: { prefix: 'EXP', label: 'Travel expense filed' },
+  bookConferenceRoom: { prefix: 'RM', label: 'Room booked' },
+  lookupBenefits: { prefix: 'BEN', label: 'Benefits looked up' },
+  checkPayroll: { prefix: 'PAY', label: 'Payroll checked' },
+  checkOnCall: { prefix: 'ONC', label: 'On-call schedule checked' },
+  requestAccess: { prefix: 'ACC', label: 'Access request submitted' },
+  listOpenTickets: { prefix: 'TIX', label: 'Open tickets pulled' },
+  listPendingTrainings: { prefix: 'TRN', label: 'Training queue pulled' },
+  logWorkloadConcern: { prefix: 'WLD', label: 'Workload concern logged' },
+  blockFocusTime: { prefix: 'CAL', label: 'Focus time blocked' }
+};
+
+// ---------- personas ----------
+// Three employee types on one platform: a corporate PM, a data analyst,
+// and an engineer. Everything employee-facing (greeting, journey,
+// quick actions, assistant tone, career plan) is sourced from PERSONAS[id].
+// Manager View intentionally stays fixed on Jordan's team regardless of
+// persona—it's a separate "manager" vantage point, not a per-employee mirror.
+const PERSONAS = {
+  pm: {
+    id: 'pm', label: 'Product Manager', sub: 'Corporate · Consumer Growth',
+    name: 'Jordan Reyes', role: 'Product Manager, Consumer Growth', city: 'Bellevue, WA', tenureLabel: '2 months in',
+    buddy: 'Alex Chen', managerName: 'Dana Whitfield', payPeriodsAccrued: 4, userSlug: 'jordan.reyes',
+    openTickets: 2, openTicketsNote: '1 IT ticket, 1 facilities request', pendingTrainings: 2, nextTraining: 'Security & Code of Conduct',
+    heroLead: "Good morning, Jordan—your week is looking busy, so let's get ahead of it.",
+    systemContext: "talking to Jordan Reyes—a new Product Manager on Consumer Growth in Bellevue, WA, 2 months into the job. Jordan has accrued 23.2 PTO hours so far (4 pay periods at 5.8 hrs each) and just returned from a Seattle client trip",
+    greeting: "Hey Jordan—I'm your Magenta Pulse assistant. I can reset access, file tickets, book rooms, expense trips, check PTO and payroll, or talk through your career. What do you need?",
+    quickActions: [
+      { tag: 'VPN', label: 'Reset VPN', sub: 'Access restored in seconds', q: 'Reset my VPN password' },
+      { tag: 'IT', label: 'File IT ticket', sub: 'Routed and prioritized', q: 'My laptop keeps dropping wifi—file an IT ticket' },
+      { tag: 'PTO', label: 'Request PTO', sub: '14 days remaining', q: 'How much PTO do I have left?' },
+      { tag: 'EXP', label: 'Expense travel', sub: 'Pulled from your card feed', q: 'Expense my Seattle trip' },
+      { tag: 'RM', label: 'Book a room', sub: 'Finds and confirms it', q: 'Book a room for 3pm today' }
+    ],
+    chips: ['Reset my VPN password', 'Expense my Seattle trip', 'Book a room for 3pm', 'How much PTO do I have?', 'What does my dental plan cover?', 'How do I become a Senior PM?'],
+    careerChips: ['How do I become a Senior PM?', 'What if I moved into pricing?', 'How do I get better at exec storytelling?'],
+    careerContext: "advising Jordan Reyes, a Product Manager on Consumer Growth in Bellevue, 2 months in. Strong at customer discovery and data; developing cross-org influence; gaps in pricing/packaging and executive storytelling",
+    milestones: [
+      {
+        when: 'PRE-START', title: 'Before day one', summary: "Everything we could do without you, we already did—so day one is about people, not paperwork.",
+        tasks: [
+          { id: 't1', label: 'Welcome email from your onboarding buddy', meta: 'Sent by Alex Chen—auto-matched on role and team', done: true },
+          { id: 't2', label: 'Background check and I-9 cleared', meta: 'HR system—no action needed from you', done: true },
+          { id: 't3', label: 'Laptop and badge shipped to Bellevue', meta: 'Auto-generated equipment request EQ-4471', done: true }
+        ]
+      },
+      {
+        when: 'WEEK 1', title: 'Get set up', summary: "Accounts were provisioned overnight based on your role—PM tooling, analytics read access, and your team channels.",
+        tasks: [
+          { id: 't4', label: 'Accounts auto-provisioned (12 systems)', meta: 'SSO, Jira, Figma, Looker, Slack, VPN', done: true },
+          { id: 't5', label: 'Meet your onboarding buddy', meta: 'Alex Chen—30 min, already on your calendar', done: true },
+          { id: 't6', label: 'Complete security and code of conduct training', meta: '45 min, required', done: false },
+          { id: 't7', label: 'First 1:1 with your manager', meta: 'Dana Whitfield—Friday 10:00 AM', done: true }
+        ]
+      },
+      {
+        when: 'MONTH 1', title: 'Learn the business', summary: "A PM-specific learning path was generated for you, weighted toward Consumer Growth metrics.",
+        tasks: [
+          { id: 't8', label: 'Consumer Growth metrics deep dive', meta: 'Training module—2 hours', done: false },
+          { id: 't9', label: 'Shadow two customer discovery calls', meta: 'Research team—book any two', done: false },
+          { id: 't10', label: 'Ship your first small change', meta: 'Ramp goal—paired with Marcus Hale', done: false },
+          { id: 't11', label: 'Set up expense and travel profile', meta: 'Needed before your Seattle trip', done: true }
+        ]
+      },
+      {
+        when: 'MONTH 3', title: 'Own your surface', summary: "Milestone check-ins and a growth conversation are scheduled automatically—your pulse data feeds into them.",
+        tasks: [
+          { id: 't12', label: '90-day check-in with your manager', meta: 'Scheduled Aug 22', done: false },
+          { id: 't13', label: 'Take ownership of one roadmap area', meta: 'Retention onboarding funnel', done: false },
+          { id: 't14', label: 'Set growth goals with your AI coach', meta: 'Grow Me → Career Coach', done: false }
+        ]
+      }
+    ],
+    trend: [4.4, 4.2, 4.3, 3.9, 3.6, 3.4], workload: 7, mood: 3,
+    defaultPlan: {
+      target: 'Product Manager → Senior Product Manager',
+      summary: "You're two quarters of evidence away. Close the pricing and exec-narrative gaps, own one cross-org launch end-to-end, and your promo packet writes itself.",
+      readiness: 68, timeline: '2-3 quarters',
+      gaps: [
+        { skill: 'Customer discovery', level: 'Strong', pct: 88 },
+        { skill: 'Cross-org influence', level: 'Developing', pct: 54 },
+        { skill: 'Pricing & packaging', level: 'Gap', pct: 32 },
+        { skill: 'Executive storytelling', level: 'Gap', pct: 38 },
+        { skill: 'Data & experimentation', level: 'Solid', pct: 71 }
+      ],
+      learning: [
+        { title: 'Pricing strategy for subscription products', meta: 'Internal cohort—4 weeks, starts Aug 10' },
+        { title: 'Narrative writing for exec reviews', meta: 'Self-paced, 6 hours' },
+        { title: 'Advanced experimentation with the growth data team', meta: 'Shadow program—2 sprints' }
+      ],
+      mentors: [
+        { name: 'Priya Raman', why: 'Director, Consumer Pricing—ran the last plan restructure' },
+        { name: 'Marcus Hale', why: 'Senior PM, Retention—promoted on a similar path last year' }
+      ],
+      projects: [
+        { title: 'Own the Q4 family-plan pricing test', detail: 'Highest-visibility pricing surface, needs a PM with discovery depth.' },
+        { title: 'Lead the churn-signal working group', detail: 'Cross-org influence practice with Care, Retail, and Data.' }
+      ],
+      roles: [
+        { title: 'Senior PM, Retention & Loyalty', team: 'Consumer Growth', match: '82%' },
+        { title: 'Senior PM, Pricing Platform', team: 'Commercial Systems', match: '74%' },
+        { title: 'Senior PM, Care Automation', team: 'Customer Experience', match: '69%' }
+      ]
+    }
+  },
+
+  analyst: {
+    id: 'analyst', label: 'Data Analyst', sub: 'Corporate · Consumer Insights',
+    name: 'Casey Nguyen', role: 'Data Analyst, Consumer Insights', city: 'Bellevue, WA', tenureLabel: '1 month in',
+    buddy: 'Tasha Reed', managerName: 'Renee Vasquez', payPeriodsAccrued: 2, userSlug: 'casey.nguyen',
+    openTickets: 1, openTicketsNote: '1 IT ticket—BI tool crash', pendingTrainings: 3, nextTraining: 'Data Privacy & Governance',
+    heroLead: "Good morning, Casey—your dashboard refresh finished overnight, and a couple onboarding tasks are still open.",
+    systemContext: "talking to Casey Nguyen—a new Data Analyst on Consumer Insights in Bellevue, WA, 1 month into the job. Casey has accrued 11.6 PTO hours so far (2 pay periods at 5.8 hrs each) and is ramping up on the churn-reporting pipeline",
+    greeting: "Hey Casey—I'm your Magenta Pulse assistant. I can reset access, request dataset permissions, check PTO and payroll, or talk through your career. What do you need?",
+    quickActions: [
+      { tag: 'VPN', label: 'Reset VPN', sub: 'Access restored in seconds', q: 'Reset my VPN password' },
+      { tag: 'ACC', label: 'Request data access', sub: 'Routed to the Data Platform team', q: 'I need access to the churn dataset in the warehouse' },
+      { tag: 'PTO', label: 'Request PTO', sub: '8 days remaining', q: 'How much PTO do I have left?' },
+      { tag: 'IT', label: 'File IT ticket', sub: 'Routed and prioritized', q: 'My BI tool keeps crashing—file an IT ticket' },
+      { tag: 'BEN', label: 'Ask about benefits', sub: 'Health, dental, 401(k)', q: 'What does my dental plan cover?' }
+    ],
+    chips: ['Reset my VPN password', 'Request access to the churn dataset', 'How much PTO do I have?', 'My BI tool keeps crashing', 'What does my dental plan cover?', 'How do I become a Senior Data Analyst?'],
+    careerChips: ['How do I become a Senior Data Analyst?', 'What if I moved into data science?', 'How do I get better at stakeholder storytelling?'],
+    careerContext: "advising Casey Nguyen, a Data Analyst on Consumer Insights in Bellevue, 1 month in. Strong at SQL and dashboarding; developing experimentation design; gaps in stakeholder storytelling and statistical modeling",
+    milestones: [
+      {
+        when: 'PRE-START', title: 'Before day one', summary: "Everything we could do without you, we already did—so day one is about the data, not paperwork.",
+        tasks: [
+          { id: 'r1', label: 'Welcome email from your onboarding buddy', meta: 'Sent by Tasha Reed—auto-matched on team and stack', done: true },
+          { id: 'r2', label: 'Background check and I-9 cleared', meta: 'HR system—no action needed from you', done: true },
+          { id: 'r3', label: 'Laptop imaged and shipped to Bellevue', meta: 'BI tools and SQL client pre-installed, EQ-5182', done: true }
+        ]
+      },
+      {
+        when: 'WEEK 1', title: 'Get set up', summary: "Accounts were provisioned overnight based on your role—warehouse, BI tooling, and your team channels.",
+        tasks: [
+          { id: 'r4', label: 'Accounts auto-provisioned (10 systems)', meta: 'Warehouse, Looker, dbt, Slack, VPN, Jira', done: true },
+          { id: 'r5', label: 'Meet your onboarding buddy', meta: 'Tasha Reed—30 min, already on your calendar', done: true },
+          { id: 'r6', label: 'Complete security and code of conduct training', meta: '45 min, required', done: false },
+          { id: 'r7', label: 'First 1:1 with your manager', meta: 'Renee Vasquez—Friday 9:00 AM', done: true }
+        ]
+      },
+      {
+        when: 'MONTH 1', title: 'Learn the warehouse', summary: "A ramp-up path was generated for you, weighted toward Consumer Insights' core tables.",
+        tasks: [
+          { id: 'r8', label: 'Warehouse schema and dbt walkthrough', meta: 'Paired session—2 hours', done: false },
+          { id: 'r9', label: 'Shadow two stakeholder readouts', meta: 'With any teammate', done: false },
+          { id: 'r10', label: 'Ship your first dashboard update', meta: 'Paired with Tasha Reed', done: false },
+          { id: 'r11', label: 'Set up direct deposit and benefits enrollment', meta: 'Needed before your first paycheck', done: true }
+        ]
+      },
+      {
+        when: 'MONTH 3', title: 'Own a dashboard', summary: "Milestone check-ins and a growth conversation are scheduled automatically—your pulse data feeds into them.",
+        tasks: [
+          { id: 'r12', label: '90-day check-in with your manager', meta: 'Scheduled Aug 22', done: false },
+          { id: 'r13', label: 'Take ownership of the churn-reporting dashboard', meta: 'Weekly refresh and stakeholder readout', done: false },
+          { id: 'r14', label: 'Set growth goals with your AI coach', meta: 'Grow Me → Career Coach', done: false }
+        ]
+      }
+    ],
+    trend: [4.0, 4.1, 4.3, 4.2, 4.4, 4.5], workload: 5, mood: 4,
+    defaultPlan: {
+      target: 'Data Analyst → Senior Data Analyst',
+      summary: "You're about two quarters of reps away. Close the experimentation-design and stakeholder-storytelling gaps, own one end-to-end metrics launch, and your promo packet writes itself.",
+      readiness: 63, timeline: '2-3 quarters',
+      gaps: [
+        { skill: 'SQL & data modeling', level: 'Strong', pct: 87 },
+        { skill: 'Dashboarding & BI tools', level: 'Solid', pct: 76 },
+        { skill: 'Experimentation design', level: 'Developing', pct: 50 },
+        { skill: 'Stakeholder storytelling', level: 'Gap', pct: 33 },
+        { skill: 'Statistical modeling', level: 'Gap', pct: 37 }
+      ],
+      learning: [
+        { title: 'Experimentation design for product analytics', meta: 'Internal cohort—4 weeks, starts Aug 10' },
+        { title: 'Storytelling with data for executives', meta: 'Self-paced, 5 hours' },
+        { title: 'Applied statistics for analysts', meta: 'Shadow program—2 sprints' }
+      ],
+      mentors: [
+        { name: 'Renee Vasquez', why: 'Analytics Manager—ran the last team promo cycle' },
+        { name: 'Devon Brooks', why: 'Staff Data Scientist—promoted on a similar path last year' }
+      ],
+      projects: [
+        { title: 'Own the Q4 churn-signal dashboard relaunch', detail: 'Highest-visibility reporting surface, needs someone with modeling depth.' },
+        { title: 'Lead the self-serve metrics documentation effort', detail: 'Stakeholder-facing practice across Care, Retail, and Marketing.' }
+      ],
+      roles: [
+        { title: 'Senior Data Analyst', team: 'Consumer Insights', match: '80%' },
+        { title: 'Data Scientist', team: 'Growth Analytics', match: '68%' },
+        { title: 'Analytics Lead', team: 'Customer Experience', match: '64%' }
+      ]
+    }
+  },
+
+  dev: {
+    id: 'dev', label: 'Software Developer', sub: 'Engineering · Platform',
+    name: 'Morgan Ellis', role: 'Software Engineer, Platform Engineering', city: 'Bellevue, WA', tenureLabel: 'almost 3 months in',
+    buddy: 'Priya Shah', managerName: 'Lena Ruiz', payPeriodsAccrued: 6, userSlug: 'morgan.ellis',
+    openTickets: 0, openTicketsNote: 'All clear—nothing open', pendingTrainings: 1, nextTraining: 'On-Call Incident Response',
+    heroLead: "Good morning, Morgan—your PR is waiting on review, and on-call starts Friday.",
+    systemContext: "talking to Morgan Ellis—a Software Engineer on Platform Engineering in Bellevue, WA, almost 3 months into the job. Morgan has accrued 34.8 PTO hours so far (6 pay periods at 5.8 hrs each) and is ramping onto the on-call rotation",
+    greeting: "Hey Morgan—I'm your Magenta Pulse assistant. I can reset access, request repo permissions, check PTO and payroll, look up on-call, or talk through your career. What do you need?",
+    quickActions: [
+      { tag: 'VPN', label: 'Reset VPN', sub: 'Access restored in seconds', q: 'Reset my VPN password' },
+      { tag: 'ACC', label: 'Request repo access', sub: 'Routed to Platform Eng', q: 'I need access to the billing-service repo' },
+      { tag: 'PTO', label: 'Request PTO', sub: '11 days remaining', q: 'How much PTO do I have left?' },
+      { tag: 'ONC', label: 'Check on-call', sub: "Who's up this week", q: 'Who is on call this week?' },
+      { tag: 'EXP', label: 'Expense a conference', sub: 'Pulled from your card feed', q: 'Expense my conference travel' }
+    ],
+    chips: ['Reset my VPN password', 'Who is on call this week?', 'How much PTO do I have?', 'Request access to the billing-service repo', 'What does my dental plan cover?', 'How do I become a Staff Engineer?'],
+    careerChips: ['How do I become a Staff Engineer?', 'What if I moved into SRE?', 'How do I get better at system design?'],
+    careerContext: "advising Morgan Ellis, a Software Engineer on Platform Engineering in Bellevue, almost 3 months in. Strong at coding and architecture; solid at cross-team collaboration; gaps in system design and incident-response ownership",
+    milestones: [
+      {
+        when: 'PRE-START', title: 'Before day one', summary: "Everything we could do without you, we already did—so day one is about people, not setup.",
+        tasks: [
+          { id: 'd1', label: 'Welcome email from your onboarding buddy', meta: 'Sent by Priya Shah—auto-matched on team and stack', done: true },
+          { id: 'd2', label: 'Background check and I-9 cleared', meta: 'HR system—no action needed from you', done: true },
+          { id: 'd3', label: 'Laptop imaged and shipped to Bellevue', meta: 'Dev environment pre-configured, EQ-6039', done: true }
+        ]
+      },
+      {
+        when: 'WEEK 1', title: 'Get set up', summary: "Accounts were provisioned overnight based on your role—repo access, cloud, and your team's on-call tooling.",
+        tasks: [
+          { id: 'd4', label: 'Accounts auto-provisioned (11 systems)', meta: 'GitHub, AWS, PagerDuty, Slack, VPN, Jira', done: true },
+          { id: 'd5', label: 'Meet your onboarding buddy', meta: 'Priya Shah—30 min, already on your calendar', done: true },
+          { id: 'd6', label: 'Complete security and code of conduct training', meta: '45 min, required', done: false },
+          { id: 'd7', label: 'First 1:1 with your manager', meta: 'Lena Ruiz—Friday 10:00 AM', done: true }
+        ]
+      },
+      {
+        when: 'MONTH 1', title: 'Learn the codebase', summary: "A ramp-up path was generated for you, weighted toward Platform Engineering's core services.",
+        tasks: [
+          { id: 'd8', label: 'Local dev environment and repo walkthrough', meta: 'Paired session—2 hours', done: false },
+          { id: 'd9', label: 'Shadow two on-call incidents', meta: 'Read-only, with the on-call engineer', done: false },
+          { id: 'd10', label: 'Ship your first small pull request', meta: 'Paired with Priya Shah', done: false },
+          { id: 'd11', label: 'Set up expense and travel profile', meta: 'Needed before your first conference', done: true }
+        ]
+      },
+      {
+        when: 'MONTH 3', title: 'Own a service', summary: "Milestone check-ins and a growth conversation are scheduled automatically—your pulse data feeds into them.",
+        tasks: [
+          { id: 'd12', label: '90-day check-in with your manager', meta: 'Scheduled Aug 22', done: false },
+          { id: 'd13', label: 'Take ownership of one service', meta: 'Billing-service reliability', done: false },
+          { id: 'd14', label: 'Join the on-call rotation', meta: 'Starts after Month 3 review', done: false }
+        ]
+      }
+    ],
+    trend: [4.3, 4.0, 3.8, 3.9, 4.1, 4.2], workload: 6, mood: 4,
+    defaultPlan: {
+      target: 'Software Engineer → Senior Software Engineer',
+      summary: "You're two quarters of evidence away. Close the system-design and incident-ownership gaps, lead one service migration end-to-end, and your promo packet writes itself.",
+      readiness: 65, timeline: '2-3 quarters',
+      gaps: [
+        { skill: 'Coding & architecture', level: 'Strong', pct: 85 },
+        { skill: 'Cross-team collaboration', level: 'Solid', pct: 72 },
+        { skill: 'System design', level: 'Developing', pct: 52 },
+        { skill: 'Incident response ownership', level: 'Gap', pct: 34 },
+        { skill: 'Mentoring', level: 'Gap', pct: 29 }
+      ],
+      learning: [
+        { title: 'System design for distributed services', meta: 'Internal cohort—4 weeks, starts Aug 10' },
+        { title: 'On-call ownership and incident command', meta: 'Shadow program—2 rotations' },
+        { title: 'Mentoring new engineers', meta: 'Self-paced, 4 hours' }
+      ],
+      mentors: [
+        { name: 'Lena Ruiz', why: 'Engineering Manager—ran the last promo cycle' },
+        { name: 'Priya Shah', why: 'Staff Engineer—promoted on a similar path last year' }
+      ],
+      projects: [
+        { title: 'Lead the billing-service reliability migration', detail: 'Highest-visibility infra project, needs someone with ownership depth.' },
+        { title: 'Run point on the next on-call retro', detail: 'Incident-ownership practice across Platform and SRE.' }
+      ],
+      roles: [
+        { title: 'Senior Software Engineer', team: 'Platform Engineering', match: '80%' },
+        { title: 'Staff Engineer', team: 'Platform Engineering', match: '66%' },
+        { title: 'Site Reliability Engineer', team: 'Core Infrastructure', match: '70%' }
+      ]
+    }
+  }
+};
+
+function clonePersonaMilestones(p) {
+  return JSON.parse(JSON.stringify(p.milestones));
+}
+
+function systemPromptFor(persona) {
+  return `You are Magenta Pulse, T-Mobile's employee experience assistant, ${persona.systemContext}.
+
+Voice: human, optimistic, energetic, direct. Second person ("you/your"). They/them for third parties. Concise—2-4 sentences max. No italics, no markdown, exclamation points sparse. Sentence case.
+
+Scope: HR, IT, PTO, benefits, payroll, onboarding, and career growth only. Anything else, warmly redirect in one sentence.
+
+When the request needs a back-office action, pick exactly one tool from: resetVpnPassword, fileItTicket, requestPto, expenseTravel, bookConferenceRoom, lookupBenefits, checkPayroll, checkOnCall, requestAccess, listOpenTickets, listPendingTrainings, logWorkloadConcern, blockFocusTime. Invent believable synthetic parameters and a short result_preview describing the completed outcome. If nothing needs doing, action must be null. Never claim to have emailed or notified a real person—frame sends as held for approval.
+
+Reply with ONLY raw JSON, no prose, no code fences:
+{"reply": string, "action": null | {"tool": string, "params": object, "result_preview": string}}`;
+}
+
+function refId(tool) {
+  const p = (TOOL_META[tool] || { prefix: 'ACT' }).prefix;
+  return p + String(Math.floor(1000 + Math.random() * 8999)) + String(Math.floor(10 + Math.random() * 89));
+}
+function nowTime() {
+  return new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+function stripFences(s) {
+  let t = String(s || '').trim();
+  t = t.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+  const a = t.indexOf('{'), b = t.lastIndexOf('}');
+  return a >= 0 && b > a ? t.slice(a, b + 1) : t;
+}
+
+function localFallback(text, persona) {
+  const t = String(text).toLowerCase();
+  const focusDurMatch = t.match(/(\d+)\s*min/);
+  const focusDur = focusDurMatch ? focusDurMatch[1] + ' minutes' : '30 minutes';
+  const FALLBACKS = [
+    { k: ['vpn', 'password'], reply: "Done—your VPN password is reset and a temporary one is waiting in your inbox. It expires in 24 hours, so set a new one at your next sign-in.", action: { tool: 'resetVpnPassword', params: { user: persona.userSlug, method: 'temporary_credential', notify: 'work_email' }, result_preview: 'VPN credential reset—temporary password valid for 24 hours' } },
+    { k: ['expense', 'trip', 'reimburse', 'conference'], reply: "I pulled your last trip from your calendar and card feed and drafted the report. It's queued for your manager's approval.", action: { tool: 'expenseTravel', params: { trip: 'Recent business trip', total: '$862.40', items: 5 }, result_preview: 'Expense report submitted for $862.40—approval ETA 2 business days' } },
+    { k: ['book', 'conference room', '3pm'], reply: "Booked—Rainier 4B on floor 6 holds eight people and has the good camera. I added it to your calendar with dial-in details.", action: { tool: 'bookConferenceRoom', params: { room: 'Rainier 4B', time: 'Today 3:00-4:00 PM', capacity: 8 }, result_preview: 'Rainier 4B confirmed for 3:00 PM today—invite updated' } },
+    { k: ['pto', 'vacation', 'time off', 'days off', 'saturday off'],
+      reply: `You've accrued ${(persona.payPeriodsAccrued * PTO_ACCRUAL_RATE).toFixed(1)} PTO hours so far—${persona.payPeriodsAccrued} pay periods at ${PTO_ACCRUAL_RATE} hrs each since you started. Want me to hold a block before the quarter closes?`,
+      action: { tool: 'requestPto', params: { action: 'balance_lookup', balance_hours: (persona.payPeriodsAccrued * PTO_ACCRUAL_RATE).toFixed(1), accrual_rate: PTO_ACCRUAL_RATE + ' hrs/pay period' }, result_preview: `PTO balance verified—${(persona.payPeriodsAccrued * PTO_ACCRUAL_RATE).toFixed(1)} hrs accrued` } },
+    { k: ['on-call', 'oncall', 'on call'], reply: "A teammate is on call this week, and you're up next Monday. I can send you the runbook now if you want a head start.", action: { tool: 'checkOnCall', params: { next: 'You, starting Monday' }, result_preview: "On-call schedule confirmed—you're up Monday" } },
+    { k: ['open ticket', 'my ticket', 'ticket status', 'ticket list'],
+      reply: persona.openTickets === 0
+        ? "You have no open tickets right now—nice, all clear."
+        : `You have ${persona.openTickets} open ticket${persona.openTickets === 1 ? '' : 's'} right now—${persona.openTicketsNote}.`,
+      action: persona.openTickets === 0 ? null : { tool: 'listOpenTickets', params: { count: persona.openTickets, detail: persona.openTicketsNote }, result_preview: `${persona.openTickets} open ticket(s) retrieved` } },
+    { k: ['pending training', 'my training', 'training queue', 'magenta u'],
+      reply: persona.pendingTrainings === 0
+        ? "You're all caught up—no pending trainings on Magenta U."
+        : `You have ${persona.pendingTrainings} training${persona.pendingTrainings === 1 ? '' : 's'} pending on Magenta U—next up is "${persona.nextTraining}".`,
+      action: persona.pendingTrainings === 0 ? null : { tool: 'listPendingTrainings', params: { pending: persona.pendingTrainings, next: persona.nextTraining }, result_preview: `${persona.pendingTrainings} pending training(s) retrieved` } },
+    { k: ['repo', 'dataset', 'warehouse access', 'access', 'permission'], reply: "Requested—access is filed and usually clears in under an hour since you're already on the team.", action: { tool: 'requestAccess', params: { resource: 'requested dataset/repo', level: 'read-write', team: persona.role.split(',')[1] ? persona.role.split(',')[1].trim() : persona.role }, result_preview: 'Access request filed—ETA under 1 hour' } },
+    { k: ['workload', 'heavy', 'hand off', 'overloaded'],
+      reply: "Thanks for flagging that—I've logged it against your pulse trend so your manager sees the pattern, not just this one message. Want me to block some focus time too, or look at what's due this week that could move?",
+      action: { tool: 'logWorkloadConcern', params: { source: 'Grow Me risk action', persona: persona.userSlug }, result_preview: 'Workload concern logged and linked to your pulse trend' } },
+    { k: ['focus time', 'block time', 'block my calendar'],
+      reply: `Done—blocked ${focusDur} of focus time on your calendar today and marked it busy, so nothing double-books it.`,
+      action: { tool: 'blockFocusTime', params: { duration: focusDur, when: 'Today' }, result_preview: `Focus block confirmed—${focusDur} today` } },
+    { k: ['laptop', 'broken', 'it ticket', 'ticket', 'wifi', 'monitor'], reply: "Filed it for you and flagged it as a ramp-up blocker so it gets picked up faster. You'll get a text when someone claims it.", action: { tool: 'fileItTicket', params: { category: 'hardware', priority: 'P2', asset: 'Device—' + persona.userSlug }, result_preview: 'IT ticket created—ETA 2h, assigned to Endpoint Support' } },
+    { k: ['benefit', 'dental', 'insurance', 'health', '401', 'discount'], reply: "You're on the Magenta Choice PPO with dental and vision, your 401(k) match is 100% of the first 4%, and your employee line gets 50% off. Open enrollment reopens in November.", action: { tool: 'lookupBenefits', params: { plan: 'Magenta Choice PPO', dependents: 0, match: '4%' }, result_preview: 'Benefits summary retrieved—PPO, dental, vision, 4% match' } },
+    { k: ['pay', 'paycheck', 'payroll', 'salary', 'stub'], reply: "Your last deposit landed July 15 and the next one is July 31. Nothing looks off—your W-4 and direct deposit are both current.", action: { tool: 'checkPayroll', params: { last_deposit: 'Jul 15', next_run: 'Jul 31', status: 'current' }, result_preview: 'Payroll record verified—no exceptions on your account' } },
+    { k: ['senior pm', 'promotion', 'career', 'grow', 'level up', 'senior data analyst', 'data science', 'staff engineer', 'senior engineer'], reply: "Great question—head to Grow Me and I'll map your skill gaps to learning, mentors, and open roles.", action: null }
+  ];
+  const hit = FALLBACKS.find(f => f.k.some(k => t.includes(k)));
+  if (hit) return { reply: hit.reply, action: hit.action };
+  return { reply: "I can help with HR, IT, PTO, benefits, payroll, or your career path. Tell me what you need and I'll take it from there—including the parts that usually need a ticket.", action: null };
+}
+
+function buildTrend(nums) {
+  return nums.map((v, i) => ({ label: 'W' + (i + 1), v }));
+}
+function personaSlice(p) {
+  return {
+    persona: p.id,
+    messages: [{ id: 1, role: 'assistant', text: p.greeting, action: null }],
+    log: [],
+    milestones: clonePersonaMilestones(p),
+    mood: p.mood,
+    workload: p.workload,
+    pulseSubmitted: false,
+    trend: buildTrend(p.trend),
+    elevated: false,
+    careerQ: '',
+    careerLoading: false,
+    plan: null,
+    nudgeSent: false,
+    nudgeMsg: '',
+    focusPicking: false
+  };
+}
+
+class Component extends DCLogic {
+  state = {
+    mode: 'home',
+    manager: false,
+    growTab: 'pulse',
+    draft: '',
+    thinking: false,
+    ...personaSlice(PERSONAS.pm)
+  };
+
+  // ---------- navigation ----------
+  go = (mode) => () => this.setState({ mode, manager: mode === 'manager' });
+  toggleManager = () => this.setState(s => s.manager ? { manager: false, mode: 'home' } : { manager: true, mode: 'manager' });
+  switchPersona = (id) => () => this.setState({ mode: 'home', manager: false, ...personaSlice(PERSONAS[id]) });
+
+  // ---------- assistant ----------
+  resolveAction(msgId) {
+    setTimeout(() => {
+      this.setState(s => ({
+        messages: s.messages.map(m => (m.id === msgId && m.action) ? { ...m, action: { ...m.action, pending: false } } : m),
+        log: (() => {
+          const m = s.messages.find(x => x.id === msgId);
+          if (!m || !m.action) return s.log;
+          return [{ refId: m.action.refId, tool: (TOOL_META[m.action.tool] || {}).label || m.action.tool, time: nowTime() }, ...s.log].slice(0, 6);
+        })()
+      }));
+    }, 1500);
+  }
+
+  async send(text) {
+    const t = String(text || '').trim();
+    if (!t || this.state.thinking) return;
+    const uid = Date.now();
+    this.setState(s => ({
+      messages: [...s.messages, { id: uid, role: 'user', text: t, action: null }],
+      draft: '', thinking: true, mode: 'help', manager: false
+    }));
+
+    const persona = PERSONAS[this.state.persona];
+    let parsed = null;
+    try {
+      const history = this.state.messages.slice(-6).map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }));
+      const raw = await window.claude.complete({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: systemPromptFor(persona),
+        messages: [...history, { role: 'user', content: t }]
+      });
+      const txt = Array.isArray(raw) ? raw.map(b => (b && b.text) || '').join('') : String(raw || '');
+      parsed = JSON.parse(stripFences(txt));
+      if (!parsed || typeof parsed.reply !== 'string') throw new Error('shape');
+    } catch (e) {
+      parsed = localFallback(t, persona);
+    }
+
+    const bid = uid + 1;
+    let action = null;
+    if (parsed.action && parsed.action.tool) {
+      const a = parsed.action;
+      const params = Object.entries(a.params || {}).slice(0, 4).map(([k, v]) => ({ k, v: String(v) }));
+      action = { tool: a.tool, params, resultPreview: a.result_preview || 'Completed', refId: refId(a.tool), pending: true };
+    }
+    this.setState(s => ({ thinking: false, messages: [...s.messages, { id: bid, role: 'assistant', text: parsed.reply, action }] }));
+    if (action) this.resolveAction(bid);
+  }
+
+  // ---------- guide ----------
+  toggleTask = (mi, ti) => () => this.setState(s => ({
+    milestones: s.milestones.map((m, i) => i !== mi ? m : { ...m, tasks: m.tasks.map((t, j) => j !== ti ? t : { ...t, done: !t.done }) })
+  }));
+
+  // ---------- pulse ----------
+  submitPulse = () => {
+    const score = Math.max(1, Math.min(5, this.state.mood - (this.state.workload - 5) * 0.28));
+    this.setState(s => ({
+      pulseSubmitted: true,
+      elevated: score < 3.4 || s.workload >= 7,
+      trend: [...s.trend.slice(-7), { label: 'W' + (s.trend.length + 1), v: Math.round(score * 10) / 10 }]
+    }));
+  };
+
+  sendNudge = (msg) => () => this.setState({ nudgeSent: true, nudgeMsg: msg });
+
+  openFocusPicker = () => this.setState({ focusPicking: true });
+  cancelFocusPicker = () => this.setState({ focusPicking: false });
+  pickFocusDuration = (mins) => () => {
+    this.setState({ focusPicking: false });
+    this.send(`Block ${mins} minutes of focus time on my calendar today`);
+  };
+
+  // ---------- career ----------
+  async askCareer(q) {
+    const persona = PERSONAS[this.state.persona];
+    const question = String(q || this.state.careerQ || '').trim() || persona.careerChips[0];
+    this.setState({ careerQ: question, careerLoading: true, plan: null });
+    let plan = null;
+    try {
+      const raw = await window.claude.complete({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: `You are Magenta Pulse's career coach at T-Mobile ${persona.careerContext}. Voice: direct, optimistic, second person, no italics, no markdown.
+Answer the question with a growth plan. Reply with ONLY raw JSON, no fences:
+{"target":string,"summary":string (2 sentences),"readiness":number 0-100,"timeline":string,"gaps":[{"skill":string,"level":string,"pct":number}] (4-5),"learning":[{"title":string,"meta":string}] (3),"mentors":[{"name":string,"why":string}] (2-3),"projects":[{"title":string,"detail":string}] (2),"roles":[{"title":string,"team":string,"match":string}] (3)}
+Mentors and roles are synthetic demo data—invent plausible names and T-Mobile-style team or store names.`,
+        messages: [{ role: 'user', content: question }]
+      });
+      const txt = Array.isArray(raw) ? raw.map(b => (b && b.text) || '').join('') : String(raw || '');
+      const p = JSON.parse(stripFences(txt));
+      if (!p || !Array.isArray(p.gaps)) throw new Error('shape');
+      plan = p;
+    } catch (e) {
+      plan = persona.defaultPlan;
+    }
+    this.setState({ careerLoading: false, plan });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const persona = PERSONAS[s.persona];
+    const mode = s.manager ? 'manager' : s.mode;
+
+    const personaOptions = Object.values(PERSONAS).map(p => {
+      const on = p.id === s.persona;
+      return {
+        label: p.label, sub: p.sub, pick: this.switchPersona(p.id),
+        bg: on ? MAG : '#fff', fg: on ? '#fff' : '#000', border: on ? MAG : LINE
+      };
+    });
+
+    const navDefs = [
+      { id: 'home', label: 'Home', sub: 'Your dashboard' },
+      { id: 'help', label: 'Help Me', sub: 'AI assistant' },
+      { id: 'guide', label: 'Guide Me', sub: 'Onboarding journey' },
+      { id: 'grow', label: 'Grow Me', sub: 'Pulse & career' }
+    ];
+    const navItems = navDefs.map(n => {
+      const on = mode === n.id;
+      return { label: n.label, sub: n.sub, go: this.go(n.id), bg: on ? MAG : 'transparent', fg: on ? '#fff' : '#E8E8E8', dot: on ? '#fff' : '#3a3a3a' };
+    });
+
+    const allTasks = s.milestones.flatMap(m => m.tasks);
+    const doneCount = allTasks.filter(t => t.done).length;
+    const progressPct = Math.round((doneCount / allTasks.length) * 100);
+
+    const milestones = s.milestones.map((m, mi) => {
+      const d = m.tasks.filter(t => t.done).length;
+      const pct = Math.round((d / m.tasks.length) * 100);
+      const complete = pct === 100;
+      return {
+        when: m.when, title: m.title, summary: m.summary, pct, pctCss: pct + '%',
+        badge: complete ? 'COMPLETE' : d ? 'IN PROGRESS' : 'PENDING',
+        badgeBg: complete ? MAG : d ? BERRY : GRAY,
+        tasks: m.tasks.map((t, ti) => ({
+          label: t.label, meta: t.meta, toggle: this.toggleTask(mi, ti),
+          check: t.done ? '✓' : '', state: t.done ? 'DONE' : 'PENDING',
+          stateColor: t.done ? MAG : GRAY,
+          border: t.done ? 'rgba(226,0,116,.3)' : LINE,
+          bg: t.done ? 'rgba(226,0,116,.05)' : '#fff',
+          boxBorder: t.done ? MAG : LINE, boxBg: t.done ? MAG : '#fff',
+          strike: t.done ? 'line-through' : 'none', color: t.done ? GRAY : '#000'
+        }))
+      };
+    });
+
+    const upNext = allTasks.filter(t => !t.done).slice(0, 3).map(t => ({ label: t.label }));
+
+    const quickActions = persona.quickActions.map(a => ({ tag: a.tag, label: a.label, sub: a.sub, run: () => this.send(a.q) }));
+
+    const chips = persona.chips.map(c => ({ label: c, send: () => this.send(c) }));
+    const careerChipsList = persona.careerChips.map(c => ({ label: c, send: () => this.askCareer(c) }));
+
+    const messages = s.messages.map(m => {
+      const isUser = m.role === 'user';
+      return {
+        text: m.text, align: isUser ? 'flex-end' : 'flex-start',
+        radius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+        bg: isUser ? MAG : '#fff', fg: isUser ? '#fff' : '#000',
+        border: isUser ? MAG : LINE,
+        hasAction: !!m.action,
+        action: m.action ? {
+          tool: m.action.tool, params: m.action.params, resultPreview: m.action.resultPreview, refId: m.action.refId,
+          pending: m.action.pending, done: !m.action.pending,
+          statusLabel: m.action.pending ? 'RUNNING' : 'SUCCESS',
+          statusColor: m.action.pending ? '#E8E8E8' : '#fff'
+        } : null
+      };
+    });
+
+    const trend = s.trend.slice(-6);
+    const maxV = 5, minV = 1;
+    const pts = trend.map((d, i) => {
+      const x = trend.length === 1 ? 0 : (i / (trend.length - 1)) * 336 + 2;
+      const y = 92 - ((d.v - minV) / (maxV - minV)) * 78;
+      return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
+    });
+    const last = pts[pts.length - 1] || { x: 0, y: 50 };
+    const elevated = s.elevated;
+
+    const riskLabel = elevated ? 'ELEVATED' : 'HEALTHY';
+    const riskColor = elevated ? BERRY : MAG;
+
+    const heatNames = [
+      { name: 'Jordan Reyes', vals: [1, 1, 2, 2, 3, 3, 4, elevated ? 4 : 3] },
+      { name: 'Marcus Hale', vals: [1, 2, 1, 1, 2, 1, 1, 2] },
+      { name: 'Priya Raman', vals: [2, 2, 2, 3, 2, 2, 1, 1] },
+      { name: 'Sam Okoye', vals: [1, 1, 1, 2, 2, 2, 3, 3] },
+      { name: 'Lena Fischer', vals: [1, 1, 2, 1, 1, 1, 2, 1] }
+    ];
+    const heatColor = ['#F2F2F2', '#E8E8E8', '#F3A9CE', '#E20074', '#861B54'];
+    const heat = heatNames.map(h => ({ name: h.name, cells: h.vals.map(v => ({ bg: heatColor[v] })) }));
+
+    const roster = [
+      { name: 'Jordan Reyes', role: 'PM', pulse: elevated ? '3.2' : '3.6', trend: '↓ 0.8', risk: elevated ? 'ELEVATED' : 'WATCH', hot: true },
+      { name: 'Marcus Hale', role: 'Senior PM', pulse: '4.5', trend: '↑ 0.2', risk: 'LOW', hot: false },
+      { name: 'Priya Raman', role: 'Director', pulse: '4.1', trend: '→ 0.0', risk: 'LOW', hot: false },
+      { name: 'Sam Okoye', role: 'Data Scientist', pulse: '3.8', trend: '↓ 0.3', risk: 'WATCH', hot: false },
+      { name: 'Lena Fischer', role: 'Designer', pulse: '4.6', trend: '↑ 0.4', risk: 'LOW', hot: false }
+    ].map(p => ({
+      name: p.name, role: p.role, pulse: p.pulse, trend: p.trend, risk: p.risk,
+      initials: p.name.split(' ').map(w => w[0]).join(''),
+      trendColor: p.trend.startsWith('↓') ? BERRY : p.trend.startsWith('↑') ? MAG : GRAY,
+      riskFg: p.risk === 'LOW' ? GRAY : '#fff',
+      riskBg: p.risk === 'LOW' ? '#F2F2F2' : p.risk === 'WATCH' ? GRAY : MAG,
+      rowBg: p.hot && elevated ? 'rgba(226,0,116,.05)' : 'transparent'
+    }));
+
+    const managerActions = [
+      { label: 'Send a check-in nudge', primary: true, msg: "Check-in drafted for Jordan—review and send it from your inbox. Nothing goes out until you approve it." },
+      { label: 'Rebalance sprint load', primary: false, msg: 'Sprint rebalance suggestion drafted—two items moved to Marcus for your review.' },
+      { label: 'Book 1:1 this week', primary: false, msg: 'A 30-minute 1:1 hold was placed Thursday 2:00 PM, pending your confirmation.' }
+    ].map(a => ({
+      label: a.label, run: this.sendNudge(a.msg),
+      bg: a.primary ? MAG : '#fff', fg: a.primary ? '#fff' : '#000', border: a.primary ? MAG : LINE
+    }));
+
+    const plan = s.plan ? {
+      target: s.plan.target, summary: s.plan.summary, readiness: s.plan.readiness, timeline: s.plan.timeline,
+      gaps: (s.plan.gaps || []).map(g => ({ skill: g.skill, level: g.level, pctCss: Math.max(4, Math.min(100, Number(g.pct) || 0)) + '%' })),
+      learning: (s.plan.learning || []).map((l, i) => ({ n: i + 1, title: l.title, meta: l.meta })),
+      mentors: (s.plan.mentors || []).map(m => ({ name: m.name, why: m.why, initials: String(m.name || '?').split(' ').map(w => w[0]).join('') })),
+      projects: s.plan.projects || [],
+      roles: s.plan.roles || []
+    } : null;
+
+    const titles = {
+      home: ['EMPLOYEE DASHBOARD', 'Home'],
+      help: ['HELP ME', 'AI assistant'],
+      guide: ['GUIDE ME', 'Your onboarding journey'],
+      grow: ['GROW ME', 'Pulse & career'],
+      manager: ['MANAGER VIEW', 'Team health—Consumer Growth']
+    };
+
+    return {
+      user: { name: persona.name, role: persona.role, location: persona.city + '—' + persona.tenureLabel },
+      personaOptions,
+      heroLead: persona.heroLead,
+      journeyIntro: `This journey was generated for a ${persona.role} in ${persona.city}—equipment, access, training, and check-ins were requested for you automatically.`,
+      navItems,
+      modeKicker: titles[mode][0], modeTitle: titles[mode][1],
+      isHome: mode === 'home', isHelp: mode === 'help', isGuide: mode === 'guide', isGrow: mode === 'grow', isManager: mode === 'manager',
+      toggleManager: this.toggleManager,
+      managerJustify: s.manager ? 'flex-end' : 'flex-start',
+      managerTrackBg: s.manager ? MAG : '#E8E8E8',
+      goHelp: this.go('help'), goGuide: this.go('guide'), goGrow: this.go('grow'),
+
+      ringOffset: 327 - (327 * progressPct) / 100,
+      progressPct, doneCount, taskCount: allTasks.length,
+      milestones, upNext,
+
+      kpis: [
+        {
+          value: String(persona.openTickets), label: 'Open tickets', note: persona.openTicketsNote,
+          run: () => this.send('Show me my open tickets')
+        },
+        {
+          value: (persona.payPeriodsAccrued * PTO_ACCRUAL_RATE).toFixed(1) + ' hrs', label: 'Accrued PTO', note: `${PTO_ACCRUAL_RATE} hrs/pay period × ${persona.payPeriodsAccrued}`,
+          run: () => this.send('How much PTO do I have left?')
+        },
+        {
+          value: String(persona.pendingTrainings), label: 'Magenta Training', note: `Next: ${persona.nextTraining} — Magenta U`,
+          run: () => this.send('Show me my pending trainings')
+        }
+      ],
+      quickActions, chips, messages, thinking: s.thinking,
+      draft: s.draft,
+      onDraft: (e) => this.setState({ draft: e.target.value }),
+      onKey: (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); this.send(this.state.draft); } },
+      sendDraft: () => this.send(this.state.draft),
+      systems: [
+        { name: 'Workday HR', status: 'LIVE' }, { name: 'ServiceNow IT', status: 'LIVE' },
+        { name: 'Concur Travel', status: 'LIVE' }, { name: 'Payroll', status: 'LIVE' },
+        { name: 'Benefits Center', status: 'LIVE' }, { name: 'Room Booking', status: 'LIVE' }
+      ],
+      actionLog: s.log, noActions: s.log.length === 0,
+
+      showPulse: () => this.setState({ growTab: 'pulse' }),
+      showCareer: () => this.setState({ growTab: 'career' }),
+      isPulseTab: s.growTab === 'pulse', isCareerTab: s.growTab === 'career',
+      pulseTabBg: s.growTab === 'pulse' ? '#000' : 'transparent', pulseTabFg: s.growTab === 'pulse' ? '#fff' : GRAY,
+      careerTabBg: s.growTab === 'career' ? '#000' : 'transparent', careerTabFg: s.growTab === 'career' ? '#fff' : GRAY,
+      moods: [
+        { v: 1, l: 'ROUGH' }, { v: 2, l: 'LOW' }, { v: 3, l: 'OK' }, { v: 4, l: 'GOOD' }, { v: 5, l: 'GREAT' }
+      ].map(m => ({
+        value: m.v, label: m.l, pick: () => this.setState({ mood: m.v }),
+        bg: s.mood === m.v ? MAG : '#fff', fg: s.mood === m.v ? '#fff' : '#000',
+        border: s.mood === m.v ? MAG : LINE
+      })),
+      workload: s.workload,
+      onWorkload: (e) => this.setState({ workload: Number(e.target.value) }),
+      submitPulse: this.submitPulse,
+      pulseSubmitted: s.pulseSubmitted,
+      pulseFeedback: elevated
+        ? "Your workload signal is running hot for a third week. Your manager sees the trend, not your answers—and you'll get a check-in nudge, not a report card."
+        : "You're tracking healthy. We'll check in again next week.",
+      pulsePrompt: s.pulseSubmitted
+        ? (elevated ? 'Workload has been high three weeks running—your risk indicator moved to elevated.' : "Logged for this week. Your sentiment is trending healthy.")
+        : "You haven't checked in this week. Two questions, 15 seconds.",
+      pulseCta: s.pulseSubmitted ? 'See your trend' : 'Check in now',
+      trendRange: 'LAST 6 WEEKS—AI-SCORED',
+      trendLabels: trend.map(d => ({ label: d.label })),
+      sparkPoints: pts.map(p => p.x + ',' + p.y).join(' '),
+      lastX: last.x, lastY: last.y,
+      trendNote: elevated
+        ? 'Sentiment has dropped 1.0 points over six weeks while workload climbed—consistent with early ramp overload, not disengagement.'
+        : 'Sentiment is stable with a mild dip during ramp-up—normal for the first quarter.',
+      riskLabel, riskColor,
+      riskPanelBg: elevated ? BERRY : '#fff', riskPanelFg: elevated ? '#fff' : '#000',
+      riskChipBg: elevated ? '#fff' : 'rgba(226,0,116,.1)', riskChipFg: elevated ? BERRY : MAG,
+      riskCopy: elevated
+        ? "Three weeks of rising workload with falling sentiment. Nothing here is a performance flag—it's a prompt to protect your time before it costs you."
+        : "No risk signals. Your check-ins have stayed in a healthy band since you started.",
+      riskActions: [
+        { label: 'Ask for workload help', primary: true, run: () => this.send("My workload has been heavy for three weeks—help me figure out what to drop or hand off") },
+        { label: 'Block focus time', primary: false, run: this.openFocusPicker }
+      ].map(a => ({
+        label: a.label, run: a.run,
+        bg: a.primary ? (elevated ? '#fff' : MAG) : 'transparent',
+        fg: a.primary ? (elevated ? BERRY : '#fff') : (elevated ? '#fff' : '#000'),
+        border: a.primary ? (elevated ? '#fff' : MAG) : (elevated ? 'rgba(255,255,255,.5)' : LINE)
+      })),
+      showRiskActions: !s.focusPicking,
+      focusPicking: s.focusPicking,
+      cancelFocusPicker: this.cancelFocusPicker,
+      focusCancelColor: elevated ? 'rgba(255,255,255,.8)' : GRAY,
+      focusDurations: [15, 30].map(mins => ({
+        label: mins + ' min', run: this.pickFocusDuration(mins),
+        bg: elevated ? '#fff' : MAG, fg: elevated ? BERRY : '#fff', border: elevated ? '#fff' : MAG
+      })),
+
+      careerQ: s.careerQ,
+      onCareerQ: (e) => this.setState({ careerQ: e.target.value }),
+      onCareerKey: (e) => { if (e.key === 'Enter') { e.preventDefault(); this.askCareer(this.state.careerQ); } },
+      askCareer: () => this.askCareer(this.state.careerQ),
+      careerPlaceholder: persona.careerChips[0],
+      careerChips: careerChipsList,
+      careerLoading: s.careerLoading, hasPlan: !!plan, plan,
+
+      managerHeadline: elevated ? "Your team is holding steady, but one signal needs you this week." : "Your team is healthy across the board — no signals need you this week.",
+      alertTitle: elevated ? "Jordan's workload is rising—nudge them to check in" : "Jordan is ramping on track",
+      alertBody: elevated
+        ? 'Sentiment down 1.0 over six weeks, workload self-reported at 7+ for three weeks. Recommended: a 1:1 this week and one deliverable moved off their plate.'
+        : 'No risk signals this week. Their Week-2 learning path is 50% complete.',
+      managerActions, nudgeSent: s.nudgeSent, nudgeMsg: s.nudgeMsg,
+      heat, roster
+    };
+  }
+}
+
+</script>
+</body>
+</html>
