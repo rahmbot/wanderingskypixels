@@ -234,17 +234,18 @@
   .chart-body { padding: 4px 20px 18px; display: flex; flex-direction: column; gap: 9px; }
   .bar-row { display: flex; align-items: center; gap: 12px; }
   .bar-label {
-    width: 128px;
+    width: 108px;
     flex-shrink: 0;
     font-size: 12.5px;
     color: var(--text);
     text-align: right;
   }
-  .bar-track { flex: 1; position: relative; height: 22px; }
+  .bar-track { flex: 1; position: relative; height: 22px; min-width: 0; }
   .bar-fill {
     position: absolute;
     inset: 0;
     width: 0;
+    max-width: 100%;
     border-radius: 4px;
     background: var(--accent);
     transition: width 0.5s cubic-bezier(.3,.8,.4,1);
@@ -254,15 +255,14 @@
     border: 1px dashed var(--accent-soft-border);
   }
   .bar-value {
-    position: absolute;
-    left: calc(100% + 8px);
-    top: 50%;
-    transform: translateY(-50%);
+    flex-shrink: 0;
+    width: 64px;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 12px;
     font-variant-numeric: tabular-nums;
     color: var(--text-muted);
     white-space: nowrap;
+    text-align: right;
   }
   .legend {
     display: flex;
@@ -283,7 +283,8 @@
   }
 
   @media (max-width: 480px) {
-    .bar-label { width: 92px; font-size: 11.5px; }
+    .bar-label { width: 80px; font-size: 11.5px; }
+    .bar-value { width: 54px; font-size: 11px; }
     .line { grid-template-columns: 1fr; }
     .line-inputs { justify-self: start; }
   }
@@ -485,8 +486,8 @@
         '<div class="bar-label">' + r.label + '</div>' +
         '<div class="bar-track">' +
           '<div class="bar-fill' + (r.amortized ? ' amortized' : '') + '" style="width:' + pct + '%"></div>' +
-          '<div class="bar-value">' + fmt.format(r.value) + '</div>' +
-        '</div>';
+        '</div>' +
+        '<div class="bar-value">' + fmt.format(r.value) + '</div>';
       body.appendChild(row);
     });
   }
