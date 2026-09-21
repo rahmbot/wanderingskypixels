@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bill Estimator</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="theme-color" content="#EDEFEB">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23A8611F'/%3E%3Ctext x='32' y='42' font-family='Georgia,serif' font-size='30' fill='white' text-anchor='middle'%3E$%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #EDEFEB;
+    --surface: #FFFFFF;
+    --surface-alt: #E3E6DF;
+    --border: #D3D7CB;
+    --text: #1C201C;
+    --text-muted: #5C6259;
+    --accent: #A8611F;
+    --accent-ink: #6E3E10;
+    --accent-soft: #F1E2CD;
+    --accent-soft-border: #C99356;
+    --shadow: 0 1px 2px rgba(28,32,28,0.06), 0 8px 20px -12px rgba(28,32,28,0.18);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14171A;
+      --surface: #1C2023;
+      --surface-alt: #23282B;
+      --border: #33393D;
+      --text: #ECEEEA;
+      --text-muted: #9DA39C;
+      --accent: #E0954D;
+      --accent-ink: #F3C68F;
+      --accent-soft: #35281A;
+      --accent-soft-border: #7A5228;
+      --shadow: 0 1px 2px rgba(0,0,0,0.35), 0 8px 24px -12px rgba(0,0,0,0.5);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14171A;
+    --surface: #1C2023;
+    --surface-alt: #23282B;
+    --border: #33393D;
+    --text: #ECEEEA;
+    --text-muted: #9DA39C;
+    --accent: #E0954D;
+    --accent-ink: #F3C68F;
+    --accent-soft: #35281A;
+    --accent-soft-border: #7A5228;
+    --shadow: 0 1px 2px rgba(0,0,0,0.35), 0 8px 24px -12px rgba(0,0,0,0.5);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    padding-inline: 20px;
+    padding-block: 28px 48px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+
+  .masthead { display: flex; flex-direction: column; gap: 4px; }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  h1 {
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(26px, 5vw, 34px);
+    margin: 0;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+  .sub { color: var(--text-muted); font-size: 14px; margin: 0; max-width: 55ch; }
+
+  .meter {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+    padding: 22px 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .meter-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .meter-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .meter-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: clamp(38px, 8vw, 50px);
+    line-height: 1;
+    color: var(--accent-ink);
+  }
+  .meter-value span { font-size: 0.42em; color: var(--text-muted); font-weight: 500; margin-left: 4px; }
+  .meter-range {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .meter-range b { color: var(--text); font-weight: 600; }
+
+  .season-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+  }
+  .season-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-alt);
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .season-btn:hover { border-color: var(--accent-soft-border); }
+  .season-btn[aria-pressed="true"] {
+    background: var(--accent-soft);
+    border-color: var(--accent-soft-border);
+    color: var(--accent-ink);
+    font-weight: 500;
+  }
+  .season-btn:focus-visible, input:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  section.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 16px 20px 12px;
+    gap: 12px;
+  }
+  .panel-title {
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 600;
+    font-size: 18px;
+    margin: 0;
+  }
+  .panel-note { font-size: 12px; color: var(--text-muted); }
+
+  .line {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 10px 16px;
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .line-name { font-size: 14.5px; font-weight: 500; }
+  .line-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .line-inputs { display: flex; align-items: center; gap: 8px; justify-self: end; }
+
+  .field {
+    display: flex;
+    align-items: center;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 8px;
+    gap: 4px;
+  }
+  .field .cur { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--text-muted); }
+  .field input {
+    width: 68px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .field input:focus { outline: none; }
+  .field-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-muted);
+  }
+
+  .panel-foot {
+    display: flex;
+    justify-content: space-between;
+    padding: 13px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface-alt);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .panel-foot b { font-weight: 600; }
+
+  .chart-body { padding: 4px 20px 18px; display: flex; flex-direction: column; gap: 9px; }
+  .bar-row { display: flex; align-items: center; gap: 12px; }
+  .bar-label {
+    width: 128px;
+    flex-shrink: 0;
+    font-size: 12.5px;
+    color: var(--text);
+    text-align: right;
+  }
+  .bar-track { flex: 1; position: relative; height: 22px; }
+  .bar-fill {
+    position: absolute;
+    inset: 0;
+    width: 0;
+    border-radius: 4px;
+    background: var(--accent);
+    transition: width 0.5s cubic-bezier(.3,.8,.4,1);
+  }
+  .bar-fill.amortized {
+    background: var(--accent-soft);
+    border: 1px dashed var(--accent-soft-border);
+  }
+  .bar-value {
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .legend {
+    display: flex;
+    gap: 18px;
+    padding: 12px 20px 16px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-muted); }
+  .swatch { width: 14px; height: 10px; border-radius: 3px; background: var(--accent); flex-shrink: 0; }
+  .swatch.amortized { background: var(--accent-soft); border: 1px dashed var(--accent-soft-border); }
+
+  footer.note {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    padding: 2px 4px 0;
+  }
+
+  @media (max-width: 480px) {
+    .bar-label { width: 92px; font-size: 11.5px; }
+    .line { grid-template-columns: 1fr; }
+    .line-inputs { justify-self: start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <span class="eyebrow">257 Astoria Way · McDonough, GA</span>
+    <h1>Monthly Bill Estimator</h1>
+    <p class="sub">Editable estimate of recurring household costs, with annual and semi-annual bills amortized into a monthly equivalent.</p>
+  </div>
+
+  <div class="meter">
+    <div class="meter-top">
+      <div>
+        <div class="meter-label">Estimated total / month</div>
+        <div class="meter-value" id="totalValue">$0<span>.00</span></div>
+      </div>
+      <div class="meter-range" id="rangeNote">range —</div>
+    </div>
+    <div class="season-row" role="group" aria-label="Seasonal scenario">
+      <button class="season-btn" data-season="typical" aria-pressed="true">Typical month</button>
+      <button class="season-btn" data-season="summer">Summer peak (AC)</button>
+      <button class="season-btn" data-season="winter">Winter peak (heat)</button>
+    </div>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">Billed monthly</h2>
+      <span class="panel-note">edit any figure</span>
+    </div>
+
+    <div class="line">
+      <div>
+        <div class="line-name">Electric</div>
+        <div class="line-meta">Auto-pay · ranges $130–$236 across the year</div>
+      </div>
+      <div class="line-inputs">
+        <div class="field"><span class="cur">$</span><input type="number" id="electric" value="168.05" step="0.01" aria-label="Electric monthly amount"></div>
+      </div>
+    </div>
+
+    <div class="line">
+      <div>
+        <div class="line-name">Water</div>
+        <div class="line-meta">Typically $60–65</div>
+      </div>
+      <div class="line-inputs">
+        <div class="field"><span class="cur">$</span><input type="number" id="water" value="62.50" step="0.01" aria-label="Water monthly amount"></div>
+      </div>
+    </div>
+
+    <div class="line">
+      <div>
+        <div class="line-name">Gas</div>
+        <div class="line-meta">Usually $60–65 · peaks to $265 Jan–Apr (Mar high)</div>
+      </div>
+      <div class="line-inputs">
+        <div class="field"><span class="cur">$</span><input type="number" id="gas" value="62.50" step="0.01" aria-label="Gas monthly amount"></div>
+      </div>
+    </div>
+
+    <div class="line">
+      <div>
+        <div class="line-name">Cell + internet</div>
+        <div class="line-meta">Combined plan</div>
+      </div>
+      <div class="line-inputs">
+        <div class="field"><span class="cur">$</span><input type="number" id="cellInternet" value="215.00" step="0.01" aria-label="Cell and internet monthly amount"></div>
+      </div>
+    </div>
+
+    <div class="line">
+      <div>
+        <div class="line-name">Lawncare</div>
+      </div>
+      <div class="line-inputs">
+        <div class="field"><span class="cur">$</span><input type="number" id="lawncare" value="65.00" step="0.01" aria-label="Lawncare monthly amount"></div>
+      </div>
+    </div>
+
+    <div class="panel-foot"><span>Monthly subtotal</span><b id="monthlySubtotal">$573.05</b></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">Annual &amp; semi-annual</h2>
+      <span class="panel-note">amortized to /mo</span>
+    </div>
+
+    <div class="line">
+      <div>
+        <div class="line-name">Property tax</div>
+        <div class="line-meta">Billed annually</div>
+      </div>
+      <div class="line-inputs">
+        <div class="field"><span class="cur">$</span><input type="number" id="propertyTax" value="7600" step="1" aria-label="Property tax annual amount"></div>
+        <span class="field-tag">/yr</span>
+      </div>
+    </div>
+
+    <div class="line">
+      <div>
+        <div class="line-name">Home insurance</div>
+        <div class="line-meta">Billed annually · 2026 paid, 2027 renewal in ~6–7 months</div>
+      </div>
+      <div class="line-inputs">
+        <div class="field"><span class="cur">$</span><input type="number" id="homeInsurance" value="2066" step="1" aria-label="Home insurance annual amount"></div>
+        <span class="field-tag">/yr</span>
+      </div>
+    </div>
+
+    <div class="line">
+      <div>
+        <div class="line-name">Car insurance</div>
+        <div class="line-meta">Charged twice a year, same amount</div>
+      </div>
+      <div class="line-inputs">
+        <div class="field"><span class="cur">$</span><input type="number" id="carInsurance" value="1850" step="1" aria-label="Car insurance per-payment amount"></div>
+        <span class="field-tag">×2/yr</span>
+      </div>
+    </div>
+
+    <div class="panel-foot"><span>Amortized subtotal</span><b id="annualSubtotal">$1,113.83</b></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">Where it goes</h2>
+      <span class="panel-note">monthly equivalent, by line</span>
+    </div>
+    <div class="chart-body" id="chartBody"></div>
+    <div class="legend">
+      <div class="legend-item"><span class="swatch"></span>Billed monthly</div>
+      <div class="legend-item"><span class="swatch amortized"></span>Annual / semi-annual, amortized</div>
+    </div>
+  </section>
+
+  <footer class="note">Figures are your own estimates. Edit any field and totals update immediately. Values are kept in this browser only — nothing is sent anywhere.</footer>
+
+</div>
+
+<script>
+(function () {
+  var monthlyIds = ['electric', 'water', 'gas', 'cellInternet', 'lawncare'];
+  var annualIds = { propertyTax: 1, homeInsurance: 1, carInsurance: 2 };
+  var labels = {
+    electric: 'Electric', water: 'Water', gas: 'Gas', cellInternet: 'Cell + Internet',
+    lawncare: 'Lawncare', propertyTax: 'Property Tax', homeInsurance: 'Home Insurance', carInsurance: 'Car Insurance'
+  };
+  var seasonalDefaults = {
+    typical: { electric: 168.05, gas: 62.50 },
+    summer:  { electric: 236.38, gas: 60.00 },
+    winter:  { electric: 145.00, gas: 265.00 }
+  };
+
+  var fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+  var fmt0 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+  function num(id) {
+    var el = document.getElementById(id);
+    var v = parseFloat(el.value);
+    return isNaN(v) ? 0 : v;
+  }
+
+  function loadSaved() {
+    try {
+      var raw = localStorage.getItem('billEstimatorValues');
+      if (!raw) return;
+      var saved = JSON.parse(raw);
+      Object.keys(saved).forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.value = saved[id];
+      });
+    } catch (e) { }
+  }
+
+  function persist() {
+    try {
+      var out = {};
+      monthlyIds.concat(Object.keys(annualIds)).forEach(function (id) { out[id] = document.getElementById(id).value; });
+      localStorage.setItem('billEstimatorValues', JSON.stringify(out));
+    } catch (e) { }
+  }
+
+  function renderChart(rows) {
+    var body = document.getElementById('chartBody');
+    body.innerHTML = '';
+    var max = Math.max.apply(null, rows.map(function (r) { return r.value; }));
+    rows.forEach(function (r) {
+      var row = document.createElement('div');
+      row.className = 'bar-row';
+      var pct = max > 0 ? Math.max((r.value / max) * 100, 2) : 0;
+      row.innerHTML =
+        '<div class="bar-label">' + r.label + '</div>' +
+        '<div class="bar-track">' +
+          '<div class="bar-fill' + (r.amortized ? ' amortized' : '') + '" style="width:' + pct + '%"></div>' +
+          '<div class="bar-value">' + fmt.format(r.value) + '</div>' +
+        '</div>';
+      body.appendChild(row);
+    });
+  }
+
+  function recalc() {
+    var monthlySum = 0;
+    monthlyIds.forEach(function (id) { monthlySum += num(id); });
+
+    var annualSum = 0;
+    var annualEquiv = {};
+    Object.keys(annualIds).forEach(function (id) {
+      var v = num(id) * annualIds[id];
+      annualEquiv[id] = v / 12;
+      annualSum += v / 12;
+    });
+
+    var total = monthlySum + annualSum;
+
+    document.getElementById('monthlySubtotal').textContent = fmt.format(monthlySum);
+    document.getElementById('annualSubtotal').textContent = fmt.format(annualSum);
+
+    var totalEl = document.getElementById('totalValue');
+    var whole = Math.floor(total);
+    var cents = Math.round((total - whole) * 100);
+    totalEl.innerHTML = '$' + whole.toLocaleString('en-US') + '<span>.' + String(cents).padStart(2, '0') + '</span>';
+
+    var restMonthly = monthlySum - num('electric') - num('gas');
+    var low = restMonthly + Math.min(130.02, num('electric')) + Math.min(62.50, num('gas')) + annualSum;
+    var high = restMonthly + Math.max(236.38, num('electric')) + Math.max(265.00, num('gas')) + annualSum;
+    document.getElementById('rangeNote').innerHTML = 'seasonal range <b>' + fmt0.format(low) + ' – ' + fmt0.format(high) + '</b>';
+
+    var rows = monthlyIds.map(function (id) { return { label: labels[id], value: num(id), amortized: false }; })
+      .concat(Object.keys(annualIds).map(function (id) { return { label: labels[id], value: annualEquiv[id], amortized: true }; }));
+    rows.sort(function (a, b) { return b.value - a.value; });
+    renderChart(rows);
+
+    persist();
+  }
+
+  monthlyIds.concat(Object.keys(annualIds)).forEach(function (id) {
+    document.getElementById(id).addEventListener('input', recalc);
+  });
+
+  document.querySelectorAll('.season-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.season-btn').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+      btn.setAttribute('aria-pressed', 'true');
+      var preset = seasonalDefaults[btn.dataset.season];
+      document.getElementById('electric').value = preset.electric.toFixed(2);
+      document.getElementById('gas').value = preset.gas.toFixed(2);
+      recalc();
+    });
+  });
+
+  loadSaved();
+  recalc();
+})();
+</script>
+</body>
+</html>
