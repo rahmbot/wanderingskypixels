@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Launch Sightline — App | WanderingSkyPixels</title>
+<link rel="icon" href="../logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=DM+Mono:wght@300;400&family=Outfit:wght@300;400;500;600&display=swap">
+<style>
+/* Layout: three stacked steps (launch → location → verdict); a "yes" opens the night-sky simulator and plan below. Deliberately single dark look. */
+:root{
+  /* WanderingSkyPixels site tokens */
+  --night:#050b18; --panel:#0d1a2e; --panel2:#0a1628; --line:#2a3d5a; --fg:#e8e0cc; --muted:#8193ad;
+  --flame:#c8a96e; --plume:#cfe8ff; --go:#4fc4a0; --warn:#e9c46a; --no:#e07a6a;
+  --display:"Cormorant Garamond",Georgia,serif;
+  --body:"Outfit",system-ui,-apple-system,sans-serif;
+  --mono:"DM Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+html,body{background:var(--night);color:var(--fg)}
+body{font-family:var(--body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+header{display:flex;flex-direction:column;gap:4px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(32px,6vw,48px);letter-spacing:.01em;line-height:1;margin:0}
+h1 span{color:var(--flame)}
+.sub{color:var(--muted);max-width:70ch}
+.step{display:flex;flex-direction:column;gap:12px}
+.stephead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.num{font-family:var(--mono);font-size:12px;color:var(--flame);border:1px solid #6b4a22;border-radius:3px;padding:1px 6px}
+h2{font-family:var(--display);font-size:28px;font-weight:600;letter-spacing:.01em;margin:0}
+h3{font-family:var(--mono);font-size:12px;font-weight:400;letter-spacing:.18em;margin:0 0 10px;text-transform:uppercase;color:var(--flame)}
+.note{font-size:12.5px;color:var(--muted)}
+.launches{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.lc{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:var(--panel);min-width:0}
+.lc:hover{border-color:#34466e}
+.lc:focus-visible{outline:2px solid var(--plume);outline-offset:2px}
+.lc[aria-pressed="true"]{border-color:var(--flame);background:#171d2e;box-shadow:inset 3px 0 0 var(--flame)}
+.lc .r{font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.lc .m{font-weight:600;line-height:1.3}
+.lc .d{font-family:var(--mono);font-size:12.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:3px;border:1px solid var(--line)}
+.pill.go{color:var(--go);border-color:#2f6b4c}
+.pill.tbd{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{all:unset;box-sizing:border-box;cursor:pointer;font-size:14px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
+.chip:hover{border-color:#34466e}
+.chip:focus-visible{outline:2px solid var(--plume);outline-offset:2px}
+.chip[aria-pressed="true"]{border-color:var(--flame);color:var(--flame)}
+.manual{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.manual .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.manual .grow{flex:1 1 260px}
+label.l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+input[type=text],input[type=number],input[type=date],input[type=time],select{font-family:var(--mono);font-size:14px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:7px 9px;min-width:0}
+input[type=number]{width:120px}
+button.b{font-family:var(--mono);font-size:12px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;background:linear-gradient(135deg,#c8a96e,#a07840);color:#050b18;border:0;border-radius:2px;padding:10px 18px;cursor:pointer}
+button.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--plume);outline-offset:2px}
+button:disabled{opacity:.5;cursor:default}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:16px 22px;align-items:start;padding:18px 20px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+@media (max-width:600px){.verdict{grid-template-columns:1fr}}
+.badge{font-family:var(--display);font-weight:600;font-size:44px;line-height:1;letter-spacing:.02em;padding:10px 16px;border-radius:6px;border:2px solid currentColor;text-align:center;min-width:150px}
+.badge small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.08em;margin-top:6px}
+.v-great{color:var(--go)} .v-good{color:var(--go)} .v-possible{color:var(--warn)} .v-unlikely{color:var(--no)} .v-no{color:var(--no)}
+.vtext{display:flex;flex-direction:column;gap:8px;min-width:0}
+.vtext .why{font-size:17px;font-weight:500}
+.vtext ul{margin:0;padding-left:18px;color:#c9cfe0;display:flex;flex-direction:column;gap:4px}
+.suggest{border-left:3px solid var(--warn);padding:6px 12px;background:var(--panel2);color:#dfe3ee}
+.sky{position:relative;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#000}
+canvas{display:block;width:100%;aspect-ratio:16/8}
+@media (max-width:600px){canvas{aspect-ratio:4/3}}
+.hud{position:absolute;right:10px;top:10px;font-family:var(--mono);font-size:12px;pointer-events:none;display:flex;flex-direction:column;align-items:flex-end;gap:4px;padding:8px 10px;border:1px solid #2b3a5c;border-radius:5px;background:rgba(8,13,26,.82)}
+.hud .t{font-family:var(--mono);font-size:20px;letter-spacing:.04em;line-height:1;color:var(--flame)}
+.status{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:3px;border:1px solid var(--line)}
+.status.lit{color:var(--plume);border-color:#4a6c92}.status.dark{color:var(--flame);border-color:#6b4a22}.status.hidden{color:var(--muted)}
+@media (max-width:600px){.hud{padding:5px 7px;font-size:10.5px}.hud .t{font-size:18px}}
+.controls{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center}
+.scrub{flex:1 1 100%;display:flex;align-items:center;gap:12px}
+.scrub input{flex:1;min-width:0;accent-color:var(--flame)}
+.controls label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+input[type=range].small{width:110px;accent-color:var(--plume)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.cell{background:var(--panel);padding:10px 14px;min-width:0}
+.cell .k{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.cell .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:17px;margin-top:2px}
+.cols{display:grid;grid-template-columns:1.2fr 1fr;gap:22px}
+@media (max-width:760px){.cols{grid-template-columns:1fr}}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+td.mono{white-space:nowrap}
+tr.key td{color:var(--plume)} tr.go td:first-child{color:var(--go)}
+.facts{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.facts div{display:grid;grid-template-columns:120px 1fr;gap:10px;padding:9px 12px;background:var(--panel);border-top:1px solid var(--line)}
+.facts div:first-child{border-top:0}
+.facts dt{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding-top:2px}
+.facts dd{margin:0;min-width:0}
+a{color:var(--plume)}
+.steps{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.steps li{display:grid;grid-template-columns:110px 74px 1fr;gap:12px;padding:9px 14px;background:var(--panel);border-top:1px solid var(--line);color:#c9cfe0}
+.steps li:first-child{border-top:0}
+.steps li .when{font-family:var(--mono);color:var(--fg);white-space:nowrap}
+.steps li .rel{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap;padding-top:2px}
+.steps li b{color:var(--fg);font-weight:600}
+.steps li.hot .when{color:var(--plume)}
+@media (max-width:600px){.steps li{grid-template-columns:1fr;gap:2px}.facts div{grid-template-columns:1fr;gap:2px}}
+.fine{font-size:12.5px;color:var(--muted);max-width:80ch}
+[hidden]{display:none!important}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Launch <span>Sightline</span></h1>
+    <div class="sub">Pick an upcoming Florida Space Coast launch and where you'll watch from. Find out whether you'll see it, where to look, and when.</div>
+  </header>
+
+  <section class="step" aria-labelledby="h-s1">
+    <div class="stephead"><span class="num">1</span><h2 id="h-s1">Choose a launch</h2><span class="note" id="snap"></span></div>
+    <div class="launches" id="launches"></div>
+    <div class="controls" id="timeRow">
+      <label for="ldate">Liftoff (ET) <input id="ldate" type="date"> <input id="ltime" type="time" step="60"></label>
+      <span class="note">From the schedule. Change it if the launch slips; the verdict and sky view update.</span>
+    </div>
+  </section>
+
+  <section class="step" aria-labelledby="h-s2">
+    <div class="stephead"><span class="num">2</span><h2 id="h-s2">Where are you watching from?</h2></div>
+    <div class="chips" id="cities"></div>
+    <div class="manual">
+      <div class="f grow"><label class="l" for="addr">Or type an address or place</label><input id="addr" type="text" placeholder="e.g. Arabia Mountain, Lithonia GA"></div>
+      <button class="b ghost" id="findBtn" type="button">Find it</button>
+      <div class="f"><label class="l" for="lat">Latitude</label><input id="lat" type="number" step="0.0001" placeholder="33.67"></div>
+      <div class="f"><label class="l" for="lon">Longitude</label><input id="lon" type="number" step="0.0001" placeholder="-84.11"></div>
+      <button class="b ghost" id="coordBtn" type="button">Use coordinates</button>
+    </div>
+    <div class="note" id="locNote">Address lookup uses OpenStreetMap. Coordinates always work.</div>
+  </section>
+
+  <section class="step" aria-labelledby="h-s3">
+    <div class="stephead"><span class="num">3</span><h2 id="h-s3">Can you see it?</h2></div>
+    <div class="verdict" id="verdict"></div>
+  </section>
+
+  <div id="simWrap" class="step">
+    <div class="stephead"><h2>Your sky at launch</h2><span class="note" id="simWho"></span></div>
+    <div class="sky">
+      <canvas id="cv" aria-label="Simulated sky from your location with the rocket's track"></canvas>
+      <div class="hud"><span class="t" id="hudT">T-00:30</span><span id="hudClock"></span><span class="status hidden" id="status">Waiting</span></div>
+    </div>
+    <div class="controls">
+      <div class="scrub">
+        <button class="b" id="play" type="button">Play</button>
+        <input id="scrub" type="range" min="-30" max="600" step="0.5" value="-30" aria-label="Time after liftoff">
+        <span class="mono" id="scrubLbl" style="min-width:64px;text-align:right">T-00:30</span>
+      </div>
+      <label for="speed">Speed <select id="speed"><option value="1">1×</option><option value="5" selected>5×</option><option value="20">20×</option></select></label>
+      <label for="fov">Lens frame <select id="fov"><option value="eye">Naked eye (no frame)</option><option value="24">24mm</option><option value="35" selected>35mm</option><option value="50">50mm</option><option value="85">85mm</option><option value="200">200mm</option></select></label>
+      <button class="b ghost" id="reset" type="button">Reset</button>
+    </div>
+    <div class="grid" aria-live="polite">
+      <div class="cell"><div class="k">Look toward</div><div class="v" id="rAz">–</div></div>
+      <div class="cell"><div class="k">Height above horizon</div><div class="v" id="rEl">–</div></div>
+      <div class="cell"><div class="k">Rocket altitude</div><div class="v" id="rAlt">–</div></div>
+      <div class="cell"><div class="k">Distance from you</div><div class="v" id="rRng">–</div></div>
+      <div class="cell"><div class="k">Sun where you are</div><div class="v" id="rSun">–</div></div>
+    </div>
+    <div class="cols">
+      <section><h3>When to look</h3><div class="tbl"><table><thead><tr><th>Your clock (ET)</th><th>Flight</th><th>What you'll see</th></tr></thead><tbody id="events"></tbody></table></div></section>
+      <section><h3>Launch details</h3><dl class="facts" id="facts"></dl></section>
+    </div>
+    <section><h3>Shoot plan</h3><ol class="steps" id="workflow"></ol></section>
+  </div>
+
+  <p class="fine">Proof of concept. Launch list is a snapshot from Launch Library 2 by The Space Devs, the data behind Space Launch Schedule; dates marked TBD are placeholders, so set the real liftoff above once it's announced. No guessing: a launch unlocks only when its direction is confirmed from published launch info, or is a repeat of a mission family we've already documented (like Space Station flights), and its launch time is firm. Everything else shows as pending. Flight profile is a typical first 10 minutes of a Falcon-class launch. Verdict thresholds: under 2.5° up is No, under 6° is Unlikely, 6–10° is Maybe. The sunlit check uses the real Sun position. A clear, flat horizon is assumed. Weather is not checked; use the forecast link.</p>
+</div>
+
+<script>
+(function(){
+const R=6371,D=Math.PI/180;
+// ---------- data snapshot (Launch Library 2, Florida pads, pulled Oct 15 2026) ----------
+const SNAP='Snapshot Oct 15, 2026';
+const PADS={'SLC-40':{lat:28.5618,lon:-80.5772,name:'SLC-40, Cape Canaveral SFS'},'SLC-41':{lat:28.5833,lon:-80.5830,name:'SLC-41, Cape Canaveral SFS'},'LC-39A':{lat:28.6082,lon:-80.6041,name:'LC-39A, Kennedy Space Center'},'LC-36':{lat:28.4697,lon:-80.5378,name:'LC-36, Cape Canaveral SFS'}};
+const LAUNCHES=[
+ {id:'bw5',rocket:'Falcon 9',mission:'Bandwagon-5',net:'2026-10-19T10:30:00Z',status:'Go',pad:'SLC-40',orbit:'Mid-inclination LEO (~45°)',heading:127,traj:{dir:'Southeast',conf:'confirmed',family:'Bandwagon rideshare',note:'Published launch info says it heads southeast, away from the Carolinas and mid-Atlantic. Best views are in Florida and the Caribbean. This becomes the baseline for future Bandwagon flights.'},provider:'SpaceX',web:'https://www.spacex.com/launches/',desc:'Dedicated rideshare carrying dozens of small satellites for commercial and government customers.',landing:'Droneship landing offshore'},
+ {id:'leo1',rocket:'Vulcan VC6L',mission:'Amazon Leo (LV-01)',net:'2026-10-29T00:00:00Z',status:'TBD',pad:'SLC-41',orbit:'LEO (~51.9°)',heading:45,traj:{dir:'Not yet published',conf:'pending',note:'First Amazon Leo flight on Vulcan, and Amazon Leo uses several different orbits. We wait for this flight\'s own hazard notices.'},provider:'ULA',web:'https://www.ulalaunch.com/',desc:'Broadband constellation satellites for Amazon Leo, formerly Project Kuiper.',landing:'Expendable'},
+ {id:'ng25',rocket:'Falcon 9',mission:'Cygnus NG-25',net:'2026-11-30T00:00:00Z',status:'TBD',pad:'SLC-40',orbit:'ISS (51.6°)',heading:44,traj:{dir:'Northeast',conf:'repeat',family:'Space Station flights',note:'Repeat path: every Space Station flight from Florida heads northeast up the coast to match the station\'s 51.6° orbit. Upgrades to confirmed when this flight\'s notices come out.'},provider:'SpaceX',web:'https://www.spacex.com/launches/',desc:'Northrop Grumman cargo resupply flight to the International Space Station.',landing:'Booster may land back at the Cape'},
+ {id:'griffin',rocket:'Falcon Heavy',mission:'Griffin Mission One',net:'2026-12-31T00:00:00Z',status:'TBD',pad:'LC-39A',orbit:'Lunar transfer',heading:95,traj:{dir:'Not yet published',conf:'pending',note:'New mission type. Lunar launch direction depends on the date, so we wait for published data.'},provider:'SpaceX',web:'https://www.spacex.com/launches/',desc:'Demonstration flight of Astrobotic\'s Griffin lunar lander.',landing:'Side boosters may land back at the Cape'},
+ {id:'bluering',rocket:'New Glenn',mission:'Blue Ring-1',net:'2026-12-31T00:00:00Z',status:'TBD',pad:'LC-36',orbit:'Geostationary transfer',heading:100,traj:{dir:'Not yet published',conf:'pending',note:'New mission type for New Glenn. We wait for published data.'},provider:'Blue Origin',web:'https://www.blueorigin.com/',desc:'First Blue Ring spacecraft, testing operations in transfer orbit and then GEO.',landing:'Booster lands on a ship offshore'},
+ {id:'bb14',rocket:'Falcon 9',mission:'BlueBird 14-16',net:'2026-12-31T00:00:00Z',status:'TBD',pad:'SLC-40',orbit:'LEO (~53°)',heading:43,traj:{dir:'Not yet published',conf:'pending',note:'BlueBird launches haven\'t all flown the same way. We wait for this flight\'s hazard notices.'},provider:'SpaceX',web:'https://www.spacex.com/launches/',desc:'Three AST SpaceMobile Block 2 BlueBird satellites for direct-to-phone broadband.',landing:'Droneship landing offshore'}
+];
+const CITIES=[
+ {n:'Orlando, FL',lat:28.5384,lon:-81.3789},{n:'Tampa, FL',lat:27.9506,lon:-82.4572},{n:'Miami, FL',lat:25.7617,lon:-80.1918},
+ {n:'Jacksonville, FL',lat:30.3322,lon:-81.6557},{n:'Savannah, GA',lat:32.0809,lon:-81.0912},{n:'Charleston, SC',lat:32.7765,lon:-79.9311},
+ {n:'Atlanta, GA',lat:33.749,lon:-84.388},{n:'Charlotte, NC',lat:35.2271,lon:-80.8431},{n:'Raleigh, NC',lat:35.7796,lon:-78.6382},{n:'Virginia Beach, VA',lat:36.8529,lon:-75.978}
+];
+// extra towns used only to name a better spot
+const TOWNS=CITIES.concat([{n:'Gainesville, FL',lat:29.6516,lon:-82.3248},{n:'Daytona Beach, FL',lat:29.2108,lon:-81.0228},{n:'Tallahassee, FL',lat:30.4383,lon:-84.2807},{n:'Brunswick, GA',lat:31.15,lon:-81.4915},{n:'Valdosta, GA',lat:30.8327,lon:-83.2785},{n:'Macon, GA',lat:32.8407,lon:-83.6324},{n:'Augusta, GA',lat:33.4735,lon:-82.0105},{n:'Statesboro, GA',lat:32.4488,lon:-81.7832},{n:'Columbia, SC',lat:34.0007,lon:-81.0348},{n:'Myrtle Beach, SC',lat:33.6891,lon:-78.8867},{n:'Wilmington, NC',lat:34.2104,lon:-77.8868},{n:'Greenville, SC',lat:34.8526,lon:-82.394},{n:'Fort Myers, FL',lat:26.6406,lon:-81.8723},{n:'West Palm Beach, FL',lat:26.7153,lon:-80.0534},{n:'Sebring, FL',lat:27.4956,lon:-81.4409},{n:'Ocala, FL',lat:29.1872,lon:-82.1401},{n:'Dothan, AL',lat:31.2232,lon:-85.3905},{n:'Albany, GA',lat:31.5785,lon:-84.1557},{n:'Outer Banks, NC',lat:35.5585,lon:-75.4665},{n:'Norfolk, VA',lat:36.8508,lon:-76.2859}]);
+const PROF=[[0,0,0],[60,10,3],[90,24,12],[120,45,35],[150,68,72],[180,85,110],[240,115,190],[300,140,290],[360,160,420],[420,178,590],[480,192,800],[530,200,1000],[600,205,1420]];
+const T_MIN=-30,T_MAX=600,SECO=525;
+
+// ---------- geometry ----------
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+function interp(t,i){if(t<=0)return 0;for(let k=1;k<PROF.length;k++){if(t<=PROF[k][0]){const a=PROF[k-1],b=PROF[k];return a[i]+(t-a[0])/(b[0]-a[0])*(b[i]-a[i]);}}return PROF[PROF.length-1][i];}
+function ecef(lat,lon,h){const la=lat*D,lo=lon*D,r=R+h;return [r*Math.cos(la)*Math.cos(lo),r*Math.cos(la)*Math.sin(lo),r*Math.sin(la)];}
+function dest(lat,lon,az,d){const la=lat*D,lo=lon*D,a=az*D,dd=d/R;const la2=Math.asin(Math.sin(la)*Math.cos(dd)+Math.cos(la)*Math.sin(dd)*Math.cos(a));const lo2=lo+Math.atan2(Math.sin(a)*Math.sin(dd)*Math.cos(la),Math.cos(dd)-Math.sin(la)*Math.sin(la2));return [la2/D,lo2/D];}
+function bearing(a,b){const p1=a.lat*D,p2=b.lat*D,dl=(b.lon-a.lon)*D;return ((Math.atan2(Math.sin(dl)*Math.cos(p2),Math.cos(p1)*Math.sin(p2)-Math.sin(p1)*Math.cos(p2)*Math.cos(dl))/D)+360)%360;}
+function gdist(a,b){const p1=a.lat*D,p2=b.lat*D,dp=p2-p1,dl=(b.lon-a.lon)*D;const h=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
+function frame(obs){const O=ecef(obs.lat,obs.lon,0.2),la=obs.lat*D,lo=obs.lon*D;return {O,E:[-Math.sin(lo),Math.cos(lo),0],N:[-Math.sin(la)*Math.cos(lo),-Math.sin(la)*Math.sin(lo),Math.cos(la)],U:[Math.cos(la)*Math.cos(lo),Math.cos(la)*Math.sin(lo),Math.sin(la)]};}
+function azel(F,p){const v=[p[0]-F.O[0],p[1]-F.O[1],p[2]-F.O[2]];const e=dot(v,F.E),n=dot(v,F.N),u=dot(v,F.U);return {az:((Math.atan2(e,n)/D)+360)%360,el:Math.atan2(u,Math.hypot(e,n))/D,rng:Math.hypot(v[0],v[1],v[2])};}
+const jd=ms=>ms/86400000+2440587.5;
+function sunVec(ms){const n=jd(ms)-2451545;const L=(280.46+0.9856474*n)%360;const g=((357.528+0.9856003*n)%360)*D;const lam=(L+1.915*Math.sin(g)+0.02*Math.sin(2*g))*D;const eps=(23.439-4e-7*n)*D;const ra=Math.atan2(Math.cos(eps)*Math.sin(lam),Math.cos(lam));const dec=Math.asin(Math.sin(eps)*Math.sin(lam));const l=ra-((280.46061837+360.98564736629*n)%360)*D;return [Math.cos(dec)*Math.cos(l),Math.cos(dec)*Math.sin(l),Math.sin(dec)];}
+function sunLon(ms){const n=jd(ms)-2451545;const L=(280.46+0.9856474*n)%360;const g=((357.528+0.9856003*n)%360)*D;return L+1.915*Math.sin(g)+0.02*Math.sin(2*g);}
+function moonInfo(F,ms){const d=jd(ms)-2451545;const L=218.316+13.176396*d,M=(134.963+13.064993*d)*D,Fm=(93.272+13.22935*d)*D;const lon=(L+6.289*Math.sin(M))*D,lat=5.128*Math.sin(Fm)*D;const eps=23.439*D;
+  const x=Math.cos(lat)*Math.cos(lon),y=Math.cos(eps)*Math.cos(lat)*Math.sin(lon)-Math.sin(eps)*Math.sin(lat),z=Math.sin(eps)*Math.cos(lat)*Math.sin(lon)+Math.cos(eps)*Math.sin(lat);
+  const ra=Math.atan2(y,x),dec=Math.asin(z);const l=ra-((280.46061837+360.98564736629*d)%360)*D;const v=[Math.cos(dec)*Math.cos(l),Math.cos(dec)*Math.sin(l),Math.sin(dec)];
+  const alt=Math.asin(dot(v,F.U))/D,az=((Math.atan2(dot(v,F.E),dot(v,F.N))/D)+360)%360;
+  let el=((lon/D-sunLon(ms))%360+360)%360;const illum=(1-Math.cos(el*D))/2;const waxing=el<180;
+  const name=illum<0.03?'New moon':illum>0.97?'Full moon':(illum<0.45?(waxing?'Waxing crescent':'Waning crescent'):illum<0.55?(waxing?'First quarter':'Last quarter'):(waxing?'Waxing gibbous':'Waning gibbous'));
+  return {alt,az,illum,name};}
+function sunAltAz(F,ms){const s=sunVec(ms);return {alt:Math.asin(dot(s,F.U))/D,az:((Math.atan2(dot(s,F.E),dot(s,F.N))/D)+360)%360};}
+function compass(a){return ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(a/22.5)%16];}
+const HOR=1.0; // assumed clear horizon, degrees
+
+function buildTrack(obs,pad,heading,liftMs,step){
+  const F=frame(obs),out=[];
+  for(let s=0;s<=T_MAX;s+=step){const h=interp(s,1),d=interp(s,2);const [la,lo]=dest(pad.lat,pad.lon,heading,d);const p=ecef(la,lo,h);
+    const sv=sunVec(liftMs+s*1000);const pr=dot(p,sv);const perp=Math.hypot(p[0]-pr*sv[0],p[1]-pr*sv[1],p[2]-pr*sv[2]);
+    const lit=(pr>0||perp>R+20)&&h>2;out.push({t:s,h,d,lit,...azel(F,p)});}
+  return out;}
+
+// ---------- verdict ----------
+function assess(obs,L,liftMs,heading,step){
+  const pad=PADS[L.pad],F=frame(obs);
+  const tr=buildTrack(obs,pad,heading,liftMs,step||5);
+  const sunObs=sunAltAz(F,liftMs+240000).alt;
+  const day=sunObs>-4;
+  const vis=tr.filter(p=>p.el>HOR&&(p.lit&&(!day||p.t<SECO)||(!p.lit&&p.t<SECO)||day));
+  const padDist=gdist(obs,pad)*0.6214;
+  const peakAll=tr.reduce((a,b)=>b.el>a.el?b:a,tr[0]);
+  const r={tr,sunObs,day,padDist,peakAll,vis};
+  if(!vis.length){r.v='no';r.why=`It never clears your horizon. Highest point is ${peakAll.el.toFixed(1)}°, so the Earth's curve hides it.`;return r;}
+  const pk=vis.reduce((a,b)=>b.el>a.el?b:a,vis[0]);const minR=Math.min(...vis.map(p=>p.rng))*0.6214;r.pk=pk;r.minR=minR;
+  const litDark=vis.filter(p=>p.lit&&p.h>60).length;const jelly=!day&&sunObs<-4&&litDark*(step||5)>=60&&tr.some(p=>!p.lit&&p.h<40);
+  r.jelly=jelly;
+  if(day){
+    if(pk.el>=5&&minR<200){r.v='possible';r.why=`Daylight launch about ${Math.round(padDist)} mi away. Look for a bright moving point and a white exhaust trail.`;}
+    else{r.v='unlikely';r.why=`Daylight launch about ${Math.round(padDist)} mi away. At this distance the sky washes it out.`;}
+    return r;}
+  if(minR>1100){r.v='unlikely';r.why=`It stays over ${Math.round(minR)} mi away from you. Too far to pick out reliably.`;return r;}
+  if(pk.el<2.5){r.v='no';r.why=`Barely grazes your horizon (${pk.el.toFixed(1)}° at best). Haze and the Earth's curve hide it.`;return r;}
+  if(pk.el<6){r.v='unlikely';r.why=`Only ${pk.el.toFixed(1)}° up at best, ${Math.round(minR)}+ mi away toward the ${compass(pk.az)}. That low, haze and distance almost always hide it.`;return r;}
+  if(pk.el>=10&&jelly){r.v='great';r.why=`Dark sky with a sunlit upper stage: good odds of the glowing "jellyfish" plume, peaking ${pk.el.toFixed(0)}° up toward the ${compass(pk.az)}.`;}
+  else if(pk.el>=10){r.v='good';r.why=`Night launch: the engine flame will be a bright moving point, peaking ${pk.el.toFixed(0)}° up toward the ${compass(pk.az)}.`;}
+  else{r.v='possible';r.why=`Visible but low, ${pk.el.toFixed(1)}° up at best toward the ${compass(pk.az)}. You need a clear, flat view that way.${jelly?' Sunlit plume likely.':''}`;}
+  return r;}
+const PATHTAG={confirmed:'Path confirmed',repeat:'Path known · repeat',pending:'Path pending'};
+function timeFirm(L){return L.status==='Go';}
+const RANK={no:0,unlikely:1,possible:2,good:3,great:4};
+const LABEL={great:'Great',good:'Yes',possible:'Maybe',unlikely:'Unlikely',no:'No'};
+const SUB={great:'jellyfish odds',good:'clearly visible',possible:'low or faint',unlikely:'hard to see',no:'below horizon'};
+
+function betterSpot(obs,L,liftMs,heading,cur){
+  const pad=PADS[L.pad];const brg=bearing(obs,pad);const total=gdist(obs,pad);
+  let maybe=null;
+  for(let km=40;km<Math.min(total,700);km+=40){const [la,lo]=dest(obs.lat,obs.lon,brg,km);const o={lat:la,lon:lo};const a=assess(o,L,liftMs,heading,10);
+    const near=TOWNS.reduce((b,c)=>gdist(o,c)<gdist(o,b)?c:b,TOWNS[0]);const hit={mi:Math.round(km*0.6214),dir:compass(brg),near,v:a.v,nearMi:Math.round(gdist(o,near)*0.6214)};
+    if(RANK[a.v]>=3)return {best:hit,maybe};if(!maybe&&RANK[a.v]===2)maybe=hit;}
+  return maybe?{best:null,maybe}:null;}
+
+// ---------- time helpers (Eastern) ----------
+const fmtET=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+const fmtClock=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit',second:'2-digit'});
+const fmtHM=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit'});
+const fmtParts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+function etParts(ms){const p={};fmtParts.formatToParts(new Date(ms)).forEach(x=>p[x.type]=x.value);return {date:`${p.year}-${p.month}-${p.day}`,time:`${p.hour}:${p.minute}`};}
+function etToMs(date,time){const [y,m,d]=date.split('-').map(Number),[hh,mm]=time.split(':').map(Number);for(const off of [4,5]){const ms=Date.UTC(y,m-1,d,hh+off,mm);const p=etParts(ms);if(p.date===date&&p.time===time.slice(0,5))return ms;}return Date.UTC(y,m-1,d,hh+4,mm);}
+function tfmt(t){const sg=t<0?'-':'+';const a=Math.abs(Math.round(t));return `T${sg}${String(Math.floor(a/60)).padStart(2,'0')}:${String(a%60).padStart(2,'0')}`;}
+function rel(s){const sg=s<0?'L−':'L+';const a=Math.abs(s);return a>=3600?`${sg}${Math.floor(a/3600)}h${String(Math.round(a%3600/60)).padStart(2,'0')}`:a<60?`${sg}${Math.round(a)} s`:`${sg}${Math.round(a/60)} min`;}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ---------- state ----------
+const S={L:LAUNCHES[0],liftMs:Date.parse(LAUNCHES[0].net),heading:LAUNCHES[0].heading,obs:{...CITIES[2],label:CITIES[2].n},res:null,track:null,F:null};
+try{const sv=JSON.parse(localStorage.getItem('sightline.obs')||'null');if(sv&&isFinite(sv.lat)&&isFinite(sv.lon))S.obs=sv;}catch(e){}
+
+// ---------- step 1 ----------
+document.getElementById('snap').textContent=`${SNAP} · Launch Library 2`;
+function renderLaunches(){document.getElementById('launches').innerHTML=LAUNCHES.map(L=>{const tbd=L.status!=='Go';const when=tbd&&L.net.startsWith('2026-12-31')?'Date TBD':(tbd?'NET ':'')+fmtET.format(new Date(L.net))+' ET';
+  return `<button class="lc" type="button" data-id="${L.id}" aria-pressed="${L.id===S.L.id}"><span class="r">${esc(L.rocket)} · ${esc(L.pad)}</span><span class="m">${esc(L.mission)}</span><span class="d"><span class="pill ${tbd?'tbd':'go'}">${tbd?'TBD':'Go'}</span>${esc(when)}</span><span class="r" style="text-transform:none">${esc(L.orbit)}</span><span class="d"><span class="pill ${L.traj.conf==='pending'?'tbd':'go'}">${PATHTAG[L.traj.conf]}</span>${L.traj.conf==='pending'?'Direction not published':'Heads '+esc(L.traj.dir.toLowerCase())}</span>${L.traj.conf!=='pending'&&!timeFirm(L)?'<span class="d" style="color:var(--muted)">Waiting for a firm launch time</span>':''}</button>`;}).join('');}
+document.getElementById('launches').addEventListener('click',e=>{const b=e.target.closest('.lc');if(!b)return;const L=LAUNCHES.find(x=>x.id===b.dataset.id);S.L=L;S.heading=L.heading;
+  let ms=Date.parse(L.net);if(L.net.startsWith('2026-12-31')){ms=etToMs('2026-12-15','18:00');}S.liftMs=ms;renderLaunches();run();});
+
+// ---------- step 2 ----------
+function renderCities(){document.getElementById('cities').innerHTML=CITIES.map((c,i)=>`<button class="chip" type="button" data-i="${i}" aria-pressed="${S.obs.label===c.n}">${esc(c.n)}</button>`).join('');}
+document.getElementById('cities').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;const c=CITIES[+b.dataset.i];setObs({lat:c.lat,lon:c.lon,label:c.n});});
+function setObs(o){S.obs=o;try{localStorage.setItem('sightline.obs',JSON.stringify(o));}catch(e){}document.getElementById('lat').value=o.lat.toFixed(4);document.getElementById('lon').value=o.lon.toFixed(4);renderCities();run();}
+document.getElementById('coordBtn').addEventListener('click',()=>{const la=parseFloat(document.getElementById('lat').value),lo=parseFloat(document.getElementById('lon').value);
+  if(!(la>=-90&&la<=90&&lo>=-180&&lo<=180)){document.getElementById('locNote').textContent='Enter latitude between -90 and 90 and longitude between -180 and 180 (west is negative).';return;}
+  setObs({lat:la,lon:lo,label:`${la.toFixed(3)}, ${lo.toFixed(3)}`});document.getElementById('locNote').textContent='Using your coordinates.';});
+document.getElementById('findBtn').addEventListener('click',async()=>{const q=document.getElementById('addr').value.trim();const note=document.getElementById('locNote');const btn=document.getElementById('findBtn');
+  if(!q){note.textContent='Type a place or address first.';return;}
+  btn.disabled=true;note.textContent='Looking it up…';
+  try{const res=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=us&q='+encodeURIComponent(q),{headers:{'Accept':'application/json'}});
+    if(!res.ok)throw new Error('http '+res.status);const arr=await res.json();
+    if(!arr.length){note.textContent='Couldn\'t find that place. Try adding a city and state, or enter coordinates.';}
+    else{const r=arr[0];const la=+r.lat,lo=+r.lon;const label=(r.name||String(r.display_name).split(',')[0]||q).slice(0,40)+(r.display_name?', '+String(r.display_name).split(',').slice(-3,-2)[0].trim():'');
+      setObs({lat:la,lon:lo,label:label.slice(0,60)});note.textContent=`Found: ${r.display_name.slice(0,90)} (${la.toFixed(3)}, ${lo.toFixed(3)}). Adjust the coordinates if needed.`;}}
+  catch(err){note.textContent='Lookup failed. Try again in a moment, or enter coordinates.';}
+  finally{btn.disabled=false;}});
+
+// ---------- step 3 + sim ----------
+const simWrap=document.getElementById('simWrap');
+function run(){
+  const known=S.L.traj.conf!=='pending',firm=timeFirm(S.L);
+  document.getElementById('timeRow').hidden=!(known&&firm);
+  if(!(known&&firm)){simWrap.hidden=true;S.res=null;
+    const head=!known?'Path pending':'Waiting for launch time';
+    const body=!known?`${esc(S.L.traj.note)} The visibility check and sky view open once the trajectory is published, usually 3–7 days before launch.`:`The path is known (${esc(S.L.traj.family)}: heads ${esc(S.L.traj.dir.toLowerCase())}), but the launch time isn't set yet. Time decides darkness versus daylight, so the check opens once it's firm.`;
+    document.getElementById('verdict').innerHTML=`<div class="badge" style="color:var(--muted)">Locked<small>${head}</small></div><div class="vtext"><div class="why">${!known?'No guessing: we wait for this launch\'s trajectory.':'Almost there.'}</div><ul><li>${body}</li><li>Watching from ${esc(S.obs.label)}, about ${Math.round(gdist(S.obs,PADS[S.L.pad])*0.6214)} mi from ${esc(PADS[S.L.pad].name)}.</li><li>Check <a href="https://www.spacelaunchschedule.com/" target="_blank" rel="noopener">Space Launch Schedule</a> for updates.</li></ul></div>`;
+    return;}
+  const r=assess(S.obs,S.L,S.liftMs,S.heading,2);S.res=r;S.F=frame(S.obs);
+  S.track=buildTrack(S.obs,PADS[S.L.pad],S.heading,S.liftMs,1);
+  const v=r.v,ok=RANK[v]>=2;
+  const tbd=S.L.status!=='Go';
+  const bullets=[];
+  bullets.push(`Trajectory: <b>${esc(S.L.traj.dir.toLowerCase())}</b> (${S.L.traj.conf==='confirmed'?'confirmed for this flight':'known from earlier '+esc(S.L.traj.family)}). ${esc(S.L.traj.note)}`);
+  bullets.push(`${esc(S.obs.label)} is about ${Math.round(r.padDist)} mi from ${esc(PADS[S.L.pad].name)}.`);
+  bullets.push(`Liftoff ${fmtET.format(new Date(S.liftMs))} ET${tbd?' (placeholder: set the real time below once announced)':''}. Sun at your spot: ${r.sunObs.toFixed(0)}°, ${r.day?'daylight':r.sunObs>-12?'twilight':'dark sky'}.`);
+  if(r.pk) bullets.push(`Visible from about ${clockOf(r.vis[0].t)} to ${clockOf(r.vis[r.vis.length-1].t)} ET, highest at ${r.pk.el.toFixed(1)}° toward ${compass(r.pk.az)} (${r.pk.az.toFixed(0)}°).`);
+  let sug='';
+  if(!ok){const b=betterSpot(S.obs,S.L,S.liftMs,S.heading,v);const spot=x=>`<b>${x.mi} mi ${x.dir}</b>${x.nearMi<=25?` (around ${esc(x.near.n)})`:` (nearest listed town: ${esc(x.near.n)})`}`;
+  sug=b?`<div class="suggest">${b.best?`For a clear view, head about ${spot(b.best)} toward the Cape: the verdict becomes <b>${LABEL[b.best.v]}</b>.`:''}${b.maybe&&(!b.best||b.maybe.mi<b.best.mi)?` ${b.best?'Closer in, ':''}about ${spot(b.maybe)} gets you a low <b>Maybe</b>.`:''} Or pick another city above.</div>`:`<div class="suggest">No better spot within driving range toward the Cape for this launch. Pick another launch, or watch the webcast: <a href="${S.L.web}" target="_blank" rel="noopener">${esc(S.L.provider)}</a>.</div>`;}
+  document.getElementById('verdict').innerHTML=`<div class="badge v-${v}">${LABEL[v]}<small>${SUB[v]}</small></div><div class="vtext"><div class="why">${esc(r.why)}</div><ul>${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>${sug}</div>`;
+  simWrap.hidden=!ok;
+  {const p=etParts(S.liftMs);document.getElementById('ldate').value=p.date;document.getElementById('ltime').value=p.time;
+}
+  if(ok){document.getElementById('simWho').textContent=`${S.L.rocket} · ${S.L.mission} · from ${S.obs.label}`;
+    setView();buildEvents();buildFacts();buildWorkflow();t=Math.min(T_MAX,(r.pk?r.pk.t:300));document.getElementById('scrub').value=t;requestAnimationFrame(()=>{resize();});}
+}
+function clockOf(s){return fmtClock.format(new Date(S.liftMs+s*1000));}
+
+function buildEvents(){const r=S.res,tr=S.track;const up=r.vis[0];const firstLit=tr.find(p=>p.lit&&p.el>HOR&&p.h>60);const last=r.vis[r.vis.length-1];
+  const ev=[{t:0,txt:`Liftoff from ${PADS[S.L.pad].name}.${up&&up.t>5?' Not visible from you yet.':''}`}];
+  if(up&&up.t>5) ev.push({t:up.t,txt:`Clears your horizon toward ${compass(up.az)} (${up.az.toFixed(0)}°), ${up.el.toFixed(1)}° up.`,cls:'go'});
+  ev.push({t:150,txt:'First-stage cutoff and separation; the second stage lights.'});
+  if(!r.day&&firstLit&&tr.some(p=>!p.lit&&p.h<40)) ev.push({t:firstLit.t,txt:`Second stage climbs into sunlight at ${firstLit.h.toFixed(0)} km. Plume can start glowing.`,cls:'key'});
+  ev.push({t:r.pk.t,txt:`Highest point: ${r.pk.el.toFixed(1)}° up toward ${compass(r.pk.az)} (${r.pk.az.toFixed(0)}°).`,cls:'key'});
+  ev.push({t:SECO,txt:'Second-stage cutoff (typical). A lit plume can linger.'});
+  if(last.t<T_MAX-5) ev.push({t:last.t,txt:`Drops below your horizon toward ${compass(last.az)}.`});
+  ev.sort((a,b)=>a.t-b.t);
+  document.getElementById('events').innerHTML=ev.map(e=>`<tr class="${e.cls||''}"><td class="mono">${clockOf(e.t)}</td><td class="mono">${tfmt(e.t)}</td><td>${e.txt}</td></tr>`).join('');}
+
+function buildFacts(){const L=S.L,F=S.F,m=moonInfo(F,S.liftMs);const near=S.res.padDist;const now=Date.now();
+  const cd=S.liftMs-now;const cdTxt=cd<=0?'Liftoff time has passed':`${Math.floor(cd/86400000)}d ${Math.floor(cd%86400000/3600000)}h ${Math.floor(cd%3600000/60000)}m`;
+  const nws=`https://forecast.weather.gov/MapClick.php?lat=${S.obs.lat.toFixed(4)}&lon=${S.obs.lon.toFixed(4)}`;
+  const rows=[
+    ['Mission',`${esc(L.mission)} on ${esc(L.rocket)}. ${esc(L.desc)}`],
+    ['Trajectory',`${esc(L.traj.dir)}, modeled at ${S.heading}° from the pad. ${esc(L.traj.note)}`],
+    ['Orbit',`${esc(L.orbit)}.`],
+    ['Countdown',`<span class="mono" id="countdown">${cdTxt}</span>${L.status!=='Go'?' · date not confirmed':''}`],
+    ['Moon',`${m.name}, ${Math.round(m.illum*100)}% lit, ${m.alt>0?`${m.alt.toFixed(0)}° up in the ${compass(m.az)}`:'below the horizon'} at liftoff.${m.alt>0&&m.illum>0.6?' Bright moonlight will wash out faint plume edges.':''}`],
+    ['Weather',`Not checked in this version. <a href="${nws}" target="_blank" rel="noopener">NWS forecast for your spot</a> · <a href="https://weather.com/" target="_blank" rel="noopener">The Weather Channel</a>. Check 24–48 hours ahead.`],
+    ['Watch live',`<a href="${L.web}" target="_blank" rel="noopener">${esc(L.provider)} launch page</a> · <a href="https://www.spacelaunchschedule.com/" target="_blank" rel="noopener">Space Launch Schedule</a> for time changes.`],
+    ['Booster',`${esc(L.landing)}.${near<80&&/Cape/.test(L.landing)?' You\'re close enough to hear a sonic boom when it lands.':''}`]
+  ];
+  document.getElementById('facts').innerHTML=rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');}
+setInterval(()=>{const el=document.getElementById('countdown');if(!el)return;const cd=S.liftMs-Date.now();el.textContent=cd<=0?'Liftoff time has passed':`${Math.floor(cd/86400000)}d ${Math.floor(cd%86400000/3600000)}h ${Math.floor(cd%3600000/60000)}m`;},30000);
+
+function buildWorkflow(){const r=S.res;const base=S.liftMs,F=S.F;const lf=lensAim(35);const wide=lensAim(24);
+  const up=r.vis[0].t,pk=r.pk.t;
+  const sunEvt=(()=>{const rising=sunAltAz(F,base+3600000).alt>r.sunObs;for(let s=0;s<3*3600;s+=60){const a=sunAltAz(F,base+s*1000).alt;if(rising&&a>-6)return {s,txt:'<b>Blue hour.</b> Grab one clean low-ISO frame at the same aim for a foreground to blend in.'};}return null;})();
+  const S2=[
+    {s:-50*60,txt:'<b>Arrive</b> at your spot. Red headlamp. Find the lowest stretch of horizon toward '+compass(r.pk.az)+'.'},
+    {s:-35*60,txt:`<b>Tripods up.</b> Main camera (35mm) at ${lf.az}°, ${lf.el}° up. Wide camera (24mm-equivalent) at ${wide.az}°, ${wide.el}° up.`},
+    {s:-25*60,txt:'<b>Focus</b> on a bright star or distant light, then tape the ring.'},
+    {s:-15*60,txt:r.day?'<b>Test exposure</b> for the daylight sky: ISO 100, fast shutter, burst mode ready.':'<b>Test exposure:</b> f/2.8, ISO 1600, 2–4 s with a 1 s gap. Histogram left of center.'},
+    {s:-8*60,txt:'<b>Webcast on.</b> From here, go by its clock.'},
+    {s:-60,txt:'<b>Start the intervalometers.</b> Hands off.',hot:1},
+    {s:up,txt:`<b>Look ${compass(r.vis[0].az)}</b>, ${r.vis[0].el.toFixed(0)}° up. First sight.`},
+    {s:pk,txt:`<b>Peak</b>, ${r.pk.el.toFixed(0)}° up toward ${compass(r.pk.az)}. Best frames now.`,hot:1},
+    {s:12*60,txt:'<b>Stop the main camera</b> once the plume fades. Let the wide one run a little longer for a timelapse.'}];
+  if(sunEvt&&sunEvt.s>12*60) S2.push(sunEvt);
+  S2.push({txt:'<b>Edit:</b> sync one Lightroom edit across the sequence, stack the peak frames with a Lighten blend for the full arc, and build the timelapse at 24–30 fps.'});
+  document.getElementById('workflow').innerHTML=S2.map(x=>`<li class="${x.hot?'hot':''}"><span class="when">${x.s===undefined?'After':(Math.abs(x.s)<600?fmtClock:fmtHM).format(new Date(base+x.s*1000))}</span><span class="rel">${x.s===undefined?'':rel(x.s)}</span><span>${x.txt}</span></li>`).join('');}
+
+// ---------- canvas ----------
+const cv=document.getElementById('cv'),cx=cv.getContext('2d');let W=0,H=0;
+const stars=[];let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+for(let i=0;i<1500;i++)stars.push({az:rnd()*360,el:Math.asin(rnd())/D,m:Math.pow(rnd(),3)});
+let t=T_MIN,playing=false,lens='35',VW={cAz:120,ppd:10,elC:10};
+function setView(){const vis=S.res.vis;let a0=vis[0].az,a1=vis[vis.length-1].az;let span=a1-a0;if(span>180)span-=360;if(span<-180)span+=360;
+  const mid=(a0+span/2+360)%360;VW.cAz=mid;VW.span=Math.abs(span);VW.peakEl=S.res.pk.el;}
+function resize(){const dpr=Math.min(window.devicePixelRatio||1,2);const r=cv.getBoundingClientRect();W=r.width;H=r.height;if(!W)return;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cx.setTransform(dpr,0,0,dpr,0,0);
+  const needH=Math.max(VW.span+30,80),needV=Math.max(VW.peakEl+10,22);VW.ppd=Math.min(W/needH,H*0.76/needV);VW.fovH=W/VW.ppd;VW.fovV=H/VW.ppd;VW.elC=VW.fovV/2-VW.fovV*0.22;draw();}
+function proj(az,el){let da=az-VW.cAz;if(da>180)da-=360;if(da<-180)da+=360;return [W/2+da*VW.ppd,H/2-(el-VW.elC)*VW.ppd];}
+function ext(el){const e=Math.max(el,0.1);const am=1/(Math.sin(e*D)+0.15*Math.pow(e+3.885,-1.253));return Math.pow(10,-0.4*0.28*(am-1));}
+function treeEl(az){return 0.55+0.22*Math.sin(az*0.9)+0.14*Math.sin(az*3.7+1.3)+0.08*Math.sin(az*11.1+0.4);}
+function lensAim(f){const vf=2*Math.atan(12/f)/D,hf=2*Math.atan(18/f)/D;const pk=S.res.pk;
+  if(hf>=VW.span*0.9+6){return {az:Math.round(VW.cAz),el:Math.round(Math.max(vf*0.3,Math.min(pk.el*0.6,vf*0.45))),hf,vf};}
+  return {az:Math.round(pk.az),el:Math.round(Math.max(pk.el,vf*0.3)),hf,vf};}
+function draw(){if(!W||!S.res||RANK[S.res.v]<2)return;const F=S.F,ms=S.liftMs+t*1000;const sun=sunAltAz(F,ms);
+  const tw=Math.min(1,Math.max(0,(sun.alt+18)/24));
+  const g=cx.createLinearGradient(0,0,0,H);g.addColorStop(0,`rgb(${4+40*tw*tw},${7+90*tw*tw},${16+150*tw*tw})`);g.addColorStop(1,`rgb(${10+120*tw*tw},${14+140*tw*tw},${32+170*tw*tw})`);cx.fillStyle=g;cx.fillRect(0,0,W,H);
+  const hy=proj(VW.cAz,0)[1];const [sx]=proj(sun.az,0);
+  if(sun.alt>-18&&sun.alt<6){const rg=cx.createRadialGradient(sx,hy,0,sx,hy,Math.max(W,H)*0.7);const k=Math.min(1,(sun.alt+18)/18);rg.addColorStop(0,`rgba(${150+90*k},${90+50*k},90,${0.08+0.4*k*k})`);rg.addColorStop(1,'rgba(0,0,0,0)');cx.fillStyle=rg;cx.fillRect(0,0,W,H);}
+  const sf=1-Math.min(1,Math.max(0,(sun.alt+15)/9));
+  if(sf>0.02)for(const s of stars){const [x,y]=proj(s.az,s.el);if(x<0||x>W||y<0||y>hy)continue;const a=(0.25+0.75*s.m)*sf*ext(s.el);if(a<0.03)continue;cx.fillStyle=`rgba(225,232,255,${a})`;const r=0.5+s.m*1.3;cx.fillRect(x-r/2,y-r/2,r,r);}
+  // moon
+  const m=moonInfo(F,ms);if(m.alt>0){const [mx,my]=proj(m.az,m.alt);if(mx>-20&&mx<W+20&&my>-20){const r=Math.max(4,0.5*VW.ppd/2);cx.fillStyle=`rgba(240,236,220,${0.35+0.6*m.illum})`;cx.beginPath();cx.arc(mx,my,r,0,7);cx.fill();cx.fillStyle='rgba(220,220,230,.7)';cx.font='11px "DM Mono",monospace';cx.textAlign='center';cx.fillText('Moon',mx,my-r-4);}}
+  // grid
+  const step=VW.fovH>60?10:5;cx.font='11px "DM Mono",monospace';
+  for(let a=Math.ceil((VW.cAz-VW.fovH/2)/step)*step;a<=VW.cAz+VW.fovH/2;a+=step){const [x]=proj(a,0);cx.strokeStyle='rgba(140,160,200,0.07)';cx.beginPath();cx.moveTo(x,0);cx.lineTo(x,hy);cx.stroke();}
+  for(let e=step;e<=90;e+=step){const y=proj(VW.cAz,e)[1];if(y<0)break;cx.strokeStyle='rgba(140,160,200,0.07)';cx.beginPath();cx.moveTo(0,y);cx.lineTo(W,y);cx.stroke();cx.fillStyle='rgba(160,175,210,0.6)';cx.textAlign='left';cx.fillText(`${e}°`,6,y-3);}
+  // predicted path
+  cx.setLineDash([3,5]);cx.strokeStyle='rgba(255,176,74,0.3)';cx.lineWidth=1;cx.beginPath();let first=true;for(const p of S.track){if(p.el<-1)continue;const [x,y]=proj(p.az,p.el);if(first){cx.moveTo(x,y);first=false;}else cx.lineTo(x,y);}cx.stroke();cx.setLineDash([]);
+  const now=Math.floor(Math.max(0,t));const dayK=Math.max(0,Math.min(1,(sun.alt+4)/8));
+  cx.globalCompositeOperation=dayK>0.5?'source-over':'lighter';
+  if(t>0)for(let i=0;i<=now;i+=2){const p=S.track[i];if(!p.lit||p.el<treeEl(p.az))continue;const age=t-i;const exp=p.h>60?1.6:0.25;const rk=(p.h>60?3:0.6)+exp*age;const rpx=Math.max(1.5,Math.min(rk,90)/p.rng/D*VW.ppd);const a=(dayK>0.5?0.25:0.16)*Math.exp(-age/260)*ext(p.el);if(a<0.004)continue;const [x,y]=proj(p.az,p.el);if(x<-rpx||x>W+rpx||y<-rpx||y>H+rpx)continue;const gg=cx.createRadialGradient(x,y,0,x,y,rpx);gg.addColorStop(0,`rgba(225,238,255,${a})`);gg.addColorStop(0.55,`rgba(170,205,255,${a*0.45})`);gg.addColorStop(1,'rgba(150,190,255,0)');cx.fillStyle=gg;cx.beginPath();cx.arc(x,y,rpx,0,7);cx.fill();}
+  let stat='hidden',cur=null;
+  if(t>=0){cur=S.track[Math.min(now,T_MAX)];if(cur.el>treeEl(cur.az)){const [x,y]=proj(cur.az,cur.el);const burn=t<SECO,e=ext(cur.el);
+    if(cur.lit&&!(dayK>0.5)){stat='lit';const r=burn?5:3;const gg=cx.createRadialGradient(x,y,0,x,y,r*3);gg.addColorStop(0,`rgba(255,255,255,${0.95*e})`);gg.addColorStop(1,'rgba(200,225,255,0)');cx.fillStyle=gg;cx.beginPath();cx.arc(x,y,r*3,0,7);cx.fill();}
+    else if(burn){stat=dayK>0.5?'lit':'dark';const gg=cx.createRadialGradient(x,y,0,x,y,7);gg.addColorStop(0,`rgba(255,${dayK>0.5?245:200},${dayK>0.5?220:120},${0.95*e})`);gg.addColorStop(1,'rgba(255,140,40,0)');cx.fillStyle=gg;cx.beginPath();cx.arc(x,y,7,0,7);cx.fill();}}}
+  cx.globalCompositeOperation='source-over';
+  // horizon
+  cx.beginPath();cx.moveTo(0,H);for(let x=0;x<=W;x+=2){const az=VW.cAz+(x-W/2)/VW.ppd;cx.lineTo(x,proj(az,treeEl(az))[1]);}cx.lineTo(W,H);cx.closePath();cx.fillStyle=`rgb(${3+30*tw*tw},${5+35*tw*tw},${11+40*tw*tw})`;cx.fill();
+  // lens frame
+  if(lens!=='eye'){const f=parseFloat(lens);const a=lensAim(f);let [x0,y0]=proj(a.az-a.hf/2,a.el+a.vf/2),[x1,y1]=proj(a.az+a.hf/2,a.el-a.vf/2);x0=Math.max(x0,2);y0=Math.max(y0,2);x1=Math.min(x1,W-2);y1=Math.min(y1,H-2);
+    cx.save();cx.setLineDash([6,4]);cx.strokeStyle='rgba(255,176,74,0.85)';cx.lineWidth=1.5;cx.strokeRect(x0,y0,x1-x0,y1-y0);cx.setLineDash([]);cx.fillStyle='rgba(255,176,74,0.95)';const lab=`${f}mm · ${a.az}° · ${a.el}° up`;const w2=cx.measureText(lab).width;if(x1-x0>w2+12){cx.textAlign='left';cx.fillText(lab,x0+6,y0+14);}else{cx.textAlign='center';cx.fillText(lab,(x0+x1)/2,Math.max(12,y0-6));}cx.restore();}
+  // compass + pad marker
+  cx.fillStyle='rgba(200,210,235,0.8)';cx.textAlign='center';cx.font='500 12px "Outfit",sans-serif';
+  for(let a=0;a<360;a+=22.5){let da=a-VW.cAz;if(da>180)da-=360;if(da<-180)da+=360;if(Math.abs(da)>VW.fovH/2)continue;const [x]=proj(a,0);cx.fillText(`${compass(a)} ${Math.round(a)}°`,x,Math.min(H-8,hy+24));}
+  const padAE=azel(F,ecef(PADS[S.L.pad].lat,PADS[S.L.pad].lon,0));{const [x]=proj(padAE.az,0);if(x>0&&x<W){cx.fillStyle='rgba(255,176,74,0.85)';cx.font='11px "DM Mono",monospace';cx.fillText('▲ Pad',x,hy-6);}}
+  const st=document.getElementById('status');st.className='status '+stat;st.textContent=stat==='lit'?(dayK>0.5?'Daylight: bright point':'Sunlit: plume visible'):stat==='dark'?'In Earth\'s shadow: engine glow':t<0?'Waiting for liftoff':'Below your horizon';
+  document.getElementById('hudT').textContent=tfmt(t);document.getElementById('hudClock').textContent=fmtClock.format(new Date(ms))+' ET';document.getElementById('scrubLbl').textContent=tfmt(t);
+  if(cur){document.getElementById('rAz').textContent=`${compass(cur.az)} · ${cur.az.toFixed(0)}°`;document.getElementById('rEl').textContent=`${cur.el.toFixed(1)}°`;document.getElementById('rAlt').textContent=`${cur.h.toFixed(0)} km`;document.getElementById('rRng').textContent=`${Math.round(cur.rng*0.6214)} mi`;}
+  else ['rAz','rEl','rAlt','rRng'].forEach(id=>document.getElementById(id).textContent='–');
+  document.getElementById('rSun').textContent=sun.alt>0?`${sun.alt.toFixed(1)}° up`:`${sun.alt.toFixed(1)}° · ${sun.alt>-6?'twilight':'dark'}`;}
+
+let last=0;const btn=document.getElementById('play');
+function loop(ts){if(!playing){last=0;return;}if(last)t+=(ts-last)/1000*parseFloat(document.getElementById('speed').value);last=ts;if(t>=T_MAX){t=T_MAX;playing=false;btn.textContent='Play';}document.getElementById('scrub').value=t;draw();if(playing)requestAnimationFrame(loop);}
+btn.addEventListener('click',()=>{if(t>=T_MAX)t=T_MIN;playing=!playing;btn.textContent=playing?'Pause':'Play';if(playing)requestAnimationFrame(loop);});
+document.getElementById('scrub').addEventListener('input',e=>{t=parseFloat(e.target.value);draw();});
+document.getElementById('fov').addEventListener('change',e=>{lens=e.target.value;draw();});
+function timeChanged(){const d=document.getElementById('ldate').value,tm=document.getElementById('ltime').value;if(!d||!tm)return;S.liftMs=etToMs(d,tm);run();}
+document.getElementById('ldate').addEventListener('change',timeChanged);document.getElementById('ltime').addEventListener('change',timeChanged);
+document.getElementById('reset').addEventListener('click',()=>{playing=false;btn.textContent='Play';t=T_MIN;document.getElementById('scrub').value=t;draw();});
+window.addEventListener('resize',resize);
+try{if(window.self!==window.top)document.querySelector('header').hidden=true;}catch(e){}
+renderLaunches();renderCities();document.getElementById('lat').value=S.obs.lat.toFixed(4);document.getElementById('lon').value=S.obs.lon.toFixed(4);run();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>draw());
+})();
+</script>
+</body>
+</html>
