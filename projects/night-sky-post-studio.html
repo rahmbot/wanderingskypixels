@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Night Sky Post Studio — Guided Instagram Photo Editor | WanderingSkyPixels Projects</title>
+<meta name="description" content="Upload a night-sky or landscape shot, answer a few questions about the story you want to tell, and get an Instagram-ready edit with your watermark placed clear of the hero.">
+<link rel="icon" href="../logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── Site design tokens ── */
+  :root{
+    --night:#050b18;--deep:#0a1628;--mid:#111f38;--card:#0d1a2e;--horizon:#1a2f52;
+    --star:#e8e0cc;--gold:#c8a96e;--aurora:#4fc4a0;--nebula:#7b8cde;--muted:#6a7d99;--dim:#2a3d5a;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--night);color:var(--star);font-family:'Outfit',sans-serif;font-weight:300;overflow-x:hidden;}
+  a{text-decoration:none;color:inherit;}
+
+  /* ── Site Nav (same as all pages) ── */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 4rem;background:rgba(5,11,24,0.92);backdrop-filter:blur(18px);border-bottom:1px solid rgba(200,169,110,0.12);}
+  .nav-logo img{height:42px;width:auto;display:block;filter:brightness(1.08);}
+  .nav-links{display:flex;gap:2rem;list-style:none;align-items:center;}
+  .nav-links a{color:var(--muted);font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.2s;}
+  .nav-links a:hover{color:var(--gold);}
+  .nav-cta{background:linear-gradient(135deg,var(--gold),#a07840);color:var(--night)!important;padding:0.5rem 1.4rem;border-radius:2px;font-weight:500!important;}
+  .nav-dropdown{position:relative;}
+  .nav-dropdown-trigger{display:flex;align-items:center;gap:0.3rem;cursor:pointer;color:var(--muted);font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;}
+  .nav-dropdown-menu{display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);background:rgba(5,11,24,0.98);backdrop-filter:blur(20px);border:1px solid var(--dim);min-width:220px;list-style:none;padding:0.5rem 0;z-index:200;box-shadow:0 20px 60px rgba(0,0,0,0.5);margin-top:8px;}
+  .nav-dropdown:hover .nav-dropdown-menu{display:block;}
+  .nav-dropdown-menu::before{content:'';position:absolute;top:-8px;left:0;right:0;height:8px;}
+  .nav-dropdown-menu li a{display:block;padding:0.65rem 1.2rem;color:var(--muted);font-size:0.82rem;transition:color 0.2s,background 0.2s;}
+  .nav-dropdown-menu li a:hover{color:var(--gold);background:rgba(200,169,110,0.06);}
+  .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none;}
+  .hamburger span{display:block;width:24px;height:1.5px;background:var(--star);}
+  .mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:rgba(5,11,24,0.98);backdrop-filter:blur(20px);border-bottom:1px solid var(--dim);z-index:99;padding:1.5rem 2rem;flex-direction:column;}
+  .mobile-menu.open{display:flex;}
+  .mobile-menu a{color:var(--muted);font-size:0.9rem;letter-spacing:0.08em;text-transform:uppercase;padding:1rem 0;border-bottom:1px solid var(--dim);}
+
+  /* ── Page hero ── */
+  .page-hero{padding:8rem 4rem 3rem;max-width:1100px;margin:0 auto;}
+  .section-label{font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;}
+  .page-hero h1{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;line-height:1.15;margin-bottom:1rem;}
+  .page-hero p{font-size:0.95rem;color:var(--muted);line-height:1.8;max-width:640px;margin-bottom:0.6rem;}
+  .breadcrumb{font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;color:var(--muted);margin-bottom:1.5rem;}
+  .breadcrumb a{color:var(--gold);}
+  .breadcrumb a:hover{text-decoration:underline;}
+
+  /* ── Context strip ── */
+  .context-strip{max-width:1100px;margin:0 auto 2rem;padding:0 4rem;}
+  .context-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+  .ctx-card{background:var(--card);border:1px solid var(--dim);border-radius:2px;padding:1.2rem 1.5rem;}
+  .ctx-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.15em;color:var(--gold);text-transform:uppercase;margin-bottom:0.4rem;}
+  .ctx-val{font-size:0.88rem;color:var(--star);line-height:1.5;}
+
+  /* ── Prototype shell ── */
+  .proto-shell{max-width:1160px;margin:0 auto 4rem;padding:0 4rem;}
+  .proto-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.2em;color:var(--nebula);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;}
+  .proto-label::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--nebula);}
+  .proto-note{font-size:0.82rem;color:var(--muted);margin-bottom:1.2rem;line-height:1.6;max-width:70ch;}
+  .proto-note a{color:var(--gold);}
+  .proto-note a:hover{text-decoration:underline;}
+
+  .mp-app{background:#050b18;border-radius:10px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.08);}
+  .mp-chrome{background:#0a1628;border-bottom:1px solid var(--dim);padding:0.65rem 1rem;display:flex;align-items:center;gap:0.6rem;}
+  .mp-dot{width:10px;height:10px;border-radius:50%;}
+  .mp-dot.r{background:#ff5f57;} .mp-dot.y{background:#febc2e;} .mp-dot.g{background:#28c840;}
+  .mp-chrome-label{margin-left:auto;font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.08em;color:rgba(255,255,255,0.5);}
+  .mp-frame{width:100%;height:1150px;border:0;display:block;background:#050b18;}
+
+  /* ── Reflection ── */
+  .reflection{max-width:1100px;margin:0 auto;padding:0 4rem 6rem;}
+  .reflection-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem;}
+  .ref-card{background:var(--card);border:1px solid var(--dim);border-radius:2px;padding:1.6rem 1.8rem;}
+  .ref-card h3{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:400;margin:0.5rem 0 0.7rem;color:var(--star);}
+  .ref-card p{font-size:0.88rem;color:var(--muted);line-height:1.75;}
+
+  .rules{max-width:1100px;margin:0 auto 3rem;padding:0 4rem;}
+  .rule-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+  .rule{background:var(--card);border:1px solid var(--dim);border-left:2px solid var(--aurora);border-radius:2px;padding:1.2rem 1.4rem;}
+  .rule.pend{border-left-color:var(--muted);}
+  .rule b{font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--aurora);display:block;margin-bottom:0.4rem;font-weight:400;}
+  .rule.pend b{color:var(--muted);}
+  .rule p{font-size:0.86rem;color:var(--muted);line-height:1.65;}
+  @media(max-width:768px){
+    nav{padding:1rem 2rem;}
+    .nav-links{display:none;}
+    .hamburger{display:flex;}
+    .page-hero,.context-strip,.proto-shell,.reflection,.rules{padding-left:1.5rem;padding-right:1.5rem;}
+    .context-cards,.reflection-grid,.rule-row{grid-template-columns:1fr;}
+    .page-hero h1{font-size:2.2rem;}
+    .mp-frame{height:900px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a href="../index.html" class="nav-logo"><img src="../logo.png" alt="WanderingSkyPixels"></a>
+  <ul class="nav-links">
+    <li class="nav-dropdown">
+      <span class="nav-dropdown-trigger">Specialties ▾</span>
+      <ul class="nav-dropdown-menu">
+        <li><a href="../specialties/landscape.html">🏔️ Landscape & Cityscape</a></li>
+        <li><a href="../specialties/astro.html">🌌 Astrophotography</a></li>
+        <li><a href="../specialties/aerial.html">🚁 Drone & Aerial</a></li>
+        <li><a href="../specialties/iceland.html">🇮🇸 Iceland Guide</a></li>
+        <li><a href="../specialties/london-guide.html">🇬🇧 London Guide</a></li>
+      </ul>
+    </li>
+    <li class="nav-dropdown">
+      <span class="nav-dropdown-trigger" style="color:var(--gold);">Portfolio ▾</span>
+      <ul class="nav-dropdown-menu">
+        <li><a href="../portfolio/index.html">📷 Photography</a></li>
+        <li><a href="index.html">💼 Projects</a></li>
+      </ul>
+    </li>
+    <li><a href="../learn/index.html">Learn</a></li>
+    <li><a href="../gear.html">Gear</a></li>
+    <li><a href="../contact.html" class="nav-cta">Work With Me</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="../index.html">Home</a>
+  <a href="../portfolio/index.html">Portfolio — Photography</a>
+  <a href="index.html" style="padding-left:1.8rem;font-size:0.82rem;">💼 Projects</a>
+  <a href="../learn/index.html">Learn</a>
+  <a href="../gear.html">Gear</a>
+  <a href="../contact.html" class="nav-cta">Work With Me</a>
+</div>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="breadcrumb"><a href="index.html">Projects</a> / Night Sky Post Studio</div>
+  <div class="section-label">Photo Tool · Interactive Prototype</div>
+  <h1>Night Sky Post Studio</h1>
+  <p>Most of my editing for Instagram is the same routine. Warm up the moon, pull back the highlights, lift the city out of the shadows, crop to 4:5, and drop the watermark somewhere it won't fight the shot. Filters don't get it right, because every frame needs something a little different.</p>
+  <p style="margin-top:0.8rem;">So I built an editor that works like a creative director. It reads the photo first, asks what story I'm going for, and only then sets the sliders. I can still adjust every one of them. The watermark goes on last, on its own layer, and lands in the quietest corner it can find.</p>
+</div>
+
+<!-- CONTEXT STRIP -->
+<div class="context-strip">
+  <div class="context-cards">
+    <div class="ctx-card">
+      <div class="ctx-label">The Problem</div>
+      <div class="ctx-val">One-tap filters treat every photo the same. A moonrise over a skyline needs different help than a bright drone landscape, and the wrong crop or watermark spot can ruin the hero.</div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label">The Approach</div>
+      <div class="ctx-val">Measure the frame, offer three distinct directions, ask two or three questions about mood and placement, then blend all of that into a starting edit you can fine-tune.</div>
+    </div>
+    <div class="ctx-card">
+      <div class="ctx-label">The Rule</div>
+      <div class="ctx-val">Never edit blind. Nothing gets applied until a direction is picked, and exports only ever come out at 1:1, 4:5 or 16:9 so Instagram never crops them on upload.</div>
+    </div>
+  </div>
+</div>
+
+<!-- FLOW -->
+<div class="rules">
+  <div class="section-label">How an edit flows</div>
+  <div class="rule-row">
+    <div class="rule"><b>1 · Assess &amp; vibe</b><p>Reads exposure, crushed shadows, clipping and color cast. Suggests three looks and asks what you want people to feel.</p></div>
+    <div class="rule"><b>2 · Edit blueprint</b><p>Your answers become real slider values with a note on why. Pick the crop, drag to frame it, and hold to compare with the raw shot.</p></div>
+    <div class="rule"><b>3 · Watermark &amp; export</b><p>The mark is drawn after the grade so it stays crisp, placed away from the hero, then saved as a full-size JPG at 95% quality.</p></div>
+  </div>
+</div>
+
+<!-- PROTOTYPE -->
+<div class="proto-shell">
+  <div class="proto-label">Live Interactive Prototype</div>
+  <p class="proto-note">It opens on a sample moonrise so you can click straight through. Pick a direction, answer the questions, build the blueprint, and watch where the watermark lands. Upload your own photo any time, and turn on Claude for suggestions written for that specific shot. Want more room? <a href="night-sky-post-studio-app.html" target="_blank" rel="noopener">Open it in its own tab →</a></p>
+
+  <div class="mp-app">
+    <div class="mp-chrome">
+      <span class="mp-dot r"></span><span class="mp-dot y"></span><span class="mp-dot g"></span>
+      <span class="mp-chrome-label">night sky post studio — instagram edit</span>
+    </div>
+    <iframe class="mp-frame" src="night-sky-post-studio-app.html" title="Night Sky Post Studio interactive prototype" loading="lazy"></iframe>
+  </div>
+</div>
+
+<!-- REFLECTION -->
+<div class="reflection">
+  <div class="section-label">Design Rationale</div>
+  <div class="reflection-grid">
+    <div class="ref-card">
+      <div class="section-label">Ask Before Editing</div>
+      <h3>The questions are the feature</h3>
+      <p>The same moonrise can be calm and warm or dark and dramatic. Both are right, depending on the post. So the tool asks first. Three short questions turn into specific choices, like more grain for a film look or a deeper vignette for drama.</p>
+    </div>
+    <div class="ref-card">
+      <div class="section-label">House Style Built In</div>
+      <h3>Moon shots stay warm</h3>
+      <p>My own rules are part of the logic. Moon and sunset frames lean warmer, highlights get pulled before exposure goes up, and crushed shadows get an extra lift so the city reads. It starts where I would start.</p>
+    </div>
+    <div class="ref-card">
+      <div class="section-label">Protect The Hero</div>
+      <h3>A watermark that knows where not to go</h3>
+      <p>Auto placement scores each corner for brightness and detail, then picks the darkest, quietest one. The mark is drawn after all the pixel work, so the grade never softens or tints it.</p>
+    </div>
+    <div class="ref-card">
+      <div class="section-label">Still Yours</div>
+      <h3>Suggestions, not decisions</h3>
+      <p>Every value the tool picks stays on a slider with a reset. Claude can write the directions and the blueprint, but you always see the reasoning and can change any of it before export.</p>
+    </div>
+  </div>
+</div>
+
+<div class="reflection" style="padding-top:0;">
+  <div class="section-label">What's Next</div>
+  <div class="ref-card">
+    <p>Next up is video. The plan is a reel builder for moon timelapses that follows the style I like most: open on a behind-the-scenes snapshot, cut to the timelapse zoomed out, push in during the hero moment, slow down for the pose, and ease back out. After that, saved presets per series and batch edits for a full shoot.</p>
+  </div>
+</div>
+
+<script>
+  document.getElementById('hamburger').addEventListener('click', function() {
+    this.classList.toggle('open');
+    document.getElementById('mobile-menu').classList.toggle('open');
+  });
+</script>
+</body>
+</html>
