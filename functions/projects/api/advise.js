@@ -1,5 +1,6 @@
 /**
- * POST /projects/api/advise — Claude call for the Camera & Framing Advisor.
+ * POST /projects/api/advise — Claude call for the Camera & Framing Advisor
+ * and Night Sky Post Studio (both send one user message: up to 2 photos + text).
  *
  * Lives under /projects, so the Projects gate (../_middleware.js) only lets
  * unlocked visitors reach it. Calls Anthropic directly from the site; the
