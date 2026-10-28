@@ -84,6 +84,12 @@ textarea{min-height:84px;resize:vertical}
 .guide canvas{display:block;width:100%;height:auto}
 .guide-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .toggle{font:400 12.5px var(--mono);letter-spacing:.06em;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:99px;padding:5px 11px;cursor:pointer}
+.shot-cmp{display:flex;flex-direction:column;gap:8px}
+.shot-cmp .frame{position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#000;max-width:100%}
+.shot-cmp canvas{display:block;width:100%;height:auto}
+.shot-cmp .badge{position:absolute;left:8px;bottom:8px;font:400 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;background:rgba(5,11,24,.82);color:var(--gold);padding:4px 8px;border-radius:2px}
+.seg.small button{min-height:32px;font-size:13px;padding:0 12px}
+.pnote{font-size:13.5px;color:var(--muted);border-left:2px solid var(--nebula);padding:2px 0 2px 10px}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted)}
 .legend i{display:inline-block;width:14px;height:0;border-top:2px solid;vertical-align:middle;margin-right:5px}
 
@@ -389,7 +395,10 @@ ul.notes li::before{content:"";position:absolute;left:2px;top:.6em;width:6px;hei
     "horizon": 0.66,
     "subject": {"x": 0.62, "y": 0.40, "label": "2-3 words"},
     "lines": [{"x1": 0.10, "y1": 0.95, "x2": 0.55, "y2": 0.55, "label": "2-3 words"}],
-    "avoid": [{"x": 0.85, "y": 0.0, "w": 0.15, "h": 0.25, "label": "2-3 words"}]
+    "avoid": [{"x": 0.85, "y": 0.0, "w": 0.15, "h": 0.25, "label": "2-3 words"}],
+    "tilt": 0,
+    "aspect": "3:2",
+    "previewNote": "one short sentence, or null"
   },
   "notes": ["short best-practice / do / don't lines"]
 }`;
@@ -403,7 +412,7 @@ ul.notes li::before{content:"";position:absolute;left:2px;top:.6em;width:6px;hei
 - Stabilization: On handheld, Off on tripod.
 - focalLength: only fill for zoom lenses (e.g. 24-70mm, 70-200mm, 150-600mm). One primary pick and one alternative within the lens range. Use null for primes.
 - framing: 3–5 items based on the scene's look and feel, time of day and every visible element; say what to emphasize vs minimize, where to place horizon/subject, foreground interest, leading lines, what to crop out.
-- overlay draws the framing guide on the photo. All numbers are fractions 0–1 of the photo's width (x, w) and height (y, h), origin top-left. "crop" is the suggested frame inside this photo (use the full photo {0,0,1,1} if it is already right; the photographer may need to step back or zoom out if a wider frame is better — say so in framing). "horizon" is where the horizon should sit in the original photo coordinates, or null if no horizon. "subject" is the main subject's position, or null. "lines" are 0–2 leading lines worth using. "avoid" are 0–2 distractions to crop out or hide. Be accurate to what is actually in the photo.
+- overlay draws the framing guide on the photo. All numbers are fractions 0–1 of the photo's width (x, w) and height (y, h), origin top-left. "crop" is the suggested frame inside this photo (use the full photo {0,0,1,1} if it is already right; the photographer may need to step back or zoom out if a wider frame is better — say so in framing). "horizon" is where the horizon should sit in the original photo coordinates, or null if no horizon. "subject" is the main subject's position, or null. "lines" are 0–2 leading lines worth using. "avoid" are 0–2 distractions to crop out or hide. Be accurate to what is actually in the photo. The app also shows a "suggested shot" preview made by cropping the photo to "crop" (adjusted to "aspect") and rotating it by "tilt", so make "crop" the strongest composition actually inside this photo, not just a safe trim. "tilt" is the degrees to rotate the photo to level a crooked horizon or verticals (positive = clockwise, between -8 and 8; 0 if already level). "aspect" is the best aspect ratio for this composition: one of "3:2", "2:3", "4:5", "16:9", "1:1". "previewNote" names what the preview cannot show because it needs the photographer to act (get lower, step left, zoom out, wait for the light); null if the crop says it all.
 - notes: 2–4 items; mention apps like PhotoPills when the scene needs planning (moon/Milky Way position, alignment).
 - Keep every string short; this is read on a phone in the field.`;
 
@@ -521,6 +530,43 @@ ${SHAPE}`;
     }
   }
 
+  // ---------- suggested shot (crop + level + aspect from the user's own photo) ----------
+  const ASPECTS = { "3:2": 3/2, "2:3": 2/3, "4:5": 4/5, "16:9": 16/9, "1:1": 1, "5:4": 5/4, "9:16": 9/16 };
+  function suggestedRect(W, H, o){
+    const c = o.crop || {x:0, y:0, w:1, h:1};
+    let w = clamp(c.w) * W || W, h = clamp(c.h) * H || H;
+    const cx = (clamp(c.x) + clamp(c.w) / 2) * W, cy = (clamp(c.y) + clamp(c.h) / 2) * H;
+    const ar = ASPECTS[String(o.aspect || "").trim()] || (w / h);
+    // match aspect inside the suggested crop's area
+    if (w / h > ar) w = h * ar; else h = w / ar;
+    const th = Math.max(-8, Math.min(8, Number(o.tilt) || 0)) * Math.PI / 180;
+    // shrink until all four corners land inside the rotated photo
+    const inside = (k) => {
+      const hw = w * k / 2, hh = h * k / 2, cs = Math.cos(th), sn = Math.sin(th);
+      return [[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]].every(([dx, dy]) => {
+        // output corner -> source pixel: inverse rotation about (cx, cy)
+        const sx = cx + dx * cs + dy * sn, sy = cy - dx * sn + dy * cs;
+        return sx >= -0.5 && sx <= W + 0.5 && sy >= -0.5 && sy <= H + 0.5;
+      });
+    };
+    let k = 1; while (k > 0.3 && !inside(k)) k -= 0.01;
+    return { cx, cy, w: w * k, h: h * k, th };
+  }
+  function drawSuggested(canvas, img, o){
+    const W = img.naturalWidth || img.width, H = img.naturalHeight || img.height;
+    const r = suggestedRect(W, H, o);
+    canvas.width = Math.round(r.w); canvas.height = Math.round(r.h);
+    const g = canvas.getContext("2d");
+    g.imageSmoothingQuality = "high";
+    g.translate(canvas.width / 2, canvas.height / 2);
+    g.rotate(r.th);
+    g.drawImage(img, -r.cx, -r.cy, W, H);
+  }
+  function drawOriginal(canvas, img){
+    const W = img.naturalWidth || img.width, H = img.naturalHeight || img.height;
+    canvas.width = W; canvas.height = H; canvas.getContext("2d").drawImage(img, 0, 0, W, H);
+  }
+
   // ---------- render ----------
   function el(tag, cls, text){ const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function render(r, opts = {}){
@@ -563,6 +609,32 @@ ${SHAPE}`;
         const p = el("p"); p.append(el("b", null, f.title || "")); p.append(document.createTextNode(f.detail || "")); li.append(p); ol.append(li);
       });
       out.append(ol);
+    }
+
+    if (img && r.overlay){
+      const o = r.overlay;
+      const bar = el("div", "guide-bar");
+      bar.append(el("div", "label", "Suggested shot"));
+      const seg = el("div", "seg small"); seg.setAttribute("role", "group"); seg.setAttribute("aria-label", "Compare");
+      const bA = el("button", null, "Suggested"), bB = el("button", null, "Your photo");
+      [bA, bB].forEach(b => { b.type = "button"; seg.append(b); });
+      bar.append(seg); out.append(bar);
+      const wrap = el("div", "shot-cmp"); const fr = el("div", "frame"); const cv = document.createElement("canvas");
+      cv.setAttribute("role", "img");
+      const badge = el("span", "badge");
+      fr.append(cv, badge); wrap.append(fr);
+      const tiltDeg = Math.round((Number(o.tilt) || 0) * 10) / 10;
+      const facts = [o.aspect ? o.aspect + " frame" : "", tiltDeg ? "leveled " + Math.abs(tiltDeg) + "°" : ""].filter(Boolean).join(" · ");
+      const show = which => {
+        const sug = which === "s";
+        bA.setAttribute("aria-pressed", sug ? "true" : "false"); bB.setAttribute("aria-pressed", sug ? "false" : "true");
+        if (sug){ drawSuggested(cv, img, o); badge.textContent = "Suggested" + (facts ? " · " + facts : ""); cv.setAttribute("aria-label", "Your photo cropped and leveled to the suggested framing"); }
+        else { drawOriginal(cv, img); badge.textContent = "Your photo"; cv.setAttribute("aria-label", "Your original photo"); }
+      };
+      bA.addEventListener("click", () => show("s")); bB.addEventListener("click", () => show("o"));
+      show("s");
+      if (o.previewNote) wrap.append(el("div", "pnote", "In the field: " + o.previewNote));
+      out.append(wrap);
     }
 
     const card = el("div", "card rows");
@@ -619,7 +691,8 @@ ${SHAPE}`;
       {title:"Trim the hot sky", detail:"Keep only a sliver of sky above the ridge."}
     ],
     overlay: { crop:{x:0.04,y:0.22,w:0.94,h:0.76}, horizon:0.40, subject:{x:0.63,y:0.55,label:"Falls"},
-      lines:[{x1:0.08,y1:0.95,x2:0.50,y2:0.76,label:"Rock line"}], avoid:[{x:0.72,y:0.0,w:0.28,h:0.20,label:"Hot sky"}] },
+      lines:[{x1:0.08,y1:0.95,x2:0.50,y2:0.76,label:"Rock line"}], avoid:[{x:0.72,y:0.0,w:0.28,h:0.20,label:"Hot sky"}],
+      tilt: 1.5, aspect: "4:5", previewNote: "Get the camera low over the near rocks so they fill the bottom of the frame." },
     notes: ["Wipe spray off the filter between frames.", "Rotate the CPL to cut glare on wet rock."]
   };
   const exImg = exampleScene();
