@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Camera &amp; Framing Advisor — Beta | WanderingSkyPixels</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap">
+<style>
+/* Layout: one phone column — scene photo, one batch of setup questions, a viewfinder readout, the framing guide drawn on the photo, settings, then beta feedback. Single dark look to match the site. */
+:root{
+  --night:#050b18; --panel:#0d1a2e; --panel2:#0a1628; --mid:#111f38; --line:#2a3d5a;
+  --fg:#e8e0cc; --muted:#8193ad; --gold:#c8a96e; --gold2:#a07840; --aurora:#4fc4a0; --nebula:#7b8cde; --no:#e07a6a;
+  --display:"Cormorant Garamond",Georgia,serif;
+  --body:"Outfit",system-ui,-apple-system,sans-serif;
+  --mono:"DM Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--night);color:var(--fg);margin:0}
+body{font-family:var(--body);font-weight:300;font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:max(14px,env(safe-area-inset-top,0px)) 40px}
+a{color:var(--gold)}
+img{max-width:100%}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.top img{height:34px;width:auto;display:block}
+.beta{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--aurora);border:1px solid rgba(79,196,160,.45);border-radius:2px;padding:3px 8px}
+header{display:flex;flex-direction:column;gap:4px}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(30px,8vw,40px);line-height:1.02;margin:0;text-wrap:balance}
+h1 span{color:var(--gold)}
+.sub{color:var(--muted);font-size:14px;margin:0}
+.label{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+section{display:flex;flex-direction:column;gap:10px}
+
+/* photo */
+.shot{position:relative;border:1px dashed var(--line);border-radius:6px;background:var(--panel2);aspect-ratio:3/2;max-width:100%;overflow:hidden;display:grid;place-items:center}
+.shot img{width:100%;height:100%;object-fit:cover;display:block}
+.shot .empty{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);text-align:center;padding:16px;font-size:14px}
+.shot .empty svg{width:40px;height:40px;color:var(--gold)}
+.shot .clear{position:absolute;top:8px;right:8px;background:rgba(5,11,24,.75);color:var(--fg);border:1px solid var(--line);border-radius:99px;padding:5px 10px;font:500 12px var(--body);cursor:pointer}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;border-radius:2px;border:1px solid var(--line);background:var(--panel);color:var(--fg);font:500 14px var(--body);padding:0 14px;cursor:pointer;text-align:center}
+.btn.primary{background:linear-gradient(135deg,var(--gold),var(--gold2));border:0;color:var(--night);font-family:var(--mono);font-weight:500;letter-spacing:.12em;text-transform:uppercase;font-size:13px}
+.btn svg{width:18px;height:18px;flex:none}
+.btn:disabled{opacity:.55;cursor:default}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* form */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:2px 14px}
+.q{display:grid;grid-template-columns:92px 1fr;gap:6px 12px;align-items:center;padding:11px 0;border-top:1px solid var(--line)}
+.q:first-child{border-top:0}
+.q.stack{grid-template-columns:1fr}
+.field{min-width:0;display:flex;flex-direction:column;gap:6px}
+select,input[type=text],textarea{width:100%;min-height:42px;font:400 15px var(--body);color:var(--fg);background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:8px 10px}
+textarea{min-height:84px;resize:vertical}
+::placeholder{color:#5d6f8b}
+.addrow{display:flex;gap:6px}
+.addrow input{flex:1;min-width:0}
+.addrow button{flex:none;min-height:42px;padding:0 12px;border-radius:3px;border:1px solid var(--gold);background:transparent;color:var(--gold);font:500 14px var(--body);cursor:pointer}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{min-height:38px;padding:0 12px;border-radius:99px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);font:400 14px var(--body);cursor:pointer}
+.seg button[aria-pressed="true"]{background:rgba(200,169,110,.14);border-color:var(--gold);color:var(--fg);font-weight:500}
+
+.status{font-size:14px;color:var(--muted);display:flex;align-items:center;gap:10px}
+.status.err{color:var(--no)}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--gold);animation:sp .9s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+
+/* results */
+.result{display:flex;flex-direction:column;gap:14px}
+.tag{align-self:flex-start;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);border-radius:2px;padding:2px 7px;color:var(--muted)}
+.evf{background:#000;border:1px solid var(--line);border-radius:4px;padding:12px 14px;display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--mono);font-size:17px;color:#f1efe8;font-variant-numeric:tabular-nums}
+.evf b{color:var(--gold);font-weight:500}
+.evf .nd{flex-basis:100%;font-size:12.5px;color:var(--muted)}
+.scene{font-size:14px;color:var(--muted)}
+
+.guide{position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#000;max-width:100%}
+.guide canvas{display:block;width:100%;height:auto}
+.guide-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.toggle{font:400 12.5px var(--mono);letter-spacing:.06em;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:99px;padding:5px 11px;cursor:pointer}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:0;border-top:2px solid;vertical-align:middle;margin-right:5px}
+
+.rows .row{display:grid;grid-template-columns:92px 1fr;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
+.rows .row:first-child{border-top:0}
+.row .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+.row .v{min-width:0}
+.row .v strong{font-family:var(--mono);font-weight:500;font-size:15px;display:block;color:var(--fg)}
+.row .v small{color:var(--muted);font-size:13px;display:block}
+ol.framing,ul.notes{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+ol.framing li{display:grid;grid-template-columns:26px 1fr;gap:10px}
+ol.framing .n{font-family:var(--mono);font-size:13px;color:var(--night);background:var(--gold);border-radius:50%;width:22px;height:22px;display:grid;place-items:center;font-weight:500}
+ol.framing p{margin:0;min-width:0;font-size:14.5px}
+ol.framing p b{display:block;font-weight:500}
+ul.notes li{padding-left:16px;position:relative;font-size:14px}
+ul.notes li::before{content:"";position:absolute;left:2px;top:.6em;width:6px;height:6px;background:var(--aurora);transform:rotate(45deg)}
+.close{border-left:2px solid var(--gold);padding:4px 0 4px 12px;font-size:14px;color:var(--muted)}
+.changes{background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.35);border-radius:3px;padding:10px 12px;font-size:14px}
+
+/* feedback */
+.fb .scale{display:flex;gap:6px}
+.fb .scale button{flex:1;min-height:40px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);border-radius:3px;font:500 15px var(--mono);cursor:pointer}
+.fb .scale button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--night)}
+.fb .ends{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted)}
+.fb-done{font-size:14px;color:var(--muted)}
+.fb-done code{font-family:var(--mono);color:var(--fg);user-select:all}
+.foot{font-size:12.5px;color:var(--muted);text-align:center}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a href="framing-advisor.html" aria-label="About this project"><img src="../logo.png" alt="WanderingSkyPixels"></a>
+    <span class="beta">Beta</span>
+  </div>
+  <header>
+    <h1>Camera <span>&amp;</span> Framing Advisor</h1>
+    <p class="sub">Snap the scene you're standing in. Get starting settings and a framing guide drawn on your photo.</p>
+  </header>
+
+  <!-- 1 · scene -->
+  <section aria-labelledby="l-photo">
+    <div class="label" id="l-photo">Scene</div>
+    <div class="shot" id="shot">
+      <div class="empty" id="shotEmpty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        <span>Take a quick phone photo of the scene</span>
+      </div>
+      <img id="shotImg" alt="Your scene photo" hidden>
+      <button class="clear" id="shotClear" type="button" hidden>Remove</button>
+    </div>
+    <div class="two">
+      <label class="btn primary" for="camInput">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Take photo
+      </label>
+      <label class="btn" for="libInput">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m3 16 5-5 4 4 3-3 6 6"/></svg>Attach photo
+      </label>
+      <input class="vh" type="file" id="camInput" accept="image/*" capture="environment">
+      <input class="vh" type="file" id="libInput" accept="image/*">
+    </div>
+  </section>
+
+  <!-- 2 · setup -->
+  <section aria-labelledby="l-kit">
+    <div class="label" id="l-kit">Your setup</div>
+    <div class="card">
+      <div class="q">
+        <label class="label" for="camSel">Camera</label>
+        <div class="field">
+          <select id="camSel"></select>
+          <div class="addrow" id="camAdd" hidden><input type="text" id="camNew" placeholder="Make and model, e.g. Nikon Z8"><button type="button" id="camAddBtn">Add</button></div>
+        </div>
+      </div>
+      <div class="q">
+        <label class="label" for="lensSel">Lens</label>
+        <div class="field">
+          <select id="lensSel"></select>
+          <div class="addrow" id="lensAdd" hidden><input type="text" id="lensNew" placeholder="e.g. 20mm f/1.8 or 100-400mm"><button type="button" id="lensAddBtn">Add</button></div>
+        </div>
+      </div>
+      <div class="q">
+        <label class="label" for="ndSel">ND filter</label>
+        <div class="field">
+          <select id="ndSel">
+            <option value="None">None</option>
+            <option value="ND8 (3-stop)">ND8 · 3-stop</option>
+            <option value="ND64 (6-stop)">ND64 · 6-stop</option>
+            <option value="ND1000 (10-stop)">ND1000 · 10-stop</option>
+            <option value="Variable ND">Variable ND</option>
+            <option value="other">Other…</option>
+          </select>
+          <input type="text" id="ndOther" placeholder="e.g. ND16 or 15-stop" hidden>
+        </div>
+      </div>
+      <div class="q">
+        <div class="label" id="l-cpl">Polarizer</div>
+        <div class="seg" role="group" aria-labelledby="l-cpl" id="cplSeg">
+          <button type="button" data-v="No" aria-pressed="true">No CPL</button>
+          <button type="button" data-v="Yes" aria-pressed="false">CPL on</button>
+        </div>
+      </div>
+      <div class="q">
+        <div class="label" id="l-sup">Support</div>
+        <div class="seg" role="group" aria-labelledby="l-sup" id="supSeg">
+          <button type="button" data-v="Tripod" aria-pressed="true">Tripod</button>
+          <button type="button" data-v="Handheld" aria-pressed="false">Handheld</button>
+        </div>
+      </div>
+      <div class="q stack">
+        <div class="label" id="l-goal">Goal · pick any</div>
+        <div class="seg" role="group" aria-labelledby="l-goal" id="goalSeg">
+          <button type="button" data-v="Sharp landscape" aria-pressed="true">Sharp landscape</button>
+          <button type="button" data-v="Silky water or clouds" aria-pressed="false">Silky water / clouds</button>
+          <button type="button" data-v="Frozen motion" aria-pressed="false">Frozen motion</button>
+          <button type="button" data-v="Stars or Milky Way" aria-pressed="false">Stars / Milky Way</button>
+          <button type="button" data-v="Moon alignment" aria-pressed="false">Moon alignment</button>
+          <button type="button" data-v="Cityscape at blue hour" aria-pressed="false">Blue-hour city</button>
+        </div>
+        <input type="text" id="goalOther" placeholder="Something else? e.g. light trails, sunburst">
+      </div>
+      <div class="q stack">
+        <label class="label" for="notes">Notes &amp; vision</label>
+        <textarea id="notes" placeholder="What you're going for, or anything the photo doesn't show. e.g. moon rises behind the tower in 20 min, want it big in frame."></textarea>
+      </div>
+    </div>
+  </section>
+
+  <button class="btn primary" id="goBtn" type="button">Get settings &amp; framing</button>
+  <div class="status" id="status" hidden></div>
+
+  <!-- 3 · result -->
+  <section class="result" id="result" aria-live="polite"></section>
+
+  <section id="adjust" hidden>
+    <div class="label">Tune from a test shot</div>
+    <input type="text" id="testNote" placeholder="Optional: what looks off? e.g. sky blown, water not smooth">
+    <label class="btn" for="testInput">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Send test shot or LCD photo
+    </label>
+    <input class="vh" type="file" id="testInput" accept="image/*">
+  </section>
+
+  <!-- 4 · beta feedback -->
+  <section class="fb" id="feedback" aria-labelledby="l-fb">
+    <div class="label" id="l-fb">Beta feedback</div>
+    <div class="card">
+      <div class="q stack">
+        <div class="label" id="l-r1" style="color:var(--fg)">Were the settings a good starting point?</div>
+        <div class="scale" role="group" aria-labelledby="l-r1" data-key="settings"></div>
+        <div class="ends"><span>Way off</span><span>Spot on</span></div>
+      </div>
+      <div class="q stack">
+        <div class="label" id="l-r2" style="color:var(--fg)">Was the framing guide useful?</div>
+        <div class="scale" role="group" aria-labelledby="l-r2" data-key="framing"></div>
+        <div class="ends"><span>Not really</span><span>Very</span></div>
+      </div>
+      <div class="q stack">
+        <div class="label" id="l-r3" style="color:var(--fg)">How easy was it to use?</div>
+        <div class="scale" role="group" aria-labelledby="l-r3" data-key="ease"></div>
+        <div class="ends"><span>Confusing</span><span>Easy</span></div>
+      </div>
+      <div class="q stack">
+        <label class="label" for="fbText" style="color:var(--fg)">What worked, what didn't, what's missing?</label>
+        <textarea id="fbText" placeholder="Anything goes. Bugs, wrong settings, features you'd want."></textarea>
+        <input type="text" id="fbName" placeholder="Your name (optional)">
+      </div>
+    </div>
+    <button class="btn" id="fbSend" type="button">Send feedback by email</button>
+    <div class="fb-done" id="fbDone" hidden>
+      Your email app should open with everything filled in. If it didn't, copy your feedback and email it to <code>contact@wanderingskypixels.com</code>.
+      <div style="margin-top:8px"><button class="toggle" id="fbCopy" type="button">Copy feedback</button></div>
+    </div>
+  </section>
+
+  <p class="foot">A WanderingSkyPixels beta · <a href="framing-advisor.html">About this project</a></p>
+</div>
+
+<script>
+(() => {
+  const API = "https://wsp-api.rahmmenon.workers.dev";
+  const FEEDBACK_TO = "contact@wanderingskypixels.com";
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k, d){ try{ const v = localStorage.getItem("wsp-cfa:"+k); return v ? JSON.parse(v) : d; }catch{ return d; } },
+    set(k, v){ try{ localStorage.setItem("wsp-cfa:"+k, JSON.stringify(v)); }catch{} }
+  };
+
+  // ---------- setup lists ----------
+  let cams = store.get("cams", ["Sony A7R V", "Sony A6400"]);
+  let lenses = store.get("lenses", ["14mm GM", "35mm", "24-70mm", "70-200mm", "150-600mm"]);
+  const last = store.get("last", {});
+  function fillSelect(sel, list, val){
+    sel.innerHTML = "";
+    list.forEach(x => { const o = document.createElement("option"); o.value = o.textContent = x; sel.append(o); });
+    const add = document.createElement("option"); add.value = "__add"; add.textContent = "+ Add new…"; sel.append(add);
+    sel.value = list.includes(val) ? val : list[0];
+  }
+  fillSelect($("camSel"), cams, last.camera || "Sony A7R V");
+  fillSelect($("lensSel"), lenses, last.lens || "14mm GM");
+  let prevCam = $("camSel").value, prevLens = $("lensSel").value;
+
+  function wireAdd(sel, box, input, btn, getList, setList, key, getPrev, setPrev){
+    sel.addEventListener("change", () => {
+      if (sel.value === "__add"){ box.hidden = false; input.focus(); sel.value = getPrev(); }
+      else { setPrev(sel.value); box.hidden = true; saveLast(); }
+    });
+    const add = () => {
+      const v = input.value.trim(); if (!v) return;
+      const list = getList();
+      if (!list.some(x => x.toLowerCase() === v.toLowerCase())) { list.push(v); setList(list); store.set(key, list); }
+      fillSelect(sel, getList(), v); setPrev(sel.value);
+      input.value = ""; box.hidden = true; saveLast();
+    };
+    btn.addEventListener("click", add);
+    input.addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); add(); } });
+  }
+  wireAdd($("camSel"), $("camAdd"), $("camNew"), $("camAddBtn"), () => cams, l => cams = l, "cams", () => prevCam, v => prevCam = v);
+  wireAdd($("lensSel"), $("lensAdd"), $("lensNew"), $("lensAddBtn"), () => lenses, l => lenses = l, "lenses", () => prevLens, v => prevLens = v);
+
+  $("ndSel").addEventListener("change", () => { $("ndOther").hidden = $("ndSel").value !== "other"; saveLast(); });
+  if (last.nd && [...$("ndSel").options].some(o => o.value === last.nd)) $("ndSel").value = last.nd;
+
+  function single(segId, val){
+    const seg = $(segId);
+    seg.addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b) return;
+      seg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+      saveLast();
+    });
+    if (val) seg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.v === val ? "true" : "false"));
+  }
+  const segVal = id => $(id).querySelector('[aria-pressed="true"]')?.dataset.v || "";
+  single("cplSeg", last.cpl); single("supSeg", last.support);
+  $("goalSeg").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
+  });
+  function saveLast(){ store.set("last", { camera: prevCam, lens: prevLens, nd: $("ndSel").value, cpl: segVal("cplSeg"), support: segVal("supSeg") }); }
+
+  // ---------- photos ----------
+  let scene = null; // {blob, b64, img}
+  async function prep(file, max = 1280){
+    const url = URL.createObjectURL(file);
+    try{
+      const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+      const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      const dataUrl = c.toDataURL("image/jpeg", 0.85);
+      const out = new Image(); out.src = dataUrl; await out.decode().catch(() => {});
+      return { b64: dataUrl.split(",")[1], dataUrl, img: out, w: c.width, h: c.height };
+    } finally { URL.revokeObjectURL(url); }
+  }
+  async function takeScene(file){
+    if (!file) return;
+    try{
+      scene = await prep(file);
+      $("shotImg").src = scene.dataUrl;
+      $("shotImg").hidden = false; $("shotEmpty").hidden = true; $("shotClear").hidden = false;
+      setStatus("");
+    }catch{ setStatus("Couldn't read that photo. Try a JPEG, or take a new one.", true); }
+  }
+  $("camInput").addEventListener("change", e => { takeScene(e.target.files[0]); e.target.value = ""; });
+  $("libInput").addEventListener("change", e => { takeScene(e.target.files[0]); e.target.value = ""; });
+  $("shotClear").addEventListener("click", () => { scene = null; $("shotImg").hidden = true; $("shotEmpty").hidden = false; $("shotClear").hidden = true; });
+
+  function setStatus(msg, err, busy){
+    const s = $("status"); s.hidden = !msg; s.className = "status" + (err ? " err" : ""); s.innerHTML = "";
+    if (busy){ const sp = document.createElement("span"); sp.className = "spin"; s.append(sp); }
+    s.append(document.createTextNode(msg || ""));
+  }
+
+  // ---------- prompt ----------
+  function answers(){
+    const nd = $("ndSel").value === "other" ? ($("ndOther").value.trim() || "Other (unspecified)") : $("ndSel").value;
+    const goals = [...$("goalSeg").querySelectorAll('[aria-pressed="true"]')].map(b => b.dataset.v);
+    const g2 = $("goalOther").value.trim(); if (g2) goals.push(g2);
+    return {
+      camera: prevCam, lens: prevLens, nd, cpl: segVal("cplSeg"), support: segVal("supSeg"),
+      goal: goals.join("; ") || "Not specified — infer from the scene",
+      notes: $("notes").value.trim() || "None",
+      localTime: new Date().toLocaleString([], { weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit" })
+    };
+  }
+
+  const SHAPE = `{
+  "scene": "one sentence: light level/direction, time of day, sky, subject, motion, dynamic range",
+  "mode": {"value": "M | A | S", "why": "few words"},
+  "aperture": {"value": "f/8", "why": "few words"},
+  "shutter": {"base": "1/125s (exposure without ND)", "withND": "converted exposure with the ND, or null if no ND", "why": "few words"},
+  "iso": {"value": "100", "why": "few words"},
+  "focus": {"value": "AF-S, Spot, or MF", "why": "few words"},
+  "whiteBalance": {"value": "5600K or preset", "why": "few words"},
+  "drive": {"value": "Single / 2s timer / 3- or 5-frame bracket ±EV", "why": "few words"},
+  "stabilization": {"value": "On | Off", "why": "few words"},
+  "focalLength": {"primary": "35mm", "primaryWhy": "short framing reason", "alt": "50mm", "altWhy": "short framing reason"} or null,
+  "framing": [{"title": "3-6 words", "detail": "one or two short sentences"}],
+  "overlay": {
+    "crop": {"x": 0.08, "y": 0.10, "w": 0.84, "h": 0.80},
+    "horizon": 0.66,
+    "subject": {"x": 0.62, "y": 0.40, "label": "2-3 words"},
+    "lines": [{"x1": 0.10, "y1": 0.95, "x2": 0.55, "y2": 0.55, "label": "2-3 words"}],
+    "avoid": [{"x": 0.85, "y": 0.0, "w": 0.15, "h": 0.25, "label": "2-3 words"}]
+  },
+  "notes": ["short best-practice / do / don't lines"]
+}`;
+
+  const RULES = `Rules:
+- Handheld sharpness on high-res bodies (61MP A7R V): shutter at least 1/(2 × focal length) even with stabilization. Adjust for crop bodies (A6400 is APS-C, 1.5x).
+- Stars: use the NPF rule. Quick guide for 14mm on full frame: about 6–8 s at f/1.8 for pinpoint stars. For night skies, focus manually on a bright star with magnification.
+- Diffraction: prefer f/8–f/11 for landscapes; never go past f/11.
+- High-contrast scenes (bright sky vs dark foreground): suggest bracketing.
+- If an ND is used: give base exposure without ND in "base", then the converted exposure with it in "withND" (round sensibly, switch to Bulb if over 30 s).
+- Stabilization: On handheld, Off on tripod.
+- focalLength: only fill for zoom lenses (e.g. 24-70mm, 70-200mm, 150-600mm). One primary pick and one alternative within the lens range. Use null for primes.
+- framing: 3–5 items based on the scene's look and feel, time of day and every visible element; say what to emphasize vs minimize, where to place horizon/subject, foreground interest, leading lines, what to crop out.
+- overlay draws the framing guide on the photo. All numbers are fractions 0–1 of the photo's width (x, w) and height (y, h), origin top-left. "crop" is the suggested frame inside this photo (use the full photo {0,0,1,1} if it is already right; the photographer may need to step back or zoom out if a wider frame is better — say so in framing). "horizon" is where the horizon should sit in the original photo coordinates, or null if no horizon. "subject" is the main subject's position, or null. "lines" are 0–2 leading lines worth using. "avoid" are 0–2 distractions to crop out or hide. Be accurate to what is actually in the photo.
+- notes: 2–4 items; mention apps like PhotoPills when the scene needs planning (moon/Milky Way position, alignment).
+- Keep every string short; this is read on a phone in the field.`;
+
+  function buildPrompt(a){
+    return `You are a field photography settings advisor. The attached image is a quick phone photo of the scene the photographer is standing in. Study it closely: light level and direction, time of day, sky, subject, motion (water, clouds, traffic, people) and dynamic range.
+
+Photographer's setup:
+- Camera: ${a.camera}
+- Lens: ${a.lens}
+- ND filter: ${a.nd}
+- Circular polarizer: ${a.cpl}
+- Support: ${a.support}
+- Goal: ${a.goal}
+- Notes / vision (take these into account): ${a.notes}
+- Local time on their phone: ${a.localTime}
+
+Give starting camera settings and framing recommendations.
+${RULES}
+
+Reply with only JSON, no other text, in this shape:
+${SHAPE}`;
+  }
+
+  // ---------- API (site's Cloudflare Worker proxy) ----------
+  async function ask(prompt, images){
+    const content = images.map(b64 => ({ type: "image", source: { type: "base64", media_type: "image/jpeg", data: b64 } }));
+    content.push({ type: "text", text: prompt });
+    const res = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ max_tokens: 2500, messages: [{ role: "user", content }] })
+    });
+    const raw = await res.text();
+    let data; try{ data = JSON.parse(raw); }catch{ throw new Error("proxy: " + raw.slice(0, 200)); }
+    if (data.error) throw new Error("api: " + (data.error.message || JSON.stringify(data.error)));
+    const text = (data.content || []).filter(c => c.type === "text").map(c => c.text).join("\n");
+    if (!text) throw new Error("empty: " + raw.slice(0, 200));
+    return parseJSON(text);
+  }
+  function parseJSON(t){
+    t = t.replace(/```json|```/g, "").trim();
+    try{ return JSON.parse(t); }catch{}
+    const a = t.indexOf("{"), b = t.lastIndexOf("}");
+    if (a >= 0 && b > a) return JSON.parse(t.slice(a, b + 1));
+    throw new Error("bad json: " + t.slice(0, 200));
+  }
+
+  // ---------- framing guide (drawn on the photo) ----------
+  const clamp = v => Math.max(0, Math.min(1, Number(v) || 0));
+  function drawGuide(canvas, img, o, show){
+    const W = img.naturalWidth || img.width, H = img.naturalHeight || img.height;
+    canvas.width = W; canvas.height = H;
+    const g = canvas.getContext("2d");
+    g.drawImage(img, 0, 0, W, H);
+    if (!show || !o) return;
+    const u = Math.max(W, H) / 640; // stroke unit
+    const css = getComputedStyle(document.documentElement);
+    const GOLD = css.getPropertyValue("--gold").trim(), AUR = css.getPropertyValue("--aurora").trim(),
+          NEB = css.getPropertyValue("--nebula").trim(), NO = css.getPropertyValue("--no").trim();
+    const font = `${Math.round(13 * u)}px "DM Mono", monospace`;
+    function tag(text, x, y, color){
+      if (!text) return;
+      g.font = font; const pad = 5 * u, tw = g.measureText(text).width, th = 13 * u;
+      x = Math.max(pad, Math.min(W - tw - pad * 3, x)); y = Math.max(th + pad * 2, Math.min(H - pad, y));
+      g.fillStyle = "rgba(5,11,24,.82)"; g.fillRect(x, y - th - pad, tw + pad * 2, th + pad * 2);
+      g.fillStyle = color; g.fillText(text, x + pad, y - pad * 0.2);
+    }
+    // crop: dim outside, frame + thirds inside
+    const c = o.crop;
+    if (c){
+      const x = clamp(c.x) * W, y = clamp(c.y) * H, w = clamp(c.w) * W, h = clamp(c.h) * H;
+      const full = w > W * 0.97 && h > H * 0.97;
+      if (!full){
+        g.fillStyle = "rgba(0,0,0,.55)";
+        g.beginPath(); g.rect(0, 0, W, H); g.rect(x, y, w, h); g.fill("evenodd");
+      }
+      g.strokeStyle = "rgba(255,255,255,.35)"; g.lineWidth = 1 * u; g.setLineDash([]);
+      g.beginPath();
+      for (let i = 1; i < 3; i++){ g.moveTo(x + w * i / 3, y); g.lineTo(x + w * i / 3, y + h); g.moveTo(x, y + h * i / 3); g.lineTo(x + w, y + h * i / 3); }
+      g.stroke();
+      g.strokeStyle = GOLD; g.lineWidth = 2.5 * u; g.strokeRect(x, y, w, h);
+      if (!full) tag("Suggested frame", x + 6 * u, y + 24 * u, GOLD);
+    }
+    // horizon
+    if (o.horizon != null && o.horizon !== ""){
+      const y = clamp(o.horizon) * H;
+      g.strokeStyle = AUR; g.lineWidth = 2 * u; g.setLineDash([10 * u, 7 * u]);
+      g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); g.setLineDash([]);
+      tag("Horizon here", W - 140 * u, y - 6 * u, AUR);
+    }
+    // leading lines
+    (o.lines || []).slice(0, 3).forEach(l => {
+      const x1 = clamp(l.x1) * W, y1 = clamp(l.y1) * H, x2 = clamp(l.x2) * W, y2 = clamp(l.y2) * H;
+      g.strokeStyle = NEB; g.fillStyle = NEB; g.lineWidth = 3 * u;
+      g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke();
+      const a = Math.atan2(y2 - y1, x2 - x1), s = 14 * u;
+      g.beginPath(); g.moveTo(x2, y2); g.lineTo(x2 - s * Math.cos(a - .45), y2 - s * Math.sin(a - .45)); g.lineTo(x2 - s * Math.cos(a + .45), y2 - s * Math.sin(a + .45)); g.closePath(); g.fill();
+      tag(l.label, (x1 + x2) / 2 + 8 * u, (y1 + y2) / 2, NEB);
+    });
+    // avoid
+    (o.avoid || []).slice(0, 3).forEach(r => {
+      const x = clamp(r.x) * W, y = clamp(r.y) * H, w = clamp(r.w) * W, h = clamp(r.h) * H;
+      g.strokeStyle = NO; g.lineWidth = 2 * u; g.setLineDash([6 * u, 5 * u]); g.strokeRect(x, y, w, h); g.setLineDash([]);
+      tag("✕ " + (r.label || "Avoid"), x + 4 * u, y + h - 4 * u, NO);
+    });
+    // subject
+    const s = o.subject;
+    if (s && s.x != null){
+      const x = clamp(s.x) * W, y = clamp(s.y) * H, r = 18 * u;
+      g.strokeStyle = GOLD; g.lineWidth = 2.5 * u;
+      g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.stroke();
+      g.beginPath(); g.moveTo(x - r * 1.6, y); g.lineTo(x - r * .6, y); g.moveTo(x + r * .6, y); g.lineTo(x + r * 1.6, y);
+      g.moveTo(x, y - r * 1.6); g.lineTo(x, y - r * .6); g.moveTo(x, y + r * .6); g.lineTo(x, y + r * 1.6); g.stroke();
+      tag(s.label || "Subject", x + r * 1.8, y + 5 * u, GOLD);
+    }
+  }
+
+  // ---------- render ----------
+  function el(tag, cls, text){ const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function render(r, opts = {}){
+    const out = $("result"); out.innerHTML = "";
+    if (opts.example) out.append(el("span", "tag", "Example result · waterfall at golden hour"));
+    if (opts.changes){ const c = el("div", "changes"); c.append(el("b", null, "What changed: ")); c.append(document.createTextNode(opts.changes)); out.append(c); }
+    const v = x => (x && (x.value || x)) || "—";
+
+    const evf = el("div", "evf");
+    [["", v(r.mode)], ["", v(r.aperture)], ["", r.shutter?.withND || r.shutter?.base || "—"], ["ISO ", String(v(r.iso)).replace(/^ISO\s*/i, "")]].forEach(([p, t]) => {
+      const s = el("span"); if (p) s.append(document.createTextNode(p)); s.append(el("b", null, t)); evf.append(s);
+    });
+    if (r.shutter?.withND) evf.append(el("span", "nd", "Base " + r.shutter.base + " → with ND " + r.shutter.withND));
+    out.append(evf);
+    if (r.scene) out.append(el("div", "scene", r.scene));
+
+    // framing guide image
+    const img = opts.img || scene?.img;
+    if (img && r.overlay){
+      const bar = el("div", "guide-bar");
+      bar.append(el("div", "label", "Framing guide"));
+      const tg = el("button", "toggle", "Show original"); tg.type = "button"; bar.append(tg);
+      out.append(bar);
+      const box = el("div", "guide"); const cv = document.createElement("canvas");
+      cv.setAttribute("role", "img"); cv.setAttribute("aria-label", "Your photo with the suggested frame, horizon, subject and leading lines drawn on it");
+      box.append(cv); out.append(box);
+      let on = true; drawGuide(cv, img, r.overlay, on);
+      tg.addEventListener("click", () => { on = !on; drawGuide(cv, img, r.overlay, on); tg.textContent = on ? "Show original" : "Show guide"; });
+      const lg = el("div", "legend");
+      [["var(--gold)", "Frame & subject"], ["var(--aurora)", "Horizon"], ["var(--nebula)", "Leading line"], ["var(--no)", "Crop out"]].forEach(([c, t]) => {
+        const s = el("span"); const i = el("i"); i.style.borderColor = c; s.append(i, document.createTextNode(t)); lg.append(s);
+      });
+      out.append(lg);
+    }
+
+    if (Array.isArray(r.framing) && r.framing.length){
+      const ol = el("ol", "framing");
+      r.framing.forEach((f, i) => {
+        const li = el("li"); li.append(el("span", "n", String(i + 1)));
+        const p = el("p"); p.append(el("b", null, f.title || "")); p.append(document.createTextNode(f.detail || "")); li.append(p); ol.append(li);
+      });
+      out.append(ol);
+    }
+
+    const card = el("div", "card rows");
+    const row = (k, val, why) => {
+      const d = el("div", "row"); d.append(el("div", "k", k));
+      const vv = el("div", "v"); vv.append(el("strong", null, val || "—")); if (why) vv.append(el("small", null, why)); d.append(vv); card.append(d);
+    };
+    row("Mode", r.mode?.value, r.mode?.why);
+    row("Aperture", r.aperture?.value, r.aperture?.why);
+    row("Shutter", r.shutter?.withND ? `${r.shutter.base} base · ${r.shutter.withND} with ND` : r.shutter?.base, r.shutter?.why);
+    row("ISO", r.iso?.value, r.iso?.why);
+    row("Focus", r.focus?.value, r.focus?.why);
+    row("White bal.", r.whiteBalance?.value, r.whiteBalance?.why);
+    row("Drive", r.drive?.value, r.drive?.why);
+    row("Stabilizer", r.stabilization?.value, r.stabilization?.why);
+    if (r.focalLength && r.focalLength.primary){
+      row("Focal", r.focalLength.primary, r.focalLength.primaryWhy);
+      row("Alt focal", r.focalLength.alt, r.focalLength.altWhy);
+    }
+    out.append(el("div", "label", "Settings")); out.append(card);
+
+    if (Array.isArray(r.notes) && r.notes.length){
+      out.append(el("div", "label", "Field notes"));
+      const ul = el("ul", "notes"); r.notes.forEach(n => ul.append(el("li", null, n))); out.append(ul);
+    }
+    out.append(el("div", "close", "This is a starting point. A phone photo can't meter exactly, so take a test shot, check the histogram, and adjust. You can send the test shot below to fine-tune."));
+    $("adjust").hidden = !!opts.example;
+  }
+
+  // Example shown before the first run, drawn on a generated placeholder scene
+  function exampleScene(){
+    const c = document.createElement("canvas"); c.width = 960; c.height = 640; const g = c.getContext("2d");
+    let gr = g.createLinearGradient(0, 0, 0, 380); gr.addColorStop(0, "#f2b467"); gr.addColorStop(1, "#7d5a4a"); g.fillStyle = gr; g.fillRect(0, 0, 960, 380);
+    g.fillStyle = "#2b2a28"; g.beginPath(); g.moveTo(0, 300); g.lineTo(220, 230); g.lineTo(420, 280); g.lineTo(560, 200); g.lineTo(960, 260); g.lineTo(960, 640); g.lineTo(0, 640); g.fill();
+    gr = g.createLinearGradient(0, 220, 0, 470); gr.addColorStop(0, "#e9eef0"); gr.addColorStop(1, "#9fb7c0"); g.fillStyle = gr; g.fillRect(560, 220, 90, 260);
+    g.fillStyle = "#28414a"; g.beginPath(); g.ellipse(560, 540, 380, 90, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#3d3a35"; for (let i = 0; i < 9; i++){ g.beginPath(); g.ellipse(80 + i * 45, 600 - i * 18, 50, 20, -.3, 0, Math.PI * 2); g.fill(); }
+    const img = new Image(); img.src = c.toDataURL("image/jpeg", .8); return img;
+  }
+  const EXAMPLE = {
+    scene: "Late golden hour, warm side light from the left, fast cascade into a shaded pool, bright sky top-right, about 3 stops of range.",
+    mode: {value:"M", why:"ND long exposure, lock it down"},
+    aperture: {value:"f/9", why:"front-to-back sharpness, under diffraction"},
+    shutter: {base:"1/60s", withND:"1s", why:"6-stop ND smooths the falls"},
+    iso: {value:"100", why:"cleanest files"},
+    focus: {value:"AF-S, Flexible Spot → MF", why:"focus on rocks a third in, then lock"},
+    whiteBalance: {value:"5200K", why:"keeps the warm light"},
+    drive: {value:"2s timer, 3-frame ±1EV", why:"no shake, cover the sky"},
+    stabilization: {value:"Off", why:"on a tripod"},
+    focalLength: null,
+    framing: [
+      {title:"Rocks lead into the falls", detail:"Get the 14mm low near the wet rocks so they point at the cascade."},
+      {title:"Falls on the right third", detail:"Let the side light rake across the water."},
+      {title:"Trim the hot sky", detail:"Keep only a sliver of sky above the ridge."}
+    ],
+    overlay: { crop:{x:0.04,y:0.22,w:0.94,h:0.76}, horizon:0.40, subject:{x:0.63,y:0.55,label:"Falls"},
+      lines:[{x1:0.08,y1:0.95,x2:0.50,y2:0.76,label:"Rock line"}], avoid:[{x:0.72,y:0.0,w:0.28,h:0.20,label:"Hot sky"}] },
+    notes: ["Wipe spray off the filter between frames.", "Rotate the CPL to cut glare on wet rock."]
+  };
+  const exImg = exampleScene();
+  exImg.decode().catch(() => {}).then(() => render(EXAMPLE, { example: true, img: exImg }));
+
+  // ---------- run ----------
+  let lastResult = null, lastAnswers = null, busy = false;
+  $("goBtn").addEventListener("click", async () => {
+    if (busy) return;
+    if (!scene){ setStatus("Add a photo of the scene first.", true); $("shot").scrollIntoView({behavior:"smooth", block:"center"}); return; }
+    const a = answers(); saveLast();
+    busy = true; $("goBtn").disabled = true; setStatus("Reading the scene… this takes 10–30 seconds.", false, true);
+    try{
+      const r = await ask(buildPrompt(a), [scene.b64]);
+      lastResult = r; lastAnswers = a; render(r); setStatus("");
+      $("result").scrollIntoView({behavior:"smooth", block:"start"});
+    }catch(e){ console.error(e); setStatus("Couldn't get a recommendation. Check your connection and tap again.", true); }
+    finally{ busy = false; $("goBtn").disabled = false; }
+  });
+
+  $("testInput").addEventListener("change", async e => {
+    const f = e.target.files[0]; e.target.value = "";
+    if (!f || !lastResult || busy) return;
+    let test; try{ test = await prep(f); }catch{ setStatus("Couldn't read that test shot.", true); return; }
+    busy = true; setStatus("Checking your test shot…", false, true);
+    const prompt = `You gave these starting settings for a photo. Image 1 is the original phone photo of the scene; image 2 is the photographer's test shot (or a photo of the camera LCD / histogram).
+
+Setup: ${JSON.stringify(lastAnswers)}
+Previous settings: ${JSON.stringify(lastResult)}
+Photographer says: ${$("testNote").value.trim() || "nothing extra"}
+
+Judge exposure (highlights, shadows, histogram if visible), sharpness, motion blur, white balance and composition. Revise the settings and framing. Keep "overlay" in image 1's coordinates.
+${RULES}
+
+Reply with only JSON in the same shape as the previous settings, plus a "changes" string: one or two short sentences on what you changed and why.`;
+    try{
+      const r = await ask(prompt, [scene.b64, test.b64]);
+      lastResult = r; render(r, { changes: r.changes || "" }); setStatus("");
+      $("result").scrollIntoView({behavior:"smooth", block:"start"});
+    }catch(err){ console.error(err); setStatus("Couldn't check the test shot. Tap the button to try again.", true); }
+    finally{ busy = false; }
+  });
+
+  // ---------- beta feedback ----------
+  const ratings = {};
+  document.querySelectorAll(".fb .scale").forEach(sc => {
+    for (let i = 1; i <= 5; i++){ const b = el("button", null, String(i)); b.type = "button"; b.setAttribute("aria-pressed", "false"); b.setAttribute("aria-label", i + " of 5"); sc.append(b); }
+    sc.addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b) return;
+      sc.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+      ratings[sc.dataset.key] = Number(b.textContent);
+    });
+  });
+  function feedbackText(){
+    const a = lastAnswers || answers();
+    const r = lastResult;
+    return [
+      "Camera & Framing Advisor beta feedback",
+      "",
+      "Settings a good starting point: " + (ratings.settings || "–") + "/5",
+      "Framing guide useful: " + (ratings.framing || "–") + "/5",
+      "Ease of use: " + (ratings.ease || "–") + "/5",
+      "",
+      "Comments:",
+      $("fbText").value.trim() || "(none)",
+      "",
+      "From: " + ($("fbName").value.trim() || "(not given)"),
+      "",
+      "--- Context ---",
+      "Setup: " + [a.camera, a.lens, "ND " + a.nd, "CPL " + a.cpl, a.support].join(" · "),
+      "Goal: " + a.goal,
+      r ? "Scene: " + (r.scene || "") : "Ran the app: not yet",
+      r ? "Got: " + [r.mode?.value, r.aperture?.value, r.shutter?.withND || r.shutter?.base, "ISO " + (r.iso?.value || "")].join(" · ") : "",
+      "Device: " + navigator.userAgent
+    ].join("\n");
+  }
+  $("fbSend").addEventListener("click", () => {
+    const body = feedbackText();
+    const href = "mailto:" + FEEDBACK_TO + "?subject=" + encodeURIComponent("Camera & Framing Advisor beta feedback") + "&body=" + encodeURIComponent(body);
+    $("fbDone").hidden = false;
+    window.location.href = href;
+  });
+  $("fbCopy").addEventListener("click", async () => {
+    const t = feedbackText();
+    try{ await navigator.clipboard.writeText(t); $("fbCopy").textContent = "Copied"; }
+    catch{
+      const ta = document.createElement("textarea"); ta.value = t; ta.setAttribute("readonly", ""); ta.style.minHeight = "140px";
+      $("fbDone").append(ta); ta.select(); $("fbCopy").textContent = "Selected below — copy it";
+    }
+  });
+})();
+</script>
+</body>
+</html>
