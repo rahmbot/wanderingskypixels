@@ -42,5 +42,10 @@ export async function onRequestPost({ request, env }) {
     body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, messages: [{ role: "user", content }] }),
   });
   const data = await upstream.text();
+  // A rejected API key must not look like the Projects gate's 401 to the apps.
+  if (upstream.status === 401 || upstream.status === 403) {
+    console.error("Anthropic auth failed", upstream.status, data.slice(0, 300));
+    return Response.json({ error: { type: "upstream_auth", message: "The site's Claude API key was rejected." } }, { status: 502, headers: { "Cache-Control": "no-store" } });
+  }
   return new Response(data, { status: upstream.status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 }
