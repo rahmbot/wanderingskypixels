@@ -416,12 +416,12 @@ function parseLoose(t){ t=String(t).replace(/```json|```/g,"").trim(); try{ retu
 async function siteJson(prompt, blob){
   const content=[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:await blobToB64(blob)}},{type:"text",text:prompt+"\nReply with only the JSON, no other text."}];
   let res; try{ res=await fetch(SITE_API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({max_tokens:2500,messages:[{role:"user",content}]})}); }catch{ throw {code:"upstream_error"}; }
-  let data=null; try{ data=await res.json(); }catch{}
+  let raw=""; try{ raw=await res.text(); }catch{} let data=null; try{ data=JSON.parse(raw); }catch{}
   const msg=String(data?.error?.message||"");
   if(res.status===401 && /access code/i.test(msg)) throw {code:"locked"};
   if(res.status===429) throw {code:"rate_limited"};
   if(data?.error?.type==="upstream_auth" || res.status===401 || res.status===403) throw {code:"site_key"};
-  if(!res.ok || !data || data.error) throw {code:"upstream_error"};
+  if(!res.ok || !data || data.error) throw {code:"upstream_error", detail:`HTTP ${res.status}${msg?": "+msg:(raw&&!data?": "+raw.replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim().slice(0,120):"")}`};
   return parseLoose((data.content||[]).filter(c=>c.type==="text").map(c=>c.text).join("\n"));
 }
 function anchorSave(blob, filename){ const url=URL.createObjectURL(blob), a=document.createElement("a"); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000); return Promise.resolve(); }
@@ -443,7 +443,7 @@ function anchorSave(blob, filename){ const url=URL.createObjectURL(blob), a=docu
 const RULES = `You are a professional photographer, photo editor and creative director for an Instagram account that posts astrophotography, moon alignments and drone landscapes. House rules: moon, moonrise and sunset frames lean warmer; landscapes get trend-aware, high-engagement grading; never cover or crowd the hero subject; Instagram crops are only 1:1 (1080x1080), 4:5 (1080x1350) or 16:9 (1080x608), prefer 4:5.
 Adjustment ranges: exposure -2..2 (EV, decimals), contrast -50..50, highlights -100..100, shadows -100..100, temperature -50..50 (positive warmer), tint -50..50 (positive magenta), vibrance -50..50, saturation -50..50, sharpen 0..100, vignette 0..100, grain 0..50.`;
 async function photoBlob(){ const t=document.createElement("canvas"), sc=Math.min(1,1400/Math.max(srcC.width,srcC.height)); t.width=srcC.width*sc|0; t.height=srcC.height*sc|0; t.getContext("2d").drawImage(srcC,0,0,t.width,t.height); return new Promise(r=>t.toBlob(r,"image/jpeg",.9)); }
-const errCopy = c => ({not_granted:"Claude wasn't allowed for this page, so the built-in suggestions are used.",rate_limited:"Too many requests right now. Try again in a minute.",refused:"Claude declined this one. The built-in suggestions still work.",invalid_json:"Claude's answer couldn't be read. Try again.",image_rejected:"That image couldn't be sent. Try a smaller JPG.",locked:"Your Projects access has expired. Reload the page and enter the access code again.",site_key:"Claude isn't connected on the site right now. The built-in suggestions still work."}[c] || "Claude couldn't answer just now. The built-in suggestions still work.");
+const errCopy = e => { const c=e?.code; const base=({not_granted:"Claude wasn't allowed for this page, so the built-in suggestions are used.",rate_limited:"Too many requests right now. Try again in a minute.",refused:"Claude declined this one. The built-in suggestions still work.",invalid_json:"Claude's answer couldn't be read. Try again.",image_rejected:"That image couldn't be sent. Try a smaller JPG.",locked:"Your Projects access has expired. Reload the page and enter the access code again.",site_key:"Claude isn't connected on the site right now. The built-in suggestions still work."}[c] || "Claude couldn't answer just now. The built-in suggestions still work."); const d=e?.detail || (e instanceof Error ? e.message : ""); return d ? `${base} (${d})` : base; };
 
 $("askRead").addEventListener("click", async()=>{
   const btn=$("askRead"), st=$("readStatus"); btn.disabled=true; st.className="status"; st.textContent="Claude is studying the frame…";
@@ -462,7 +462,7 @@ $("askRead").addEventListener("click", async()=>{
     if(li.length){ state.aiObs=true; $("obs").innerHTML=li.map(([t,i])=>`<li class="${i?"issue":""}">${esc(t)}</li>`).join(""); }
     renderReadouts(); renderDirs(); renderQs(); setMode(); schedule();
     st.textContent="Claude's read is in. Pick a direction below.";
-  }catch(e){ st.className="status err"; st.textContent=errCopy(e?.code); }
+  }catch(e){ st.className="status err"; st.textContent=errCopy(e); }
   finally{ btn.disabled=false; }
 });
 
@@ -477,7 +477,7 @@ $("toBlueprint").addEventListener("click", async()=>{
       const qa=[...state.qs,PLACE_Q].map(q=>`${q.q} -> ${state.answers[q.id]||"(no answer)"}`).join("\n");
       const r = await ai.json(`${RULES}\n\nThe attached image is the raw photo. Stats: ${JSON.stringify(state.stats)}.\nChosen direction: ${d.name} — ${d.summary}. Its starting values: ${JSON.stringify(d.settings)}.\nThe photographer's answers:\n${qa}\nExtra note: ${state.note||"(none)"}\n\nBlend your analysis with their intent into final values. Reply with only JSON: {"ratio":"4:5|1:1|16:9","settings":{same 11 keys},"watermark":{"position":"top-left|top-right|bottom-left|bottom-right|bottom-center"},"notes":{"framing":"1-2 sentences on the crop","global":"1-2 sentences on light and color","local":"1 sentence on sharpening, vignette and grain"}}. Choose the watermark position that stays well clear of the hero subject.`, await photoBlob());
       if(r?.settings){ bp={ ratio: RATIOS[r.ratio]? r.ratio : "4:5", settings:clampSet(r.settings), watermark:{position:["top-left","top-right","bottom-left","bottom-right","bottom-center"].includes(r?.watermark?.position)?r.watermark.position:"auto"}, notes:{framing:String(r.notes?.framing||""),global:String(r.notes?.global||""),local:String(r.notes?.local||"")} }; state.bpBy="Claude"; }
-    }catch(e){ st.className="status err"; st.textContent=errCopy(e?.code); }
+    }catch(e){ st.className="status err"; st.textContent=errCopy(e); }
     finally{ btn.disabled=false; }
   }
   if(!bp){ bp=localBlueprint(); state.bpBy="local"; }
