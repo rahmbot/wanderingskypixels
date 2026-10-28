@@ -416,10 +416,12 @@ function parseLoose(t){ t=String(t).replace(/```json|```/g,"").trim(); try{ retu
 async function siteJson(prompt, blob){
   const content=[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:await blobToB64(blob)}},{type:"text",text:prompt+"\nReply with only the JSON, no other text."}];
   let res; try{ res=await fetch(SITE_API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({max_tokens:2500,messages:[{role:"user",content}]})}); }catch{ throw {code:"upstream_error"}; }
-  if(res.status===401) throw {code:"locked"};
+  let data=null; try{ data=await res.json(); }catch{}
+  const msg=String(data?.error?.message||"");
+  if(res.status===401 && /access code/i.test(msg)) throw {code:"locked"};
   if(res.status===429) throw {code:"rate_limited"};
-  let data; try{ data=await res.json(); }catch{ throw {code:"upstream_error"}; }
-  if(data.error) throw {code:"upstream_error"};
+  if(data?.error?.type==="upstream_auth" || res.status===401 || res.status===403) throw {code:"site_key"};
+  if(!res.ok || !data || data.error) throw {code:"upstream_error"};
   return parseLoose((data.content||[]).filter(c=>c.type==="text").map(c=>c.text).join("\n"));
 }
 function anchorSave(blob, filename){ const url=URL.createObjectURL(blob), a=document.createElement("a"); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000); return Promise.resolve(); }
@@ -441,7 +443,7 @@ function anchorSave(blob, filename){ const url=URL.createObjectURL(blob), a=docu
 const RULES = `You are a professional photographer, photo editor and creative director for an Instagram account that posts astrophotography, moon alignments and drone landscapes. House rules: moon, moonrise and sunset frames lean warmer; landscapes get trend-aware, high-engagement grading; never cover or crowd the hero subject; Instagram crops are only 1:1 (1080x1080), 4:5 (1080x1350) or 16:9 (1080x608), prefer 4:5.
 Adjustment ranges: exposure -2..2 (EV, decimals), contrast -50..50, highlights -100..100, shadows -100..100, temperature -50..50 (positive warmer), tint -50..50 (positive magenta), vibrance -50..50, saturation -50..50, sharpen 0..100, vignette 0..100, grain 0..50.`;
 async function photoBlob(){ const t=document.createElement("canvas"), sc=Math.min(1,1400/Math.max(srcC.width,srcC.height)); t.width=srcC.width*sc|0; t.height=srcC.height*sc|0; t.getContext("2d").drawImage(srcC,0,0,t.width,t.height); return new Promise(r=>t.toBlob(r,"image/jpeg",.9)); }
-const errCopy = c => ({not_granted:"Claude wasn't allowed for this page, so the built-in suggestions are used.",rate_limited:"Too many requests right now. Try again in a minute.",refused:"Claude declined this one. The built-in suggestions still work.",invalid_json:"Claude's answer couldn't be read. Try again.",image_rejected:"That image couldn't be sent. Try a smaller JPG.",locked:"Your Projects access has expired. Reload the page and enter the access code again."}[c] || "Claude couldn't answer just now. The built-in suggestions still work.");
+const errCopy = c => ({not_granted:"Claude wasn't allowed for this page, so the built-in suggestions are used.",rate_limited:"Too many requests right now. Try again in a minute.",refused:"Claude declined this one. The built-in suggestions still work.",invalid_json:"Claude's answer couldn't be read. Try again.",image_rejected:"That image couldn't be sent. Try a smaller JPG.",locked:"Your Projects access has expired. Reload the page and enter the access code again.",site_key:"Claude isn't connected on the site right now. The built-in suggestions still work."}[c] || "Claude couldn't answer just now. The built-in suggestions still work.");
 
 $("askRead").addEventListener("click", async()=>{
   const btn=$("askRead"), st=$("readStatus"); btn.disabled=true; st.className="status"; st.textContent="Claude is studying the frame…";
