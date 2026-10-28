@@ -271,7 +271,7 @@ ul.notes li::before{content:"";position:absolute;left:2px;top:.6em;width:6px;hei
 
 <script>
 (() => {
-  const API = "https://wsp-api.rahmmenon.workers.dev";
+  const API = "/projects/api/advise"; // same-site, behind the Projects access code
   const FEEDBACK_TO = "contact@wanderingskypixels.com";
   const $ = id => document.getElementById(id);
   const store = {
@@ -445,6 +445,7 @@ ${SHAPE}`;
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ max_tokens: 2500, messages: [{ role: "user", content }] })
     });
+    if (res.status === 401){ const e = new Error("locked"); e.code = "locked"; throw e; }
     const raw = await res.text();
     let data; try{ data = JSON.parse(raw); }catch{ throw new Error("proxy: " + raw.slice(0, 200)); }
     if (data.error) throw new Error("api: " + (data.error.message || JSON.stringify(data.error)));
@@ -709,7 +710,7 @@ ${SHAPE}`;
       const r = await ask(buildPrompt(a), [scene.b64]);
       lastResult = r; lastAnswers = a; render(r); setStatus("");
       $("result").scrollIntoView({behavior:"smooth", block:"start"});
-    }catch(e){ console.error(e); setStatus("Couldn't get a recommendation. Check your connection and tap again.", true); }
+    }catch(e){ console.error(e); setStatus(e.code === "locked" ? "Your access has expired. Reload the page and enter the access code again." : "Couldn't get a recommendation. Check your connection and tap again.", true); }
     finally{ busy = false; $("goBtn").disabled = false; }
   });
 
@@ -732,7 +733,7 @@ Reply with only JSON in the same shape as the previous settings, plus a "changes
       const r = await ask(prompt, [scene.b64, test.b64]);
       lastResult = r; render(r, { changes: r.changes || "" }); setStatus("");
       $("result").scrollIntoView({behavior:"smooth", block:"start"});
-    }catch(err){ console.error(err); setStatus("Couldn't check the test shot. Tap the button to try again.", true); }
+    }catch(err){ console.error(err); setStatus(err.code === "locked" ? "Your access has expired. Reload the page and enter the access code again." : "Couldn't check the test shot. Tap the button to try again.", true); }
     finally{ busy = false; }
   });
 
