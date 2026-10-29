@@ -124,6 +124,11 @@ input[type=file]{display:none}
 .ai p{margin:0;flex:1}
 .ai .btn{min-height:40px;white-space:nowrap}
 
+.magicbtn{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 13px;border-radius:999px;border:1px solid var(--fg);background:var(--fg);color:var(--bg);font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;box-shadow:0 0 0 4px rgba(233,180,106,.12)}
+.magicbtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.magicbtn:disabled{opacity:.5;cursor:default}
+.surprised{border:1px solid rgba(233,180,106,.35)}
+.surprised span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 /* step 3: directions */
 .dirs{display:flex;flex-direction:column;gap:8px}
 .dir{text-align:left;background:var(--raise);border:1px solid transparent;border-radius:10px;padding:11px 12px;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:start}
@@ -255,7 +260,8 @@ pre{font-family:var(--f-mono);font-size:11px;background:var(--stage);border-radi
 
         <!-- 2 readout -->
         <section class="stp" data-step="1" hidden>
-          <h2>Frame readout</h2>
+          <div class="headrow"><h2>Frame readout</h2><button class="magicbtn" id="surpriseBtn" title="Skip the questions and jump to a finished edit"><svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>Surprise me!</button></div>
+          <p class="lede" style="margin-top:-6px">Want it done for you? <b style="color:var(--fg);font-weight:500">Surprise me!</b> skips the questions and jumps to a finished edit.</p>
           <div class="readouts" id="readouts"></div>
           <ul class="obs" id="obs"></ul>
           <div class="ai" id="aiRead" hidden>
@@ -316,6 +322,7 @@ pre{font-family:var(--f-mono);font-size:11px;background:var(--stage);border-radi
         <!-- 8 watermark & export -->
         <section class="stp" data-step="7" hidden>
           <h2>Watermark &amp; export</h2>
+          <div class="note surprised" id="surpriseNote" hidden><b>Surprise edit</b><span></span></div>
           <p class="lede">The mark is drawn last, on its own layer, so the grade never touches it.</p>
           <p class="label">Placement</p>
           <div class="wmrow"><div class="posgrid" id="posgrid"></div><p id="autoNote"></p></div>
@@ -579,10 +586,42 @@ async function buildBlueprint(){
   }
   if(!bp){ bp=localBlueprint(); state.bpBy="local"; }
   if(state.answers.place) bp.ratio=state.ratio;
-  state.blueprint=bp; state.filters={...bp.settings}; state.ratio=bp.ratio; state.wm.position=bp.watermark.position; state.notes=bp.notes;
+  state.blueprint=bp; state.filters={...bp.settings}; state.ratio=bp.ratio; state.wm.position=bp.watermark.position; state.notes=bp.notes; state.surprise=null;
   if(state.bpBy==="Claude") st.textContent="";
   renderRatios(); renderNotes(); renderPos(); go(5);
 }
+
+// ---------- Surprise me: one tap to a finished edit ----------
+function autoBlueprint(){
+  // No Claude: start from the look that suits the scene, then let the measured stats steer it.
+  const s=state.stats, night=/moon|night/i.test(s.scene);
+  const idx = night ? 0 : 2;
+  const keep=state.dirIdx; state.dirIdx=idx; state.answers={}; state.note="";
+  const bp=localBlueprint(); state.dirIdx=keep;
+  bp.name = night ? "Warm lunar glow" : "Crisp, punchy pop";
+  bp.why = night ? "Night frame, so the moon goes warm, the city lifts out of the shadows and the sky stays deep." : "A clean, high-contrast grade with lifted shadows tends to stop the scroll on landscape shots.";
+  return bp;
+}
+async function surprise(){
+  const st=$("readStatus"), btn=$("surpriseBtn"); st.className="status"; let bp=null;
+  state.busy=true; btn.disabled=true; $("askRead").disabled=true; updateNav();
+  if(ai){
+    st.textContent="Claude is creating the best edit for this shot…";
+    try{
+      const r = await ai.json(`${RULES}
+
+The attached image is the raw photo. Measured stats: ${JSON.stringify(state.stats)}.
+The photographer tapped "Surprise me": skip the questions and make the single best Instagram edit for this exact photo, the one most likely to stop the scroll while staying true to the scene. Fix exposure and clipping first, then grade. Reply with only JSON: {"name":"2-4 word name for the look","why":"one sentence on what you did and why","ratio":"4:5|1:1|16:9","settings":{"exposure":0,"contrast":0,"highlights":0,"shadows":0,"temperature":0,"tint":0,"vibrance":0,"saturation":0,"sharpen":0,"vignette":0,"grain":0},"watermark":{"position":"top-left|top-right|bottom-left|bottom-right|bottom-center"},"notes":{"framing":"1-2 sentences on the crop","global":"1-2 sentences on light and color","local":"1 sentence on sharpening, vignette and grain"}}. Choose the watermark position that stays well clear of the hero subject.`, await photoBlob());
+      if(r?.settings){ bp={ name:String(r.name||"Claude's pick").slice(0,40), why:String(r.why||""), ratio: RATIOS[r.ratio]? r.ratio : "4:5", settings:clampSet(r.settings), watermark:{position:["top-left","top-right","bottom-left","bottom-right","bottom-center"].includes(r?.watermark?.position)?r.watermark.position:"auto"}, notes:{framing:String(r.notes?.framing||""),global:String(r.notes?.global||""),local:String(r.notes?.local||"")} }; state.bpBy="Claude"; }
+    }catch(e){ st.className="status err"; st.textContent=errCopy(e)+" Used the built-in auto edit instead."; }
+  }
+  if(!bp){ bp=autoBlueprint(); state.bpBy="local"; }
+  state.busy=false; btn.disabled=false; $("askRead").disabled=false;
+  state.blueprint=bp; state.filters={...bp.settings}; state.ratio=bp.ratio; state.wm.position=bp.watermark.position; state.notes=bp.notes; state.surprise=bp;
+  if(state.bpBy==="Claude") st.textContent="";
+  renderRatios(); renderNotes(); renderPos(); state.maxStep=6; go(7);
+}
+$("surpriseBtn").addEventListener("click", surprise);
 
 // ---------- steps 6-7: frame, adjustments ----------
 function renderNotes(){
@@ -748,7 +787,7 @@ async function exportJpg(){
 // ---------- reset & home ----------
 function resetEdits(){
   state.aiObs=false; state.dirs=DEFAULT_DIRS; state.qs=DEFAULT_QS; state.dirIdx=null; state.answers={}; state.note="";
-  state.filters={...ZERO}; state.blueprint=null; state.notes=null; state.bpBy=null;
+  state.filters={...ZERO}; state.blueprint=null; state.notes=null; state.bpBy=null; state.surprise=null;
   state.ratio="4:5"; state.zoom=1; state.cx=.5; state.cy=.5; state.tab="Light"; state.wm={...WM_DEFAULT}; state.maxStep=0;
   $("zoom").value=1; $("zoomO").textContent="1.00×"; $("noteBox").value=""; $("useAi").checked=true;
   ["readStatus","bpStatus","exportStatus"].forEach(id=>{ $(id).textContent=""; $(id).className="status"; });
@@ -801,6 +840,8 @@ function go(i){
   $("sampleBtn").hidden = state.hasPhoto;
   if(i===6) renderSliders();
   if(i===5||i===6) renderNotes();
+  const sn=$("surpriseNote"); sn.hidden = !(i===7 && state.surprise);
+  if(state.surprise) sn.querySelector("span").textContent = `${state.surprise.name}${state.bpBy==="Claude"?" by Claude":""}. ${state.surprise.why} Tap Back to fine-tune.`;
   $("panel").scrollTop=0;
   updateNav(); setMode(); schedule();
 }
