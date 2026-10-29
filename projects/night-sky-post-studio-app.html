@@ -232,7 +232,7 @@ pre{font-family:var(--f-mono);font-size:11px;background:var(--stage);border-radi
     <div class="stage" id="stage" hidden>
       <canvas id="view" aria-label="Edited photo preview"></canvas>
       <span class="tag" id="modeTag">Raw</span>
-      <span class="hint" id="dragHint" hidden>Drag to reposition</span>
+      <span class="hint" id="dragHint" hidden>Drag the photo to reframe</span>
       <button class="cmp" id="compare" aria-label="Hold to see the original" title="Hold to see the original" aria-pressed="false">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="#e8e6e1" stroke-width="1.6"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="#e8e6e1"/></svg>
       </button>
@@ -734,8 +734,8 @@ function setMode(){ const edited=KEYS.some(k=>state.filters[k]!==0); const t=$("
 
 // ---------- stage interactions ----------
 let drag=null;
-view.addEventListener("pointerdown",e=>{ if(state.step!==5) return; drag={x:e.clientX,y:e.clientY}; view.setPointerCapture(e.pointerId); });
-view.addEventListener("pointermove",e=>{ if(!drag)return; const [W,H]=RATIOS[state.ratio]; const [, , cw]=cropRect(720,Math.round(H*720/W)); const k=cw/view.getBoundingClientRect().width; state.cx-=(e.clientX-drag.x)*k/srcC.width; state.cy-=(e.clientY-drag.y)*k/srcC.height; drag={x:e.clientX,y:e.clientY}; schedule(); });
+view.addEventListener("pointerdown",e=>{ if(!state.hasPhoto) return; drag={x:e.clientX,y:e.clientY}; view.setPointerCapture(e.pointerId); });
+view.addEventListener("pointermove",e=>{ if(!drag)return; const [W,H]=RATIOS[state.ratio]; const [, , cw]=cropRect(720,Math.round(H*720/W)); const k=cw/view.getBoundingClientRect().width; state.cx-=(e.clientX-drag.x)*k/srcC.width; state.cy-=(e.clientY-drag.y)*k/srcC.height; drag={x:e.clientX,y:e.clientY}; if(!state.dragged){ state.dragged=true; $("dragHint").hidden=true; } schedule(); });
 ["pointerup","pointercancel"].forEach(t=>view.addEventListener(t,()=>drag=null));
 const cmp=$("compare");
 const cmpOn=e=>{ e?.preventDefault?.(); state.compare=true; cmp.setAttribute("aria-pressed","true"); setMode(); schedule(); };
@@ -788,7 +788,7 @@ async function exportJpg(){
 function resetEdits(){
   state.aiObs=false; state.dirs=DEFAULT_DIRS; state.qs=DEFAULT_QS; state.dirIdx=null; state.answers={}; state.note="";
   state.filters={...ZERO}; state.blueprint=null; state.notes=null; state.bpBy=null; state.surprise=null;
-  state.ratio="4:5"; state.zoom=1; state.cx=.5; state.cy=.5; state.tab="Light"; state.wm={...WM_DEFAULT}; state.maxStep=0;
+  state.ratio="4:5"; state.zoom=1; state.cx=.5; state.cy=.5; state.dragged=false; state.tab="Light"; state.wm={...WM_DEFAULT}; state.maxStep=0;
   $("zoom").value=1; $("zoomO").textContent="1.00×"; $("noteBox").value=""; $("useAi").checked=true;
   ["readStatus","bpStatus","exportStatus"].forEach(id=>{ $(id).textContent=""; $(id).className="status"; });
   if(state.hasPhoto){ analyze(); renderReadouts(); }
@@ -833,7 +833,7 @@ function go(i){
   document.querySelectorAll(".stp").forEach(el=>el.hidden = +el.dataset.step!==i); app.dataset.step=i;
   app.classList.toggle("nophoto", !state.hasPhoto);
   $("stage").hidden = !state.hasPhoto;
-  $("stage").classList.toggle("dragable", i===5); $("dragHint").hidden = i!==5;
+  $("stage").classList.toggle("dragable", state.hasPhoto); $("dragHint").hidden = !state.hasPhoto || (state.dragged && i!==5);
   $("loaded").hidden = !state.hasPhoto;
   $("dropTitle").textContent = state.hasPhoto ? "Replace photo" : "Choose a photo";
   $("dropSub").textContent = state.hasPhoto ? "or tap Next to edit this one from scratch" : "or drop it here";
