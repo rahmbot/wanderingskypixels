@@ -92,6 +92,29 @@
     .page-hero h1{font-size:2.2rem;}
     .mp-frame{height:900px;}
   }
+
+  /* ── Collapsed about section ── */
+  .page-hero{padding-bottom:1.2rem;}
+  .about{max-width:1100px;margin:0 auto 1.6rem;padding:0 4rem;}
+  .about details{border:1px solid var(--dim);border-radius:2px;background:var(--card);}
+  .about summary{cursor:pointer;list-style:none;padding:0.9rem 1.2rem;font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:0.6rem;}
+  .about summary::-webkit-details-marker{display:none;}
+  .about summary::before{content:'+';font-size:0.95rem;line-height:1;width:1rem;text-align:center;}
+  .about details[open] summary::before{content:'–';}
+  .about-body{padding:0.4rem 0 1.6rem;}
+  .about-body > p{font-size:0.92rem;color:var(--muted);line-height:1.8;max-width:680px;margin:0 1.2rem 0.8rem;}
+  .about-body .context-strip,.about-body .rules,.about-body .reflection{padding:0 1.2rem;margin-top:1.4rem;margin-bottom:0;}
+  .about-body .reflection{padding-bottom:0;}
+  .proto-label .full{margin-left:auto;color:var(--gold);letter-spacing:0.12em;}
+  .proto-label .full:hover{text-decoration:underline;}
+  .proto-shell{margin-bottom:3rem;}
+  .mp-frame{height:min(860px, calc(100vh - 150px));min-height:560px;}
+  @media(max-width:768px){
+    .about{padding-left:1.5rem;padding-right:1.5rem;}
+    .proto-shell{padding-left:0.75rem;padding-right:0.75rem;}
+    .mp-chrome{display:none;}
+    .mp-frame{height:calc(100svh - 90px);min-height:520px;}
+  }
 </style>
 </head>
 <body>
@@ -137,10 +160,16 @@
   <div class="breadcrumb"><a href="index.html">Projects</a> / Night Sky Post Studio</div>
   <div class="section-label">Photo Tool · Interactive Prototype</div>
   <h1>Night Sky Post Studio</h1>
-  <p>Most of my editing for Instagram is the same routine. Warm up the moon, pull back the highlights, lift the city out of the shadows, crop to 4:5, and drop the watermark somewhere it won't fight the shot. Filters don't get it right, because every frame needs something a little different.</p>
-  <p style="margin-top:0.8rem;">So I built an editor that works like a creative director. It reads the photo first, asks what story I'm going for, and only then sets the sliders. I can still adjust every one of them. The watermark goes on last, on its own layer, and lands in the quietest corner it can find.</p>
+  <p>Reads your photo, asks what story you want to tell, and builds an Instagram-ready edit with your watermark kept clear of the hero.</p>
 </div>
 
+<!-- ABOUT (collapsed) -->
+<div class="about">
+<details>
+  <summary>About this project</summary>
+  <div class="about-body">
+    <p>Most of my editing for Instagram is the same routine. Warm up the moon, pull back the highlights, lift the city out of the shadows, crop to 4:5, and drop the watermark somewhere it won't fight the shot. Filters don't get it right, because every frame needs something a little different.</p>
+    <p>So I built an editor that reads the photo first, asks what I'm going for, and only then sets the sliders. I can still adjust every one of them. The watermark goes on last, on its own layer, and lands in the quietest corner it can find.</p>
 <!-- CONTEXT STRIP -->
 <div class="context-strip">
   <div class="context-cards">
@@ -166,20 +195,6 @@
     <div class="rule"><b>1 · Assess &amp; vibe</b><p>Reads exposure, crushed shadows, clipping and color cast. Suggests three looks and asks what you want people to feel.</p></div>
     <div class="rule"><b>2 · Edit blueprint</b><p>Your answers become real slider values with a note on why. Pick the crop, drag to frame it, and hold to compare with the raw shot.</p></div>
     <div class="rule"><b>3 · Watermark &amp; export</b><p>The mark is drawn after the grade so it stays crisp, placed away from the hero, then saved as a full-size JPG at 95% quality.</p></div>
-  </div>
-</div>
-
-<!-- PROTOTYPE -->
-<div class="proto-shell">
-  <div class="proto-label">Live Interactive Prototype</div>
-  <p class="proto-note">It opens on a sample moonrise so you can click straight through. Pick a direction, answer the questions, build the blueprint, and watch where the watermark lands. Upload your own photo any time, and turn on Claude for suggestions written for that specific shot. Want more room? <a href="night-sky-post-studio-app.html" target="_blank" rel="noopener">Open it in its own tab →</a></p>
-
-  <div class="mp-app">
-    <div class="mp-chrome">
-      <span class="mp-dot r"></span><span class="mp-dot y"></span><span class="mp-dot g"></span>
-      <span class="mp-chrome-label">night sky post studio — instagram edit</span>
-    </div>
-    <iframe class="mp-frame" src="night-sky-post-studio-app.html" title="Night Sky Post Studio interactive prototype" loading="lazy"></iframe>
   </div>
 </div>
 
@@ -214,6 +229,24 @@
   <div class="section-label">What's Next</div>
   <div class="ref-card">
     <p>Next up is video. The plan is a reel builder for moon timelapses that follows the style I like most: open on a behind-the-scenes snapshot, cut to the timelapse zoomed out, push in during the hero moment, slow down for the pose, and ease back out. After that, saved presets per series and batch edits for a full shoot.</p>
+  </div>
+</div>
+
+  </div>
+</details>
+</div>
+
+<!-- PROTOTYPE -->
+<div class="proto-shell">
+  <div class="proto-label">Live Interactive Prototype <a class="full" href="night-sky-post-studio-app.html" target="_blank" rel="noopener">Open full screen →</a></div>
+  
+
+  <div class="mp-app">
+    <div class="mp-chrome">
+      <span class="mp-dot r"></span><span class="mp-dot y"></span><span class="mp-dot g"></span>
+      <span class="mp-chrome-label">night sky post studio — instagram edit</span>
+    </div>
+    <iframe class="mp-frame" src="night-sky-post-studio-app.html" title="Night Sky Post Studio interactive prototype" loading="lazy"></iframe>
   </div>
 </div>
 
