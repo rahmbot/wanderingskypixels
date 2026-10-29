@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="../logo.png">
-<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Night Sky Post Studio | WanderingSkyPixels Projects</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: photo-editor workbench — large neutral stage on the left, a 3-step guided panel on the right; stacks on phones. Deliberately single dark theme so colors are judged against neutral grey. */
+/* Layout: one fixed screen. Top bar (home · progress · reset), image stage (hidden until a photo is loaded), one step panel, bottom bar (back · next). Phone stacks stage over panel; desktop puts the panel beside the stage. Single dark theme so color is judged against neutral grey. */
 :root{
   --bg:#111317; --stage:#0b0c0f; --panel:#181b20; --raise:#20242b; --line:#2b3038;
   --fg:#e8e6e1; --muted:#8f949d; --faint:#5d626b;
@@ -23,238 +23,327 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html,body{height:100%}
-body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.5;
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.45;-webkit-text-size-adjust:100%;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
 button,input,select,textarea{font:inherit;color:inherit}
+button{-webkit-tap-highlight-color:transparent}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.app{max-width:1440px;margin:0 auto;display:flex;flex-direction:column;min-height:100%}
-header{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding-block:14px;border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:10px;min-width:0}
-.brand img{height:34px;width:auto}
-.brand h1{font-family:var(--f-display);font-weight:700;font-size:18px;letter-spacing:-.01em;margin:0;white-space:nowrap}
-.brand small{display:block;font-family:var(--f-mono);font-size:10.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
-nav.steps{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
-.step{border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 14px 6px 8px;display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--muted);font-weight:500}
-.step b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--raise);font-family:var(--f-mono);font-size:11px;font-weight:500;color:var(--fg)}
-.step[aria-current="step"]{color:var(--fg);border-color:var(--accent)}
-.step[aria-current="step"] b{background:var(--accent);color:var(--accent-ink)}
-.step.done b{background:var(--ok);color:#0d1a12}
-main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:20px;padding-block:18px}
-@media (max-width:960px){main{grid-template-columns:minmax(0,1fr)}}
 
-/* stage */
-.stagewrap{display:flex;flex-direction:column;gap:10px;min-width:0}
-.stage{position:relative;background:var(--stage);border-radius:var(--r);display:grid;place-items:center;min-height:420px;height:min(76vh,860px);overflow:hidden;touch-action:none;
+.app{height:100%;max-width:1320px;margin:0 auto;display:flex;flex-direction:column}
+
+/* top bar */
+.top{flex:none;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding-block:10px}
+.lead{display:flex;align-items:center;gap:10px;min-width:0}
+.brand{display:flex;align-items:center;gap:8px;min-width:0}
+.brand img{height:30px;width:auto}
+.brand b{font-family:var(--f-display);font-weight:700;font-size:16px;letter-spacing:-.01em;white-space:nowrap}
+@media (max-width:640px){.brand{display:none}}
+.icon{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--panel);display:inline-grid;place-items:center;cursor:pointer;flex:none;position:relative}
+.icon svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icon:disabled{opacity:.35;cursor:default}
+.icon.armed{width:auto;padding:0 12px;gap:6px;display:inline-flex;align-items:center;border-color:var(--warn);color:var(--warn);font-size:12.5px;font-weight:600;white-space:nowrap}
+.progress{display:flex;flex-direction:column;gap:5px;min-width:0}
+.ptext{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden}
+.ptext strong{color:var(--fg);font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.ptext span{font-family:var(--f-mono);font-size:11px;font-variant-numeric:tabular-nums}
+.bars{display:grid;grid-template-columns:repeat(8,1fr);gap:3px}
+.bars i{height:4px;border-radius:2px;background:var(--line)}
+.bars i.done{background:var(--ok)}
+.bars i.now{background:var(--accent)}
+.bars i.gap{margin-left:5px}
+
+/* main */
+main{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.stage{flex:0 0 42%;min-height:0;position:relative;background:var(--stage);border-radius:var(--r);display:flex;align-items:center;justify-content:center;overflow:hidden;
   background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.035) 1px,transparent 0);background-size:22px 22px}
-.stage canvas{max-width:calc(100% - 40px);max-height:calc(100% - 40px);box-shadow:0 20px 60px rgba(0,0,0,.55);cursor:grab;display:block}
-.stage canvas:active{cursor:grabbing}
-.stage.drag{outline:2px dashed var(--accent);outline-offset:-10px}
-.tag{position:absolute;top:12px;left:12px;font-family:var(--f-mono);font-size:11px;background:rgba(10,11,14,.8);border:1px solid var(--line);padding:4px 8px;border-radius:6px;color:var(--muted)}
-.tag.right{left:auto;right:12px}
+.stage canvas{display:block;max-width:calc(100% - 20px);max-height:calc(100% - 20px);box-shadow:0 14px 40px rgba(0,0,0,.55);touch-action:none}
+.stage.dragable canvas{cursor:grab}
+.stage.dragable canvas:active{cursor:grabbing}
+.tag{position:absolute;top:8px;right:8px;font-family:var(--f-mono);font-size:10.5px;background:rgba(10,11,14,.8);border:1px solid var(--line);padding:3px 7px;border-radius:6px;color:var(--muted)}
 .tag.before{color:var(--accent);border-color:var(--accent)}
-.toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px}
-.toolbar .grow{flex:1}
-.dims{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-.dims strong{color:var(--fg);font-weight:500}
-#hist{width:180px;height:40px;background:var(--stage);border-radius:6px;display:block}
-.inline{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12.5px}
-.inline input[type=range]{width:110px}
+.hint{position:absolute;left:8px;bottom:8px;font-size:11.5px;background:rgba(10,11,14,.8);border:1px solid var(--line);padding:3px 8px;border-radius:6px;color:var(--muted)}
+.cmp{position:absolute;right:8px;bottom:8px;width:40px;height:40px;border-radius:50%;background:rgba(10,11,14,.82);border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+.cmp svg{width:18px;height:18px}
+.cmp[aria-pressed="true"]{border-color:var(--accent)}
+.stage.drop{outline:2px dashed var(--accent);outline-offset:-8px}
 
-/* panel */
-aside{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;min-width:0;max-height:calc(76vh + 62px);overflow:auto}
-@media (max-width:960px){aside{max-height:none}}
-.phase{padding:18px;display:flex;flex-direction:column;gap:18px}
-.phase h2{font-family:var(--f-display);font-weight:700;font-size:21px;letter-spacing:-.015em;margin:0;text-wrap:balance}
-.lede{color:var(--muted);margin:-10px 0 0}
-.label{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
-section.block{display:flex;flex-direction:column;gap:10px}
-.readouts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.ro{background:var(--raise);border-radius:8px;padding:8px 10px;min-width:0}
-.ro span{display:block;font-size:11.5px;color:var(--muted)}
-.ro strong{font-family:var(--f-mono);font-weight:500;font-size:13px;font-variant-numeric:tabular-nums}
+.side{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.panel{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:var(--panel);border:1px solid var(--line);border-radius:var(--r)}
+.stp{padding:16px;display:flex;flex-direction:column;gap:14px}
+.stp h2{font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:-.015em;margin:0;text-wrap:balance}
+.lede{color:var(--muted);margin:-8px 0 0}
+.label{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0}
+.bottom{flex:none;display:flex;gap:8px;padding-bottom:10px}
+.btn{min-height:46px;border:1px solid var(--line);background:var(--raise);border-radius:10px;padding:0 16px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.primary{flex:1;background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent}
+.btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.status{font-size:12.5px;color:var(--muted);margin:0}
+.status:empty{display:none}
+.status.err{color:var(--warn)}
+
+/* desktop: stage beside the step column */
+@media (min-width:900px) and (min-height:540px){
+  main{flex-direction:row;gap:16px}
+  .stage{flex:1 1 auto}
+  .side{flex:0 0 400px}
+  .app.nophoto main{justify-content:center}
+  .app.nophoto main{align-items:center}
+  .app.nophoto .side{flex-basis:520px;flex-grow:0;height:auto;max-height:100%}
+  .app.nophoto .panel{flex:none}
+}
+
+/* step 1: upload */
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;border:1.5px dashed var(--line);border-radius:var(--r);padding:28px 16px;cursor:pointer;background:var(--bg)}
+.drop:hover,.drop.on{border-color:var(--accent)}
+.drop svg{width:34px;height:34px;stroke:var(--accent);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.drop strong{font-size:15px}
+.drop small{color:var(--muted)}
+.loaded{display:flex;align-items:center;gap:12px;background:var(--raise);border-radius:var(--r);padding:10px 12px}
+.loaded canvas{width:52px;height:52px;object-fit:cover;border-radius:6px;flex:none;background:var(--stage)}
+.loaded div{min-width:0;flex:1}
+.loaded strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.loaded span{font-family:var(--f-mono);font-size:11.5px;color:var(--muted)}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);cursor:pointer;font-weight:500;text-align:left}
+.linkbtn:hover{text-decoration:underline}
+input[type=file]{display:none}
+
+/* step 2: readout */
+.readouts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.ro{background:var(--raise);border-radius:8px;padding:7px 9px;min-width:0}
+.ro span{display:block;font-size:11px;color:var(--muted)}
+.ro strong{font-family:var(--f-mono);font-weight:500;font-size:12px;font-variant-numeric:tabular-nums;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ro.flag strong{color:var(--warn)}
 .obs{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
 .obs li{padding-left:16px;position:relative}
-.obs li::before{content:"";position:absolute;left:2px;top:.6em;width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.obs li::before{content:"";position:absolute;left:2px;top:.55em;width:6px;height:6px;border-radius:50%;background:var(--ok)}
 .obs li.issue::before{background:var(--warn)}
+.ai{display:flex;gap:10px;align-items:center;background:var(--accent-soft);border:1px solid rgba(233,180,106,.3);border-radius:10px;padding:10px 12px;font-size:13px}
+.ai p{margin:0;flex:1}
+.ai .btn{min-height:40px;white-space:nowrap}
+
+.magicbtn{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 13px;border-radius:999px;border:1px solid var(--fg);background:var(--fg);color:var(--bg);font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;box-shadow:0 0 0 4px rgba(233,180,106,.12)}
+.magicbtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.magicbtn:disabled{opacity:.5;cursor:default}
+.surprised{border:1px solid rgba(233,180,106,.35)}
+.surprised span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+/* step 3: directions */
 .dirs{display:flex;flex-direction:column;gap:8px}
-.dir{text-align:left;background:var(--raise);border:1px solid transparent;border-radius:8px;padding:10px 12px;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:start}
-.dir .k{grid-row:span 2;font-family:var(--f-mono);font-size:12px;width:24px;height:24px;border-radius:6px;display:grid;place-items:center;background:var(--bg);color:var(--muted)}
+.dir{text-align:left;background:var(--raise);border:1px solid transparent;border-radius:10px;padding:11px 12px;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:start}
+.dir .k{grid-row:span 2;font-family:var(--f-mono);font-size:12px;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;background:var(--bg);color:var(--muted)}
 .dir strong{font-weight:600}
 .dir small{color:var(--muted);font-size:12.5px}
-.dir:hover{border-color:var(--line)}
 .dir[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
 .dir[aria-pressed="true"] .k{background:var(--accent);color:var(--accent-ink)}
+
+/* step 4: questions */
 .q{display:flex;flex-direction:column;gap:8px}
 .q p{margin:0;font-weight:500}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 11px;cursor:pointer;font-size:13px;color:var(--fg)}
-.chip:hover{border-color:var(--faint)}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;min-height:36px;padding:0 13px;cursor:pointer;font-size:13px}
 .chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
-textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;resize:vertical;min-height:54px}
-.btn{border:1px solid var(--line);background:var(--raise);border-radius:8px;padding:9px 14px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px}
-.btn:hover{border-color:var(--faint)}
-.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.btn.primary:hover{filter:brightness(1.06)}
-.btn:disabled{opacity:.45;cursor:not-allowed}
-.btn.ghost{background:transparent}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.row .btn.primary{flex:1}
-.ai{display:flex;gap:10px;align-items:flex-start;background:var(--accent-soft);border:1px solid rgba(233,180,106,.3);border-radius:8px;padding:10px 12px;font-size:13px}
-.ai .btn{white-space:nowrap}
-.ai p{margin:0;flex:1}
-.status{font-size:12.5px;color:var(--muted);min-height:1em;margin:0}
-.status.err{color:var(--warn)}
-.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--bg);border-radius:8px;padding:3px;gap:3px}
-.seg button{border:0;background:transparent;border-radius:6px;padding:7px 4px;cursor:pointer;color:var(--muted);font-size:12.5px;line-height:1.25}
+
+/* step 5: note */
+textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;resize:none;min-height:96px;font-size:16px;line-height:1.4}
+.check{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+
+/* step 6/7: frame, adjustments */
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--bg);border-radius:10px;padding:3px;gap:3px}
+.seg button{border:0;background:transparent;border-radius:8px;min-height:44px;padding:4px;cursor:pointer;color:var(--muted);font-size:13px;line-height:1.25}
 .seg button small{display:block;font-family:var(--f-mono);font-size:10.5px}
 .seg button[aria-pressed="true"]{background:var(--raise);color:var(--fg)}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line)}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;min-height:42px;cursor:pointer;color:var(--muted);font-weight:500}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.headrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .sliders{display:flex;flex-direction:column;gap:2px}
-.sl{display:grid;grid-template-columns:96px minmax(0,1fr) 46px;align-items:center;gap:10px;padding:3px 0}
+.sl{display:grid;grid-template-columns:92px minmax(0,1fr) 46px;align-items:center;gap:10px;min-height:42px}
 .sl label{font-size:13px;color:var(--muted)}
 .sl output{font-family:var(--f-mono);font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
 .sl.changed label{color:var(--fg)}
-input[type=range]{-webkit-appearance:none;appearance:none;height:18px;background:transparent;width:100%}
+input[type=range]{-webkit-appearance:none;appearance:none;height:32px;background:transparent;width:100%;touch-action:pan-y}
 input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--line);border-radius:2px}
 input[type=range]::-moz-range-track{height:3px;background:var(--line);border-radius:2px}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--fg);margin-top:-5.5px;border:0}
-input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--fg);border:0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--fg);margin-top:-8.5px;border:0;box-shadow:0 1px 4px rgba(0,0,0,.5)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--fg);border:0}
 input[type=range].temp::-webkit-slider-runnable-track{background:linear-gradient(90deg,#5b8fd6,var(--line) 50%,#e0a050)}
 input[type=range].temp::-moz-range-track{background:linear-gradient(90deg,#5b8fd6,var(--line) 50%,#e0a050)}
-.group{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);margin:10px 0 2px}
-.note{background:var(--raise);border-radius:8px;padding:10px 12px;font-size:13px}
+input[type=range].tint::-webkit-slider-runnable-track{background:linear-gradient(90deg,#5fb06a,var(--line) 50%,#c768b6)}
+input[type=range].tint::-moz-range-track{background:linear-gradient(90deg,#5fb06a,var(--line) 50%,#c768b6)}
+.note{background:var(--raise);border-radius:10px;padding:10px 12px;font-size:13px}
 .note b{display:block;font-family:var(--f-mono);font-weight:500;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);margin-bottom:2px}
-.notes{display:flex;flex-direction:column;gap:6px}
-.posgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-width:220px}
-.posgrid button{aspect-ratio:1.6;border:1px solid var(--line);background:var(--bg);border-radius:6px;cursor:pointer;font-size:11px;color:var(--muted)}
+.dims{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.dims strong{color:var(--fg);font-weight:500}
+#hist{width:100%;height:40px;background:var(--stage);border-radius:8px;display:block}
+.small{font-size:12.5px}
+
+/* step 8: watermark */
+.wmrow{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.posgrid{display:grid;grid-template-columns:repeat(3,52px);gap:4px}
+.posgrid button{height:34px;border:1px solid var(--line);background:var(--bg);border-radius:6px;cursor:pointer;font-size:11px;color:var(--muted)}
 .posgrid button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
 .posgrid button:disabled{visibility:hidden}
-details{border-top:1px solid var(--line);padding-top:12px}
+.wmrow p{flex:1;min-width:140px;margin:0;color:var(--muted);font-size:13px}
+details{border-top:1px solid var(--line);padding-top:10px}
 summary{cursor:pointer;color:var(--muted);font-size:12.5px}
-pre{font-family:var(--f-mono);font-size:11.5px;background:var(--stage);border-radius:8px;padding:10px;overflow-x:auto;margin:8px 0 0;color:#bfc3ca}
-.upload{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-.upload .name{font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.upload .name span{color:var(--muted)}
-input[type=file]{display:none}
-.empty{color:var(--muted);font-size:13px;margin:0}
+pre{font-family:var(--f-mono);font-size:11px;background:var(--stage);border-radius:8px;padding:10px;overflow-x:auto;margin:8px 0 0;color:#bfc3ca}
+
+@media (max-width:899px), (max-height:539px){
+  .app[data-step="0"] .stage,.app[data-step="1"] .stage,.app[data-step="2"] .stage{flex-basis:34%}
+  .app[data-step="3"] .stage,.app[data-step="4"] .stage{flex-basis:27%}
+  .app[data-step="5"] .stage{flex-basis:44%}
+  .app[data-step="6"] .stage,.app[data-step="7"] .stage{flex-basis:36%}
+  .stp{gap:10px;padding:14px}
+  .chip{min-height:34px}
+  #questions{gap:12px!important}
+  .posgrid button{height:30px}
+  .sl{min-height:38px}
+  #hist{height:28px}
+  .stp[data-step="7"] .lede, .stp[data-step="7"] details{display:none}
+  .spec{background:none;padding:0;color:var(--muted);font-family:var(--f-mono);font-size:11.5px}
+  .spec b{display:none}
+}
+@media (max-width:420px){ .stp{padding:14px} .stp h2{font-size:18px} .sl{grid-template-columns:84px minmax(0,1fr) 44px} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <div class="brand">
-      <img id="brandMark" alt="WanderingSkyPixels">
-      <div><h1>Night Sky Post Studio</h1><small>Instagram edit · guided</small></div>
+<div class="app nophoto" id="app">
+  <header class="top">
+    <div class="lead">
+      <button class="icon" id="homeBtn" aria-label="Home: start over with a new photo" title="Home">
+        <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></svg>
+      </button>
+      <div class="brand"><img id="brandMark" alt="WanderingSkyPixels"><b>Night Sky Post Studio</b></div>
     </div>
-    <nav class="steps" aria-label="Editing steps">
-      <button class="step" data-phase="1" aria-current="step"><b>1</b>Assess &amp; vibe</button>
-      <button class="step" data-phase="2"><b>2</b>Edit blueprint</button>
-      <button class="step" data-phase="3"><b>3</b>Watermark &amp; export</button>
-    </nav>
+    <div class="progress" aria-live="polite">
+      <div class="ptext"><strong id="phaseName">What are we working with?</strong><span id="stepCount">1 / 8</span></div>
+      <div class="bars" id="bars"></div>
+    </div>
+    <button class="icon" id="resetBtn" aria-label="Reset edits and start again with this photo" title="Reset edits" disabled>
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+    </button>
   </header>
 
   <main>
-    <div class="stagewrap">
-      <div class="stage" id="stage">
-        <canvas id="view" aria-label="Edited photo preview. Drag to reposition the crop."></canvas>
-        <span class="tag" id="srcTag">Sample</span>
-        <span class="tag right" id="modeTag">Raw</span>
-      </div>
-      <div class="toolbar">
-        <span class="dims" id="dims"><strong>1080 × 1350</strong> · 4:5</span>
-        <label class="inline" for="zoom">Crop zoom <input type="range" id="zoom" min="1" max="3" step="0.01" value="1"></label>
-        <span class="grow"></span>
-        <canvas id="hist" width="360" height="80" aria-label="Luminance histogram"></canvas>
-        <button class="btn" id="compare" title="Hold to see the unedited crop">Hold to compare</button>
-      </div>
+    <div class="stage" id="stage" hidden>
+      <canvas id="view" aria-label="Edited photo preview"></canvas>
+      <span class="tag" id="modeTag">Raw</span>
+      <span class="hint" id="dragHint" hidden>Drag to reposition</span>
+      <button class="cmp" id="compare" aria-label="Hold to see the original" title="Hold to see the original" aria-pressed="false">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="#e8e6e1" stroke-width="1.6"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="#e8e6e1"/></svg>
+      </button>
     </div>
 
-    <aside>
-      <!-- PHASE 1 -->
-      <div class="phase" id="p1">
-        <h2>What are we working with?</h2>
-        <p class="lede">Read the frame first, pick a direction, then answer a few questions so the edit fits the story.</p>
-        <section class="block">
-          <div class="upload">
-            <div class="name" id="fileName">Sample moonrise <span>· generated placeholder</span></div>
-            <label class="btn" for="file">Upload photo</label>
-            <input type="file" id="file" accept="image/jpeg,image/png,image/webp">
+    <div class="side">
+      <div class="panel" id="panel">
+        <!-- 1 upload -->
+        <section class="stp" data-step="0">
+          <h2>What are we working with?</h2>
+          <p class="lede">Add a night-sky or landscape shot. JPG, PNG or WebP.</p>
+          <label class="drop" for="file" id="dropZone">
+            <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="9" cy="10.5" r="1.8"/><path d="m21 16-5-5-8 9"/></svg>
+            <strong id="dropTitle">Choose a photo</strong>
+            <small id="dropSub">or drop it here</small>
+          </label>
+          <input type="file" id="file" accept="image/jpeg,image/png,image/webp">
+          <div class="loaded" id="loaded" hidden>
+            <canvas id="thumb" width="104" height="104"></canvas>
+            <div><strong id="fileName"></strong><span id="fileDims"></span></div>
           </div>
+          <button class="linkbtn small" id="sampleBtn">No photo handy? Try a sample moonrise</button>
+          <p class="status" id="uploadStatus"></p>
         </section>
-        <section class="block">
-          <p class="label">Frame readout</p>
+
+        <!-- 2 readout -->
+        <section class="stp" data-step="1" hidden>
+          <div class="headrow"><h2>Frame readout</h2><button class="magicbtn" id="surpriseBtn" title="Skip the questions and jump to a finished edit"><svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>Surprise me!</button></div>
+          <p class="lede" style="margin-top:-6px">Want it done for you? <b style="color:var(--fg);font-weight:500">Surprise me!</b> skips the questions and jumps to a finished edit.</p>
           <div class="readouts" id="readouts"></div>
           <ul class="obs" id="obs"></ul>
           <div class="ai" id="aiRead" hidden>
-            <p>Have Claude look at the photo and suggest directions and questions tailored to it.</p>
+            <p>Get directions and questions written for this exact photo.</p>
             <button class="btn" id="askRead">Ask Claude</button>
           </div>
           <p class="status" id="readStatus"></p>
         </section>
-        <section class="block">
-          <p class="label">Pick a direction</p>
+
+        <!-- 3 direction -->
+        <section class="stp" data-step="2" hidden>
+          <h2>Pick a direction</h2>
+          <p class="lede">Tap one to preview it on your photo.</p>
           <div class="dirs" id="dirs"></div>
         </section>
-        <section class="block" id="questions"></section>
-        <div class="row">
-          <button class="btn primary" id="toBlueprint">Build edit blueprint</button>
-        </div>
-        <label class="inline" id="useAiWrap" hidden><input type="checkbox" id="useAi" checked> <span id="useAiText">Let Claude write the blueprint</span></label>
-        <p class="status" id="bpStatus"></p>
-      </div>
 
-      <!-- PHASE 2 -->
-      <div class="phase" id="p2" hidden>
-        <h2>Edit blueprint</h2>
-        <p class="lede" id="bpLede">Starting values from your direction and answers. Every slider stays yours to adjust.</p>
-        <section class="block">
-          <p class="label">Instagram frame</p>
+        <!-- 4 vision -->
+        <section class="stp" data-step="3" hidden>
+          <h2>Lock the vision</h2>
+          <div id="questions" style="display:flex;flex-direction:column;gap:14px"></div>
+        </section>
+
+        <!-- 5 anything else -->
+        <section class="stp" data-step="4" hidden>
+          <h2>Anything else?</h2>
+          <p class="lede">Optional. Anything the edit should know about this shot.</p>
+          <textarea id="noteBox" placeholder="e.g. part of the BofA Plaza moonrise series, keep the red beacon visible"></textarea>
+          <label class="check" id="useAiWrap" hidden><input type="checkbox" id="useAi" checked> <span id="useAiText">Let Claude write the blueprint</span></label>
+          <p class="status" id="bpStatus"></p>
+        </section>
+
+        <!-- 6 instagram frame -->
+        <section class="stp" data-step="5" hidden>
+          <h2>Instagram frame</h2>
           <div class="seg" id="ratios">
             <button data-r="4:5" aria-pressed="true">Portrait 4:5<small>1080×1350</small></button>
             <button data-r="1:1">Square 1:1<small>1080×1080</small></button>
             <button data-r="16:9">Wide 16:9<small>1080×608</small></button>
           </div>
+          <div class="sl"><label for="zoom">Crop zoom</label><input type="range" id="zoom" min="1" max="3" step="0.01" value="1"><output id="zoomO">1.00×</output></div>
+          <span class="dims" id="dims"><strong>1080 × 1350</strong> · 4:5</span>
+          <div class="note" id="frameNote" hidden><b>Framing</b><span></span></div>
         </section>
-        <section class="block notes" id="notes"></section>
-        <section class="block">
-          <div class="row" style="justify-content:space-between"><p class="label" style="margin:0">Adjustments</p><button class="btn ghost" id="resetSl" style="padding:4px 10px;font-size:12px">Reset to blueprint</button></div>
-          <div class="sliders" id="sliders"></div>
-        </section>
-        <div class="row"><button class="btn ghost" data-go="1">Back</button><button class="btn primary" data-go="3">Next: watermark</button></div>
-      </div>
 
-      <!-- PHASE 3 -->
-      <div class="phase" id="p3" hidden>
-        <h2>Watermark &amp; export</h2>
-        <p class="lede">The mark is drawn last, on its own layer, so the grade never touches it.</p>
-        <section class="block">
-          <p class="label">Placement</p>
-          <div class="row" style="align-items:flex-start;gap:16px">
-            <div class="posgrid" id="posgrid"></div>
-            <p class="empty" id="autoNote" style="flex:1;min-width:140px"></p>
+        <!-- 7 adjustments -->
+        <section class="stp" data-step="6" hidden>
+          <div class="headrow"><h2>Adjustments</h2><button class="linkbtn small" id="resetTab">Reset tab</button></div>
+          <div class="tabs" role="tablist" id="tabs">
+            <button role="tab" data-tab="Light" aria-selected="true">Light</button>
+            <button role="tab" data-tab="Color" aria-selected="false">Color</button>
+            <button role="tab" data-tab="Finish" aria-selected="false">Finish</button>
           </div>
+          <canvas id="hist" width="360" height="80" aria-label="Luminance histogram"></canvas>
+          <div class="sliders" id="sliders"></div>
+          <div class="note" id="tabNote" hidden><b id="tabNoteK"></b><span></span></div>
         </section>
-        <section class="block">
+
+        <!-- 8 watermark & export -->
+        <section class="stp" data-step="7" hidden>
+          <h2>Watermark &amp; export</h2>
+          <div class="note surprised" id="surpriseNote" hidden><b>Surprise edit</b><span></span></div>
+          <p class="lede">The mark is drawn last, on its own layer, so the grade never touches it.</p>
+          <p class="label">Placement</p>
+          <div class="wmrow"><div class="posgrid" id="posgrid"></div><p id="autoNote"></p></div>
           <div class="sliders">
             <div class="sl"><label for="wmOpacity">Opacity</label><input type="range" id="wmOpacity" min="15" max="100" value="70"><output id="wmOpacityO">70%</output></div>
             <div class="sl"><label for="wmScale">Size</label><input type="range" id="wmScale" min="8" max="35" value="16"><output id="wmScaleO">16%</output></div>
             <div class="sl"><label for="wmMargin">Edge margin</label><input type="range" id="wmMargin" min="2" max="10" value="4"><output id="wmMarginO">4%</output></div>
           </div>
-        </section>
-        <section class="block">
-          <p class="label">Export</p>
-          <div class="note"><b>Output</b><span id="exportSpec">JPEG · 1080 × 1350 · quality 95 · sRGB</span></div>
-          <div class="row"><button class="btn ghost" data-go="2">Back</button><button class="btn primary" id="exportBtn">Export JPG</button></div>
+          <div class="note spec"><b>Output</b><span id="exportSpec">JPEG · 1080 × 1350 · quality 95 · sRGB</span></div>
           <p class="status" id="exportStatus"></p>
+          <details><summary>Pipeline state</summary><pre id="stateDump"></pre></details>
         </section>
-        <details>
-          <summary>Pipeline state</summary>
-          <pre id="stateDump"></pre>
-        </details>
       </div>
-    </aside>
+
+      <div class="bottom">
+        <button class="btn ghost" id="backBtn" hidden>
+          <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Back
+        </button>
+        <button class="btn primary" id="nextBtn" disabled>Next</button>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -301,13 +390,27 @@ const DEFAULT_QS = [
 ];
 const PLACE_Q = { id:"place", q:"Where will it live?", options:["Main feed (4:5)","Carousel cover (1:1)","Wide post (16:9)"] };
 
+
+const GROUPS = { Light:["exposure","contrast","highlights","shadows"], Color:["temperature","tint","vibrance","saturation"], Finish:["sharpen","vignette","grain"] };
+const STEPS = [
+  {title:"What are we working with?", phase:0},
+  {title:"Frame readout", phase:0},
+  {title:"Pick a direction", phase:0},
+  {title:"Lock the vision", phase:0},
+  {title:"Anything else?", phase:0},
+  {title:"Instagram frame", phase:1},
+  {title:"Adjustments", phase:1},
+  {title:"Watermark & export", phase:2},
+];
+const PHASES = ["Assess & vibe","Edit blueprint","Watermark & export"];
+const WM_DEFAULT = {opacity:70, scale:16, margin:4, position:"auto"};
+
 const state = {
-  phase:1, srcName:"Sample moonrise", isSample:true, stats:null,
+  step:0, maxStep:0, hasPhoto:false, srcName:"", isSample:false, stats:null, aiObs:false,
   dirs:DEFAULT_DIRS, dirIdx:null, qs:DEFAULT_QS, answers:{}, note:"",
-  ratio:"4:5", zoom:1, cx:.5, cy:.5,
+  ratio:"4:5", zoom:1, cx:.5, cy:.5, tab:"Light",
   filters:{...ZERO}, blueprint:null, notes:null, bpBy:null,
-  wm:{opacity:70, scale:16, margin:4, position:"auto"}, wmResolved:"bottom-right",
-  compare:false, done:{1:false,2:false},
+  wm:{...WM_DEFAULT}, wmResolved:"bottom-right", compare:false, busy:false,
 };
 
 // ---------- elements ----------
@@ -316,6 +419,7 @@ const view = $("view"), vctx = view.getContext("2d", {willReadFrequently:true});
 const srcC = document.createElement("canvas"), sctx = srcC.getContext("2d", {willReadFrequently:true});
 const wmImg = new Image(); wmImg.src = WM_SRC; wmImg.onload = () => schedule();
 $("brandMark").src = WM_SRC;
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 // ---------- sample image ----------
 function genSample(){
@@ -345,6 +449,7 @@ function genSample(){
   c.fillStyle="rgba(0,0,0,.28)"; c.fillRect(0,0,W,H); // underexposed like a raw frame
 }
 
+
 // ---------- analysis ----------
 function analyze(){
   const w=200,h=Math.round(200*srcC.height/srcC.width), t=document.createElement("canvas"); t.width=w; t.height=h;
@@ -358,11 +463,11 @@ function analyze(){
 }
 function renderReadouts(){
   const s=state.stats; const ev = Math.log2(Math.max(.02,s.mean)/.18);
-  const items=[["Scene",s.scene,false],["Exposure",(ev>=0?"+":"")+ev.toFixed(1)+" EV vs mid-grey",ev<-1.2],["Crushed shadows",s.crushPct+"%",s.crushPct>15],["Clipped highlights",s.clipPct+"%",s.clipPct>1.5],["White balance",s.cast>8?"Warm cast":s.cast<-8?"Cool cast":"Neutral",false],["Source",s.width+" × "+s.height,false]];
+  const items=[["Scene",s.scene,false],["Exposure",(ev>=0?"+":"")+ev.toFixed(1)+" EV",ev<-1.2],["Crushed shadows",s.crushPct+"%",s.crushPct>15],["Clipped highlights",s.clipPct+"%",s.clipPct>1.5],["Color cast",s.cast>8?"Warm cast":s.cast<-8?"Cool cast":"Neutral",false],["Source",s.width+" × "+s.height,false]];
   $("readouts").innerHTML = items.map(([k,v,f])=>`<div class="ro${f?" flag":""}"><span>${k}</span><strong>${v}</strong></div>`).join("");
   if(!state.aiObs){
     const o=[];
-    if(state.stats.scene.startsWith("Moon")) o.push(["The moon sits right above the tallest structure. That alignment is the hero, so the crop should protect it.",0]);
+    if(state.stats.scene.startsWith("Moon")) o.push(["The moon is the hero here. Keep it clear in the crop and away from the watermark.",0]);
     if(s.mean<.2) o.push(["The frame is underexposed overall. There is detail in the city that a shadow lift will bring back.",1]);
     if(s.crushPct>15) o.push([`${s.crushPct}% of pixels are near black, mostly the skyline.`,1]);
     if(s.clipPct>1.5) o.push(["Some highlights are clipping. Pull highlights before adding exposure.",1]);
@@ -371,19 +476,6 @@ function renderReadouts(){
     $("obs").innerHTML=o.map(([t,i])=>`<li class="${i?"issue":""}">${esc(t)}</li>`).join("");
   }
 }
-const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-
-function renderDirs(){
-  $("dirs").innerHTML = state.dirs.map((d,i)=>`<button class="dir" data-i="${i}" aria-pressed="${state.dirIdx===i}"><span class="k">${"ABC"[i]}</span><strong>${esc(d.name)}</strong><small>${esc(d.summary)}</small></button>`).join("");
-}
-function renderQs(){
-  const qs=[...state.qs, PLACE_Q];
-  $("questions").innerHTML = `<p class="label">Lock the vision</p>` + qs.map(q=>`<div class="q"><p>${esc(q.q)}</p><div class="chips">${q.options.map(o=>`<button class="chip" data-q="${q.id}" data-v="${esc(o)}" aria-pressed="${state.answers[q.id]===o}">${esc(o)}</button>`).join("")}</div></div>`).join("")
-    + `<div class="q"><p>Anything else? <span style="color:var(--muted);font-weight:400">(optional)</span></p><textarea id="noteBox" placeholder="e.g. part of the BofA Plaza moonrise series, keep the red beacon visible">${esc(state.note)}</textarea></div>`;
-  $("noteBox").addEventListener("input",e=>state.note=e.target.value);
-}
-$("dirs").addEventListener("click",e=>{ const b=e.target.closest(".dir"); if(!b)return; state.dirIdx=+b.dataset.i; state.filters=clampSet(state.dirs[state.dirIdx].settings); renderDirs(); setMode(); schedule(); });
-$("questions").addEventListener("click",e=>{ const b=e.target.closest(".chip"); if(!b)return; const q=b.dataset.q; state.answers[q]= state.answers[q]===b.dataset.v? undefined : b.dataset.v; if(q==="place"&&state.answers.place){ state.ratio = /1:1/.test(b.dataset.v)?"1:1":/16:9/.test(b.dataset.v)?"16:9":"4:5"; renderRatios(); schedule(); } renderQs(); });
 
 // ---------- local blueprint ----------
 function localBlueprint(){
@@ -445,6 +537,9 @@ Adjustment ranges: exposure -2..2 (EV, decimals), contrast -50..50, highlights -
 async function photoBlob(){ const t=document.createElement("canvas"), sc=Math.min(1,1400/Math.max(srcC.width,srcC.height)); t.width=srcC.width*sc|0; t.height=srcC.height*sc|0; t.getContext("2d").drawImage(srcC,0,0,t.width,t.height); return new Promise(r=>t.toBlob(r,"image/jpeg",.9)); }
 const errCopy = e => { const c=e?.code; const base=({not_granted:"Claude wasn't allowed for this page, so the built-in suggestions are used.",rate_limited:"Too many requests right now. Try again in a minute.",refused:"Claude declined this one. The built-in suggestions still work.",invalid_json:"Claude's answer couldn't be read. Try again.",image_rejected:"That image couldn't be sent. Try a smaller JPG.",locked:"Your Projects access has expired. Reload the page and enter the access code again.",site_key:"Claude isn't connected on the site right now. The built-in suggestions still work."}[c] || "Claude couldn't answer just now. The built-in suggestions still work."); const d=e?.detail || (e instanceof Error ? e.message : ""); return d ? `${base} (${d})` : base; };
 
+
+
+// ---------- step 2: Ask Claude ----------
 $("askRead").addEventListener("click", async()=>{
   const btn=$("askRead"), st=$("readStatus"); btn.disabled=true; st.className="status"; st.textContent="Claude is studying the frame…";
   try{
@@ -460,61 +555,108 @@ $("askRead").addEventListener("click", async()=>{
     if(res?.scene) state.stats.scene=String(res.scene).slice(0,40);
     const li=[...(res.strengths||[]).map(t=>[t,0]),...(res.issues||[]).map(t=>[t,1])];
     if(li.length){ state.aiObs=true; $("obs").innerHTML=li.map(([t,i])=>`<li class="${i?"issue":""}">${esc(t)}</li>`).join(""); }
-    renderReadouts(); renderDirs(); renderQs(); setMode(); schedule();
-    st.textContent="Claude's read is in. Pick a direction below.";
+    renderReadouts(); renderDirs(); renderQs(); setMode(); schedule(); updateNav();
+    st.textContent="Claude's read is in. Tap Next to see its directions.";
   }catch(e){ st.className="status err"; st.textContent=errCopy(e); }
   finally{ btn.disabled=false; }
 });
 
-$("toBlueprint").addEventListener("click", async()=>{
-  if(state.dirIdx==null){ $("bpStatus").className="status err"; $("bpStatus").textContent="Pick a direction first, so the blueprint has a starting point."; return; }
-  const st=$("bpStatus"), btn=$("toBlueprint"); st.className="status";
-  let bp=null;
+// ---------- steps 3-5: direction, vision, note ----------
+function renderDirs(){
+  $("dirs").innerHTML = state.dirs.map((d,i)=>`<button class="dir" data-i="${i}" aria-pressed="${state.dirIdx===i}"><span class="k">${"ABC"[i]}</span><strong>${esc(d.name)}</strong><small>${esc(d.summary)}</small></button>`).join("");
+}
+function renderQs(){
+  $("questions").innerHTML = [...state.qs, PLACE_Q].map(q=>`<div class="q"><p>${esc(q.q)}</p><div class="chips">${q.options.map(o=>`<button class="chip" data-q="${q.id}" data-v="${esc(o)}" aria-pressed="${state.answers[q.id]===o}">${esc(o)}</button>`).join("")}</div></div>`).join("");
+}
+$("dirs").addEventListener("click",e=>{ const b=e.target.closest(".dir"); if(!b)return; state.dirIdx=+b.dataset.i; state.filters=clampSet(state.dirs[state.dirIdx].settings); renderDirs(); setMode(); schedule(); updateNav(); });
+$("questions").addEventListener("click",e=>{ const b=e.target.closest(".chip"); if(!b)return; const q=b.dataset.q; state.answers[q]= state.answers[q]===b.dataset.v? undefined : b.dataset.v; if(q==="place"&&state.answers.place){ state.ratio = /1:1/.test(b.dataset.v)?"1:1":/16:9/.test(b.dataset.v)?"16:9":"4:5"; renderRatios(); schedule(); } renderQs(); });
+$("noteBox").addEventListener("input",e=>state.note=e.target.value);
+
+async function buildBlueprint(){
+  const st=$("bpStatus"); st.className="status"; let bp=null;
   if(ai && $("useAi").checked){
-    btn.disabled=true; st.textContent="Claude is writing the blueprint…";
+    state.busy=true; updateNav(); st.textContent="Claude is writing the blueprint…";
     try{
       const d=state.dirs[state.dirIdx];
       const qa=[...state.qs,PLACE_Q].map(q=>`${q.q} -> ${state.answers[q.id]||"(no answer)"}`).join("\n");
       const r = await ai.json(`${RULES}\n\nThe attached image is the raw photo. Stats: ${JSON.stringify(state.stats)}.\nChosen direction: ${d.name} — ${d.summary}. Its starting values: ${JSON.stringify(d.settings)}.\nThe photographer's answers:\n${qa}\nExtra note: ${state.note||"(none)"}\n\nBlend your analysis with their intent into final values. Reply with only JSON: {"ratio":"4:5|1:1|16:9","settings":{same 11 keys},"watermark":{"position":"top-left|top-right|bottom-left|bottom-right|bottom-center"},"notes":{"framing":"1-2 sentences on the crop","global":"1-2 sentences on light and color","local":"1 sentence on sharpening, vignette and grain"}}. Choose the watermark position that stays well clear of the hero subject.`, await photoBlob());
       if(r?.settings){ bp={ ratio: RATIOS[r.ratio]? r.ratio : "4:5", settings:clampSet(r.settings), watermark:{position:["top-left","top-right","bottom-left","bottom-right","bottom-center"].includes(r?.watermark?.position)?r.watermark.position:"auto"}, notes:{framing:String(r.notes?.framing||""),global:String(r.notes?.global||""),local:String(r.notes?.local||"")} }; state.bpBy="Claude"; }
-    }catch(e){ st.className="status err"; st.textContent=errCopy(e); }
-    finally{ btn.disabled=false; }
+    }catch(e){ st.className="status err"; st.textContent=errCopy(e)+" Built from your answers instead."; }
+    finally{ state.busy=false; }
   }
   if(!bp){ bp=localBlueprint(); state.bpBy="local"; }
   if(state.answers.place) bp.ratio=state.ratio;
-  state.blueprint=bp; state.filters={...bp.settings}; state.ratio=bp.ratio; state.wm.position=bp.watermark.position; state.notes=bp.notes;
-  state.done[1]=true; if(state.bpBy==="Claude") st.textContent="";
-  renderNotes(); renderRatios(); renderSliders(); renderPos(); go(2);
-});
-
-// ---------- phase 2 ui ----------
-function renderNotes(){
-  const n=state.notes; if(!n){ $("notes").innerHTML=""; return; }
-  $("bpLede").textContent = state.bpBy==="Claude" ? "Claude blended its read of the photo with your answers. Every slider stays yours to adjust." : "Starting values from your direction and answers. Every slider stays yours to adjust.";
-  $("notes").innerHTML = [["Framing",n.framing],["Light & color",n.global],["Finish",n.local]].filter(x=>x[1]).map(([k,v])=>`<div class="note"><b>${k}</b>${esc(v)}</div>`).join("");
+  state.blueprint=bp; state.filters={...bp.settings}; state.ratio=bp.ratio; state.wm.position=bp.watermark.position; state.notes=bp.notes; state.surprise=null;
+  if(state.bpBy==="Claude") st.textContent="";
+  renderRatios(); renderNotes(); renderPos(); go(5);
 }
-function renderSliders(){
-  $("sliders").innerHTML = SL.map(s=>{
-    if(s.length===1) return `<p class="group">${s[0]}</p>`;
-    const [k,label,min,max,step]=s, v=state.filters[k];
-    return `<div class="sl${v!==0?" changed":""}" data-k="${k}"><label for="s_${k}">${label}</label><input type="range" id="s_${k}" class="${k==="temperature"?"temp":""}" min="${min}" max="${max}" step="${step}" value="${v}"><output>${fmt(k,v)}</output></div>`;
-  }).join("");
+
+// ---------- Surprise me: one tap to a finished edit ----------
+function autoBlueprint(){
+  // No Claude: start from the look that suits the scene, then let the measured stats steer it.
+  const s=state.stats, night=/moon|night/i.test(s.scene);
+  const idx = night ? 0 : 2;
+  const keep=state.dirIdx; state.dirIdx=idx; state.answers={}; state.note="";
+  const bp=localBlueprint(); state.dirIdx=keep;
+  bp.name = night ? "Warm lunar glow" : "Crisp, punchy pop";
+  bp.why = night ? "Night frame, so the moon goes warm, the city lifts out of the shadows and the sky stays deep." : "A clean, high-contrast grade with lifted shadows tends to stop the scroll on landscape shots.";
+  return bp;
+}
+async function surprise(){
+  const st=$("readStatus"), btn=$("surpriseBtn"); st.className="status"; let bp=null;
+  state.busy=true; btn.disabled=true; $("askRead").disabled=true; updateNav();
+  if(ai){
+    st.textContent="Claude is creating the best edit for this shot…";
+    try{
+      const r = await ai.json(`${RULES}
+
+The attached image is the raw photo. Measured stats: ${JSON.stringify(state.stats)}.
+The photographer tapped "Surprise me": skip the questions and make the single best Instagram edit for this exact photo, the one most likely to stop the scroll while staying true to the scene. Fix exposure and clipping first, then grade. Reply with only JSON: {"name":"2-4 word name for the look","why":"one sentence on what you did and why","ratio":"4:5|1:1|16:9","settings":{"exposure":0,"contrast":0,"highlights":0,"shadows":0,"temperature":0,"tint":0,"vibrance":0,"saturation":0,"sharpen":0,"vignette":0,"grain":0},"watermark":{"position":"top-left|top-right|bottom-left|bottom-right|bottom-center"},"notes":{"framing":"1-2 sentences on the crop","global":"1-2 sentences on light and color","local":"1 sentence on sharpening, vignette and grain"}}. Choose the watermark position that stays well clear of the hero subject.`, await photoBlob());
+      if(r?.settings){ bp={ name:String(r.name||"Claude's pick").slice(0,40), why:String(r.why||""), ratio: RATIOS[r.ratio]? r.ratio : "4:5", settings:clampSet(r.settings), watermark:{position:["top-left","top-right","bottom-left","bottom-right","bottom-center"].includes(r?.watermark?.position)?r.watermark.position:"auto"}, notes:{framing:String(r.notes?.framing||""),global:String(r.notes?.global||""),local:String(r.notes?.local||"")} }; state.bpBy="Claude"; }
+    }catch(e){ st.className="status err"; st.textContent=errCopy(e)+" Used the built-in auto edit instead."; }
+  }
+  if(!bp){ bp=autoBlueprint(); state.bpBy="local"; }
+  state.busy=false; btn.disabled=false; $("askRead").disabled=false;
+  state.blueprint=bp; state.filters={...bp.settings}; state.ratio=bp.ratio; state.wm.position=bp.watermark.position; state.notes=bp.notes; state.surprise=bp;
+  if(state.bpBy==="Claude") st.textContent="";
+  renderRatios(); renderNotes(); renderPos(); state.maxStep=6; go(7);
+}
+$("surpriseBtn").addEventListener("click", surprise);
+
+// ---------- steps 6-7: frame, adjustments ----------
+function renderNotes(){
+  const n=state.notes||{};
+  const fn=$("frameNote"); fn.hidden=!n.framing; fn.querySelector("span").textContent=n.framing||"";
+  const t=state.tab, txt = t==="Finish" ? n.local : n.global;
+  const tn=$("tabNote"); tn.hidden=!txt; $("tabNoteK").textContent = t==="Finish" ? "Finish" : "Light & color"; tn.querySelector("span").textContent=txt||"";
 }
 const fmt=(k,v)=>{ const s=SL.find(x=>x[0]===k); return s[5]?s[5](v):(v>0?"+":"")+v; };
-$("sliders").addEventListener("input",e=>{ const row=e.target.closest(".sl"); if(!row)return; const k=row.dataset.k, v=+e.target.value; state.filters[k]=v; row.querySelector("output").textContent=fmt(k,v); row.classList.toggle("changed",v!==0); schedule(); });
-$("sliders").addEventListener("dblclick",e=>{ const row=e.target.closest(".sl"); if(!row)return; const k=row.dataset.k, v=state.blueprint?.settings[k]??0; state.filters[k]=v; renderSliders(); schedule(); });
-$("resetSl").addEventListener("click",()=>{ state.filters={...(state.blueprint?.settings||ZERO)}; renderSliders(); schedule(); });
+function renderSliders(){
+  $("sliders").innerHTML = GROUPS[state.tab].map(k=>{
+    const [,label,min,max,step]=SL.find(x=>x[0]===k), v=state.filters[k];
+    return `<div class="sl${v!==0?" changed":""}" data-k="${k}"><label for="s_${k}">${label}</label><input type="range" id="s_${k}" class="${k==="temperature"?"temp":k==="tint"?"tint":""}" min="${min}" max="${max}" step="${step}" value="${v}"><output>${fmt(k,v)}</output></div>`;
+  }).join("");
+  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===state.tab));
+  $("hist").hidden = state.tab!=="Light";
+  renderNotes();
+}
+$("tabs").addEventListener("click",e=>{ const b=e.target.closest("button[data-tab]"); if(!b)return; state.tab=b.dataset.tab; renderSliders(); schedule(); });
+$("sliders").addEventListener("input",e=>{ const row=e.target.closest(".sl"); if(!row)return; const k=row.dataset.k, v=+e.target.value; state.filters[k]=v; row.querySelector("output").textContent=fmt(k,v); row.classList.toggle("changed",v!==0); setMode(); schedule(); });
+$("sliders").addEventListener("dblclick",e=>{ const row=e.target.closest(".sl"); if(!row)return; const k=row.dataset.k; state.filters[k]=state.blueprint?.settings[k]??0; renderSliders(); schedule(); });
+$("resetTab").addEventListener("click",()=>{ for(const k of GROUPS[state.tab]) state.filters[k]=state.blueprint?.settings[k]??0; renderSliders(); schedule(); });
 function renderRatios(){ document.querySelectorAll("#ratios button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.r===state.ratio)); const [w,h]=RATIOS[state.ratio]; $("dims").innerHTML=`<strong>${w} × ${h}</strong> · ${state.ratio}`; $("exportSpec").textContent=`JPEG · ${w} × ${h} · quality 95 · sRGB`; }
 $("ratios").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b)return; state.ratio=b.dataset.r; renderRatios(); schedule(); });
+$("zoom").addEventListener("input",e=>{ state.zoom=+e.target.value; $("zoomO").textContent=state.zoom.toFixed(2)+"×"; schedule(); });
 
-// ---------- phase 3 ui ----------
-const POS=["top-left",null,"top-right","auto","bottom-center",null,"bottom-left",null,"bottom-right"];
+// ---------- step 8: watermark ----------
 function renderPos(){
   const order=["top-left","","top-right","","auto","","bottom-left","bottom-center","bottom-right"];
-  $("posgrid").innerHTML = order.map(p=>p?`<button data-p="${p}" aria-pressed="${state.wm.position===p}" title="${p}">${p==="auto"?"Auto":""}</button>`:`<button disabled></button>`).join("");
+  $("posgrid").innerHTML = order.map(p=>p?`<button data-p="${p}" aria-pressed="${state.wm.position===p}" aria-label="${p}">${p==="auto"?"Auto":""}</button>`:`<button disabled tabindex="-1" aria-hidden="true"></button>`).join("");
 }
 $("posgrid").addEventListener("click",e=>{ const b=e.target.closest("button[data-p]"); if(!b)return; state.wm.position=b.dataset.p; renderPos(); schedule(); });
-[["wmOpacity","opacity"],["wmScale","scale"],["wmMargin","margin"]].forEach(([id,k])=>$(id).addEventListener("input",e=>{ state.wm[k]=+e.target.value; $(id+"O").textContent=state.wm[k]+"%"; schedule(); }));
+const WMC=[["wmOpacity","opacity"],["wmScale","scale"],["wmMargin","margin"]];
+WMC.forEach(([id,k])=>$(id).addEventListener("input",e=>{ state.wm[k]=+e.target.value; $(id+"O").textContent=state.wm[k]+"%"; schedule(); }));
+function syncWmControls(){ WMC.forEach(([id,k])=>{ $(id).value=state.wm[k]; $(id+"O").textContent=state.wm[k]+"%"; }); }
 
 // ---------- pipeline ----------
 function cropRect(ow,oh){
@@ -562,13 +704,24 @@ function renderTo(ctx,ow,oh,{raw=false,wm=true}={}){
   const [x,y,cw,ch]=cropRect(ow,oh); ctx.imageSmoothingQuality="high"; ctx.drawImage(srcC,x,y,cw,ch,0,0,ow,oh);
   const img=ctx.getImageData(0,0,ow,oh);
   if(!raw){ processPixels(img,state.filters,ow,oh); ctx.putImageData(img,0,0); }
-  if(wm && state.phase===3 && wmImg.complete && wmImg.naturalWidth){
+  if(wm && state.step===7 && wmImg.complete && wmImg.naturalWidth){
     const ww=ow*state.wm.scale/100, wh=ww*wmImg.naturalHeight/wmImg.naturalWidth, mg=ow*state.wm.margin/100;
     const p = state.wm.position==="auto" ? pickAuto(img,ow,oh,ww,wh,mg) : state.wm.position; state.wmResolved=p;
     const [wx,wy]=wmXY(p,ow,oh,ww,wh,mg);
     ctx.save(); ctx.globalAlpha=state.wm.opacity/100; ctx.shadowColor="rgba(0,0,0,.35)"; ctx.shadowBlur=ow*.006; ctx.drawImage(wmImg,wx,wy,ww,wh); ctx.restore();
   }
   return img;
+}
+
+let pending=false;
+function schedule(){ if(pending) return; pending=true; requestAnimationFrame(render); }
+function render(){
+  pending=false; if(!state.hasPhoto) return;
+  const [W,H]=RATIOS[state.ratio], ow=720, oh=Math.round(H*720/W);
+  const img=renderTo(vctx,ow,oh,{raw:state.compare});
+  if(state.step===6 && state.tab==="Light") drawHist(img);
+  if(state.step===7) $("autoNote").textContent = state.wm.position==="auto" ? `Auto placed it ${state.wmResolved.replace("-"," ")}: the quietest, darkest corner, away from the hero.` : `Pinned ${state.wm.position.replace("-"," ")}. Check it doesn't touch the subject.`;
+  $("stateDump").textContent = JSON.stringify({ dimensions:{ratio:state.ratio,width:W,height:H}, crop:{zoom:+state.zoom.toFixed(2),centerX:+state.cx.toFixed(3),centerY:+state.cy.toFixed(3)}, filters:state.filters, watermark:{...state.wm, resolved:state.wmResolved}, export:{type:"image/jpeg",quality:.95} }, null, 2);
 }
 function drawHist(img){
   const hc=$("hist"), c=hc.getContext("2d"), bins=new Uint32Array(64), d=img.data; let max=1;
@@ -577,50 +730,49 @@ function drawHist(img){
   c.clearRect(0,0,hc.width,hc.height); const bw=hc.width/64;
   for(let i=0;i<64;i++){ const v=Math.min(1,bins[i]/max), hh=v*(hc.height-6); c.fillStyle= (i===0||i===63)&&bins[i]>max*.5 ? "#e58a6f" : "rgba(232,230,225,.55)"; c.fillRect(i*bw,hc.height-hh,bw-1,hh); }
 }
-let pending=false;
-function schedule(){ if(pending) return; pending=true; requestAnimationFrame(render); }
-function render(){
-  pending=false; const [W,H]=RATIOS[state.ratio], s=720/W, ow=720, oh=Math.round(H*s);
-  const img=renderTo(vctx,ow,oh,{raw:state.compare});
-  drawHist(img);
-  if(state.phase===3) $("autoNote").textContent = state.wm.position==="auto" ? `Auto placed it ${state.wmResolved.replace("-"," ")}: the quietest, darkest corner, away from the hero.` : `Pinned ${state.wm.position.replace("-"," ")}. Check it doesn't touch the subject.`;
-  $("stateDump").textContent = JSON.stringify({ dimensions:{ratio:state.ratio,width:W,height:H}, crop:{zoom:+state.zoom.toFixed(2),centerX:+state.cx.toFixed(3),centerY:+state.cy.toFixed(3)}, filters:state.filters, watermark:{...state.wm, resolved:state.wmResolved}, export:{type:"image/jpeg",quality:.95} }, null, 2);
-}
 function setMode(){ const edited=KEYS.some(k=>state.filters[k]!==0); const t=$("modeTag"); t.textContent= state.compare?"Before":edited?"Edited":"Raw"; t.classList.toggle("before",state.compare); }
 
 // ---------- stage interactions ----------
-$("zoom").addEventListener("input",e=>{ state.zoom=+e.target.value; schedule(); });
 let drag=null;
-view.addEventListener("pointerdown",e=>{ drag={x:e.clientX,y:e.clientY}; view.setPointerCapture(e.pointerId); });
+view.addEventListener("pointerdown",e=>{ if(state.step!==5) return; drag={x:e.clientX,y:e.clientY}; view.setPointerCapture(e.pointerId); });
 view.addEventListener("pointermove",e=>{ if(!drag)return; const [W,H]=RATIOS[state.ratio]; const [, , cw]=cropRect(720,Math.round(H*720/W)); const k=cw/view.getBoundingClientRect().width; state.cx-=(e.clientX-drag.x)*k/srcC.width; state.cy-=(e.clientY-drag.y)*k/srcC.height; drag={x:e.clientX,y:e.clientY}; schedule(); });
 ["pointerup","pointercancel"].forEach(t=>view.addEventListener(t,()=>drag=null));
 const cmp=$("compare");
-const on=()=>{ state.compare=true; setMode(); schedule(); }, off=()=>{ if(!state.compare)return; state.compare=false; setMode(); schedule(); };
-cmp.addEventListener("pointerdown",on); ["pointerup","pointerleave","pointercancel"].forEach(t=>cmp.addEventListener(t,off));
-cmp.addEventListener("keydown",e=>{ if(e.key===" "||e.key==="Enter"){ e.preventDefault(); on(); } }); cmp.addEventListener("keyup",off);
+const cmpOn=e=>{ e?.preventDefault?.(); state.compare=true; cmp.setAttribute("aria-pressed","true"); setMode(); schedule(); };
+const cmpOff=()=>{ if(!state.compare)return; state.compare=false; cmp.setAttribute("aria-pressed","false"); setMode(); schedule(); };
+cmp.addEventListener("pointerdown",cmpOn); ["pointerup","pointerleave","pointercancel"].forEach(t=>cmp.addEventListener(t,cmpOff));
+cmp.addEventListener("contextmenu",e=>e.preventDefault());
+cmp.addEventListener("keydown",e=>{ if(e.key===" "||e.key==="Enter"){ e.preventDefault(); cmpOn(); } }); cmp.addEventListener("keyup",cmpOff);
 
-// ---------- upload ----------
+// ---------- photo in ----------
+function photoLoaded(name, isSample){
+  state.hasPhoto=true; state.srcName=name; state.isSample=isSample;
+  resetEdits();
+  $("fileName").textContent=name; $("fileDims").textContent=`${srcC.width} × ${srcC.height}`;
+  const tc=$("thumb").getContext("2d"), s=Math.min(srcC.width,srcC.height); tc.drawImage(srcC,(srcC.width-s)/2,(srcC.height-s)/2,s,s,0,0,104,104);
+  $("uploadStatus").textContent="";
+  go(1);
+}
 function loadFile(file){
-  if(!file || !/^image\//.test(file.type)){ $("readStatus").className="status err"; $("readStatus").textContent="That file isn't an image. Use a JPG, PNG or WebP."; return; }
+  const st=$("uploadStatus");
+  if(!file || !/^image\//.test(file.type)){ st.className="status err"; st.textContent="That file isn't an image. Use a JPG, PNG or WebP."; return; }
   const url=URL.createObjectURL(file), im=new Image();
-  im.onload=()=>{ const sc=Math.min(1,4200/Math.max(im.width,im.height)); srcC.width=im.width*sc|0; srcC.height=im.height*sc|0; sctx.drawImage(im,0,0,srcC.width,srcC.height); URL.revokeObjectURL(url);
-    state.srcName=file.name; state.isSample=false; state.aiObs=false; state.dirs=DEFAULT_DIRS; state.qs=DEFAULT_QS; state.dirIdx=null; state.answers={}; state.filters={...ZERO}; state.blueprint=null; state.notes=null; state.zoom=1; state.cx=.5; state.cy=.5; state.done={1:false,2:false}; $("zoom").value=1;
-    $("fileName").innerHTML=esc(file.name)+` <span>· ${srcC.width} × ${srcC.height}</span>`; $("srcTag").textContent=file.name.length>28?file.name.slice(0,26)+"…":file.name; $("readStatus").textContent="";
-    analyze(); renderReadouts(); renderDirs(); renderQs(); setMode(); go(1); };
-  im.onerror=()=>{ $("readStatus").className="status err"; $("readStatus").textContent="That image couldn't be opened. Try exporting it as a JPG."; };
+  im.onload=()=>{ const sc=Math.min(1,4200/Math.max(im.width,im.height)); srcC.width=im.width*sc|0; srcC.height=im.height*sc|0; sctx.drawImage(im,0,0,srcC.width,srcC.height); URL.revokeObjectURL(url); photoLoaded(file.name,false); };
+  im.onerror=()=>{ st.className="status err"; st.textContent="That image couldn't be opened. Try exporting it as a JPG."; };
   im.src=url;
 }
-$("file").addEventListener("change",e=>loadFile(e.target.files[0]));
-const stage=$("stage");
-stage.addEventListener("dragover",e=>{ e.preventDefault(); stage.classList.add("drag"); });
-stage.addEventListener("dragleave",()=>stage.classList.remove("drag"));
-stage.addEventListener("drop",e=>{ e.preventDefault(); stage.classList.remove("drag"); loadFile(e.dataTransfer.files[0]); });
+$("file").addEventListener("change",e=>{ loadFile(e.target.files[0]); e.target.value=""; });
+$("sampleBtn").addEventListener("click",()=>{ genSample(); photoLoaded("Sample moonrise",true); });
+const app=$("app");
+app.addEventListener("dragover",e=>{ e.preventDefault(); $("dropZone").classList.add("on"); });
+app.addEventListener("dragleave",e=>{ if(!app.contains(e.relatedTarget)) $("dropZone").classList.remove("on"); });
+app.addEventListener("drop",e=>{ e.preventDefault(); $("dropZone").classList.remove("on"); loadFile(e.dataTransfer.files[0]); });
 
 // ---------- export ----------
-$("exportBtn").addEventListener("click", async()=>{
-  const st=$("exportStatus"), btn=$("exportBtn"); st.className="status";
+async function exportJpg(){
+  const st=$("exportStatus"); st.className="status";
   if(!saveFile){ st.className="status err"; st.textContent="Saving files isn't available in this view. Open the page in claude.ai to export."; return; }
-  btn.disabled=true; st.textContent="Rendering full size…";
+  state.busy=true; updateNav(); st.textContent="Rendering full size…";
   try{
     const [W,H]=RATIOS[state.ratio], c=document.createElement("canvas"), ctx=c.getContext("2d",{willReadFrequently:true});
     renderTo(ctx,W,H);
@@ -629,23 +781,80 @@ $("exportBtn").addEventListener("click", async()=>{
     await saveFile(blob, `${base}_ig-${state.ratio.replace(":","x")}.jpg`);
     st.textContent=`Saved ${W} × ${H} JPG.`;
   }catch(e){ st.className = e?.code==="declined"?"status":"status err"; st.textContent = e?.code==="declined" ? "Export cancelled." : e?.code==="rate_limited" ? "A save prompt is already open. Finish it first." : "The file couldn't be saved here. Try again from claude.ai."; }
-  finally{ btn.disabled=false; }
+  finally{ state.busy=false; updateNav(); }
+}
+
+// ---------- reset & home ----------
+function resetEdits(){
+  state.aiObs=false; state.dirs=DEFAULT_DIRS; state.qs=DEFAULT_QS; state.dirIdx=null; state.answers={}; state.note="";
+  state.filters={...ZERO}; state.blueprint=null; state.notes=null; state.bpBy=null; state.surprise=null;
+  state.ratio="4:5"; state.zoom=1; state.cx=.5; state.cy=.5; state.tab="Light"; state.wm={...WM_DEFAULT}; state.maxStep=0;
+  $("zoom").value=1; $("zoomO").textContent="1.00×"; $("noteBox").value=""; $("useAi").checked=true;
+  ["readStatus","bpStatus","exportStatus"].forEach(id=>{ $(id).textContent=""; $(id).className="status"; });
+  if(state.hasPhoto){ analyze(); renderReadouts(); }
+  renderDirs(); renderQs(); renderRatios(); renderPos(); renderNotes(); syncWmControls(); setMode();
+}
+function goHome(){
+  state.hasPhoto=false; state.srcName=""; state.isSample=false; srcC.width=srcC.height=1;
+  resetEdits(); go(0);
+}
+function twoTap(btn, label, action){
+  let timer=null; const html=btn.innerHTML;
+  const disarm=()=>{ clearTimeout(timer); timer=null; btn.classList.remove("armed"); btn.innerHTML=html; };
+  btn.addEventListener("click",()=>{
+    if(btn.classList.contains("armed")){ disarm(); action(); return; }
+    btn.classList.add("armed"); btn.innerHTML=html+`<span>${label}</span>`; timer=setTimeout(disarm,3000);
+  });
+  btn.addEventListener("blur",()=>{ if(timer) setTimeout(()=>{ if(document.activeElement!==btn) disarm(); },150); });
+}
+twoTap($("resetBtn"),"Tap again to reset",()=>{ resetEdits(); go(0); });
+twoTap($("homeBtn"),"Tap again to start over",goHome);
+
+// ---------- navigation ----------
+function canNext(){
+  if(state.busy) return false;
+  switch(state.step){ case 0: return state.hasPhoto; case 2: return state.dirIdx!=null; default: return true; }
+}
+function updateNav(){
+  const s=state.step, nb=$("nextBtn");
+  nb.textContent = s===4 ? (state.busy?"Building…":"Build edit blueprint") : s===6 ? "Next: Watermark" : s===7 ? (state.busy?"Saving…":"Export JPG") : "Next";
+  nb.disabled=!canNext();
+  $("backBtn").hidden = s===0;
+  $("resetBtn").disabled = !state.hasPhoto;
+  $("phaseName").textContent = STEPS[s].title; $("phaseName").title = PHASES[STEPS[s].phase];
+  $("stepCount").textContent = `${s+1} / ${STEPS.length}`;
+  $("bars").innerHTML = STEPS.map((x,i)=>`<i class="${i===s?"now":i<=state.maxStep?"done":""}${i===5||i===7?" gap":""}"></i>`).join("");
+  if(s===2 && state.dirIdx==null) nb.title="Pick a direction first"; else nb.removeAttribute("title");
+}
+function go(i){
+  if(i>0 && !state.hasPhoto) i=0;
+  if(i>=5 && !state.blueprint) i=Math.min(i,4);
+  state.step=i; state.maxStep=Math.max(state.maxStep, i-1, 0);
+  document.querySelectorAll(".stp").forEach(el=>el.hidden = +el.dataset.step!==i); app.dataset.step=i;
+  app.classList.toggle("nophoto", !state.hasPhoto);
+  $("stage").hidden = !state.hasPhoto;
+  $("stage").classList.toggle("dragable", i===5); $("dragHint").hidden = i!==5;
+  $("loaded").hidden = !state.hasPhoto;
+  $("dropTitle").textContent = state.hasPhoto ? "Replace photo" : "Choose a photo";
+  $("dropSub").textContent = state.hasPhoto ? "or tap Next to edit this one from scratch" : "or drop it here";
+  $("sampleBtn").hidden = state.hasPhoto;
+  if(i===6) renderSliders();
+  if(i===5||i===6) renderNotes();
+  const sn=$("surpriseNote"); sn.hidden = !(i===7 && state.surprise);
+  if(state.surprise) sn.querySelector("span").textContent = `${state.surprise.name}${state.bpBy==="Claude"?" by Claude":""}. ${state.surprise.why} Tap Back to fine-tune.`;
+  $("panel").scrollTop=0;
+  updateNav(); setMode(); schedule();
+}
+$("backBtn").addEventListener("click",()=>go(Math.max(0,state.step-1)));
+$("nextBtn").addEventListener("click",()=>{
+  if(!canNext()) return;
+  if(state.step===4) return buildBlueprint();
+  if(state.step===7) return exportJpg();
+  go(state.step+1);
 });
 
-// ---------- phases ----------
-function go(p){
-  if(p>1 && !state.blueprint){ $("bpStatus").className="status err"; $("bpStatus").textContent="Build the blueprint first: pick a direction and press Build."; p=1; }
-  state.phase=p; if(p===3) state.done[2]=true;
-  [1,2,3].forEach(i=>$("p"+i).hidden= i!==p);
-  document.querySelectorAll(".step").forEach(b=>{ const i=+b.dataset.phase; b.toggleAttribute("aria-current",false); if(i===p) b.setAttribute("aria-current","step"); b.classList.toggle("done", !!state.done[i] && i!==p); });
-  if(p===2) renderSliders();
-  setMode(); schedule();
-}
-document.querySelectorAll(".step").forEach(b=>b.addEventListener("click",()=>go(+b.dataset.phase)));
-document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(+b.dataset.go)));
-
 // ---------- boot ----------
-genSample(); analyze(); renderReadouts(); renderDirs(); renderQs(); renderRatios(); renderPos(); setMode(); schedule();
+renderDirs(); renderQs(); renderRatios(); renderPos(); go(0);
 })();
 </script>
 </body>
