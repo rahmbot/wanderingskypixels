@@ -6,13 +6,13 @@
 <title>Launch Sightline — App | WanderingSkyPixels</title>
 <link rel="icon" href="../logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=DM+Mono:wght@300;400&family=Outfit:wght@300;400;500;600&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* Layout: three stacked steps (launch → location → verdict); a "yes" opens the night-sky simulator and plan below. Deliberately single dark look. */
 :root{
   /* WanderingSkyPixels site tokens */
-  --night:#050b18; --panel:#0d1a2e; --panel2:#0a1628; --line:#2a3d5a; --fg:#e8e0cc; --muted:#8193ad;
-  --flame:#c8a96e; --plume:#cfe8ff; --go:#4fc4a0; --warn:#e9c46a; --no:#e07a6a;
+  --night:#0B0D12; --panel:#1A1F2B; --panel2:#101319; --line:#262C38; --fg:#F2EBDD; --muted:#8193ad;
+  --flame:#FF6A1A; --plume:#cfe8ff; --go:#4fc4a0; --warn:#e9c46a; --no:#e07a6a;
   --display:"Cormorant Garamond",Georgia,serif;
   --body:"Outfit",system-ui,-apple-system,sans-serif;
   --mono:"DM Mono",ui-monospace,Menlo,monospace;
@@ -53,7 +53,7 @@ h3{font-family:var(--mono);font-size:12px;font-weight:400;letter-spacing:.18em;m
 label.l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 input[type=text],input[type=number],input[type=date],input[type=time],select{font-family:var(--mono);font-size:14px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:7px 9px;min-width:0}
 input[type=number]{width:120px}
-button.b{font-family:var(--mono);font-size:12px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;background:linear-gradient(135deg,#c8a96e,#a07840);color:#050b18;border:0;border-radius:2px;padding:10px 18px;cursor:pointer}
+button.b{font-family:var(--mono);font-size:12px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;background:linear-gradient(135deg,#FF6A1A,#C2470A);color:#0B0D12;border:0;border-radius:2px;padding:10px 18px;cursor:pointer}
 button.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--plume);outline-offset:2px}
 button:disabled{opacity:.5;cursor:default}
@@ -69,7 +69,7 @@ button:disabled{opacity:.5;cursor:default}
 .sky{position:relative;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#000}
 canvas{display:block;width:100%;aspect-ratio:16/8}
 @media (max-width:600px){canvas{aspect-ratio:4/3}}
-.hud{position:absolute;right:10px;top:10px;font-family:var(--mono);font-size:12px;pointer-events:none;display:flex;flex-direction:column;align-items:flex-end;gap:4px;padding:8px 10px;border:1px solid #2b3a5c;border-radius:5px;background:rgba(8,13,26,.82)}
+.hud{position:absolute;right:10px;top:10px;font-family:var(--mono);font-size:12px;pointer-events:none;display:flex;flex-direction:column;align-items:flex-end;gap:4px;padding:8px 10px;border:1px solid #2b3a5c;border-radius:5px;background:rgba(11,13,18,.82)}
 .hud .t{font-family:var(--mono);font-size:20px;letter-spacing:.04em;line-height:1;color:var(--flame)}
 .status{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:3px;border:1px solid var(--line)}
 .status.lit{color:var(--plume);border-color:#4a6c92}.status.dark{color:var(--flame);border-color:#6b4a22}.status.hidden{color:var(--muted)}

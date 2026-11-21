@@ -7,12 +7,12 @@
 <meta name="robots" content="noindex">
 <link rel="icon" href="../logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* Layout: one phone column — scene photo, one batch of setup questions, a viewfinder readout, the framing guide drawn on the photo, settings, then beta feedback. Single dark look to match the site. */
 :root{
-  --night:#050b18; --panel:#0d1a2e; --panel2:#0a1628; --mid:#111f38; --line:#2a3d5a;
-  --fg:#e8e0cc; --muted:#8193ad; --gold:#c8a96e; --gold2:#a07840; --aurora:#4fc4a0; --nebula:#7b8cde; --no:#e07a6a;
+  --night:#0B0D12; --panel:#1A1F2B; --panel2:#101319; --mid:#151922; --line:#262C38;
+  --fg:#F2EBDD; --muted:#8193ad; --gold:#FF6A1A; --gold2:#C2470A; --aurora:#4fc4a0; --nebula:#7b8cde; --no:#e07a6a;
   --display:"Cormorant Garamond",Georgia,serif;
   --body:"Outfit",system-ui,-apple-system,sans-serif;
   --mono:"DM Mono",ui-monospace,Menlo,monospace;
@@ -28,7 +28,7 @@ img{max-width:100%}
 
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .top img{height:34px;width:auto;display:block}
-.beta{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--aurora);border:1px solid rgba(79,196,160,.45);border-radius:2px;padding:3px 8px}
+.beta{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--aurora);border:1px solid rgba(255,178,122,.45);border-radius:2px;padding:3px 8px}
 header{display:flex;flex-direction:column;gap:4px}
 h1{font-family:var(--display);font-weight:600;font-size:clamp(30px,8vw,40px);line-height:1.02;margin:0;text-wrap:balance}
 h1 span{color:var(--gold)}
@@ -41,7 +41,7 @@ section{display:flex;flex-direction:column;gap:10px}
 .shot img{width:100%;height:100%;object-fit:cover;display:block}
 .shot .empty{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);text-align:center;padding:16px;font-size:14px}
 .shot .empty svg{width:40px;height:40px;color:var(--gold)}
-.shot .clear{position:absolute;top:8px;right:8px;background:rgba(5,11,24,.75);color:var(--fg);border:1px solid var(--line);border-radius:99px;padding:5px 10px;font:500 12px var(--body);cursor:pointer}
+.shot .clear{position:absolute;top:8px;right:8px;background:rgba(11,13,18,.75);color:var(--fg);border:1px solid var(--line);border-radius:99px;padding:5px 10px;font:500 12px var(--body);cursor:pointer}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;border-radius:2px;border:1px solid var(--line);background:var(--panel);color:var(--fg);font:500 14px var(--body);padding:0 14px;cursor:pointer;text-align:center}
@@ -64,7 +64,7 @@ textarea{min-height:84px;resize:vertical}
 .addrow button{flex:none;min-height:42px;padding:0 12px;border-radius:3px;border:1px solid var(--gold);background:transparent;color:var(--gold);font:500 14px var(--body);cursor:pointer}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
 .seg button{min-height:38px;padding:0 12px;border-radius:99px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);font:400 14px var(--body);cursor:pointer}
-.seg button[aria-pressed="true"]{background:rgba(200,169,110,.14);border-color:var(--gold);color:var(--fg);font-weight:500}
+.seg button[aria-pressed="true"]{background:rgba(255,106,26,.14);border-color:var(--gold);color:var(--fg);font-weight:500}
 
 .status{font-size:14px;color:var(--muted);display:flex;align-items:center;gap:10px}
 .status.err{color:var(--no)}
@@ -87,7 +87,7 @@ textarea{min-height:84px;resize:vertical}
 .shot-cmp{display:flex;flex-direction:column;gap:8px}
 .shot-cmp .frame{position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#000;max-width:100%}
 .shot-cmp canvas{display:block;width:100%;height:auto}
-.shot-cmp .badge{position:absolute;left:8px;bottom:8px;font:400 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;background:rgba(5,11,24,.82);color:var(--gold);padding:4px 8px;border-radius:2px}
+.shot-cmp .badge{position:absolute;left:8px;bottom:8px;font:400 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;background:rgba(11,13,18,.82);color:var(--gold);padding:4px 8px;border-radius:2px}
 .seg.small button{min-height:32px;font-size:13px;padding:0 12px}
 .pnote{font-size:13.5px;color:var(--muted);border-left:2px solid var(--nebula);padding:2px 0 2px 10px}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted)}
@@ -107,7 +107,7 @@ ol.framing p b{display:block;font-weight:500}
 ul.notes li{padding-left:16px;position:relative;font-size:14px}
 ul.notes li::before{content:"";position:absolute;left:2px;top:.6em;width:6px;height:6px;background:var(--aurora);transform:rotate(45deg)}
 .close{border-left:2px solid var(--gold);padding:4px 0 4px 12px;font-size:14px;color:var(--muted)}
-.changes{background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.35);border-radius:3px;padding:10px 12px;font-size:14px}
+.changes{background:rgba(255,106,26,.12);border:1px solid rgba(255,106,26,.35);border-radius:3px;padding:10px 12px;font-size:14px}
 
 /* feedback */
 .fb .scale{display:flex;gap:6px}
@@ -478,7 +478,7 @@ ${SHAPE}`;
       if (!text) return;
       g.font = font; const pad = 5 * u, tw = g.measureText(text).width, th = 13 * u;
       x = Math.max(pad, Math.min(W - tw - pad * 3, x)); y = Math.max(th + pad * 2, Math.min(H - pad, y));
-      g.fillStyle = "rgba(5,11,24,.82)"; g.fillRect(x, y - th - pad, tw + pad * 2, th + pad * 2);
+      g.fillStyle = "rgba(11,13,18,.82)"; g.fillRect(x, y - th - pad, tw + pad * 2, th + pad * 2);
       g.fillStyle = color; g.fillText(text, x + pad, y - pad * 0.2);
     }
     // crop: dim outside, frame + thirds inside

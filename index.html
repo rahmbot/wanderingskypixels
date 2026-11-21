@@ -8,37 +8,37 @@
 <meta property="og:title" content="WanderingSkyPixels — Landscape, Astro & Aerial Photography">
 <meta property="og:description" content="Atlanta-based photographer capturing landscapes, cityscapes, the night sky, and the world from above.">
 <meta property="og:url" content="https://wanderingskypixels.com/">
-<meta name="theme-color" content="#050b18">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23050b18' rx='8'/%3E%3Cpolygon points='32,8 38,24 56,24 42,34 48,50 32,40 16,50 22,34 8,24 26,24' fill='none' stroke='%23c8a96e' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#0B0D12">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230B0D12' rx='8'/%3E%3Cpolygon points='32,8 38,24 56,24 42,34 48,50 32,40 16,50 22,34 8,24 26,24' fill='none' stroke='%23FF6A1A' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/theme.css">
 <style>
-
-  :root{--night:#050b18;--deep:#0a1628;--mid:#111f38;--card:#0d1a2e;--horizon:#1a2f52;--star:#e8e0cc;--gold:#c8a96e;--aurora:#4fc4a0;--nebula:#7b8cde;--muted:#6a7d99;--dim:#2a3d5a;}
+  :root{--night:#0B0D12;--deep:#101319;--mid:#151922;--card:#1A1F2B;--horizon:#232A38;--star:#F2EBDD;--gold:#FF6A1A;--aurora:#FFB27A;--nebula:#8A94A6;--muted:#8A94A6;--dim:#262C38;}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   html{scroll-behavior:smooth;}
-  body{background:var(--night);color:var(--star);font-family:'Outfit',sans-serif;font-weight:300;overflow-x:hidden;}
+  body{background:var(--night);color:var(--star);font-family:'Barlow',sans-serif;font-weight:300;overflow-x:hidden;}
   a{text-decoration:none;color:inherit;}
 
   /* NAV */
-  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 4rem;background:rgba(5,11,24,0.92);backdrop-filter:blur(18px);border-bottom:1px solid rgba(200,169,110,0.12);transition:background 0.3s;}
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 4rem;background:rgba(11,13,18,0.92);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,106,26,0.12);transition:background 0.3s;}
   .nav-logo{text-decoration:none;display:flex;align-items:center;line-height:1;flex-shrink:0;}
   .nav-logo img{height:42px;width:auto;display:block;filter:brightness(1.08);transition:opacity 0.2s;}
   .nav-logo:hover img{opacity:0.85;}
   .nav-links{display:flex;gap:2rem;list-style:none;align-items:center;}
   .nav-links a{color:var(--muted);font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.2s;}
   .nav-links a:hover{color:var(--gold);}
-  .nav-cta{background:linear-gradient(135deg,var(--gold),#a07840);color:var(--night)!important;padding:0.5rem 1.4rem;border-radius:2px;font-weight:500!important;}
+  .nav-cta{background:linear-gradient(135deg,var(--gold),#C2470A);color:var(--night)!important;padding:0.5rem 1.4rem;border-radius:2px;font-weight:500!important;}
 
   /* DROPDOWN */
   .nav-dropdown{position:relative;}
   .nav-dropdown-trigger{display:flex;align-items:center;gap:0.3rem;cursor:pointer;}
-  .nav-dropdown-menu{display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);background:rgba(5,11,24,0.98);backdrop-filter:blur(20px);border:1px solid var(--dim);min-width:230px;list-style:none;padding:0.5rem 0;z-index:200;box-shadow:0 20px 60px rgba(0,0,0,0.5);margin-top:8px;}
+  .nav-dropdown-menu{display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);background:rgba(11,13,18,0.98);backdrop-filter:blur(20px);border:1px solid var(--dim);min-width:230px;list-style:none;padding:0.5rem 0;z-index:200;box-shadow:0 20px 60px rgba(0,0,0,0.5);margin-top:8px;}
   .nav-dropdown:hover .nav-dropdown-menu{display:block;}
   .nav-dropdown-menu::before{content:'';position:absolute;top:-8px;left:0;right:0;height:8px;background:transparent;}
   .nav-dropdown-menu li a{display:block;padding:0.65rem 1.2rem;color:var(--muted);font-size:0.82rem;letter-spacing:0.06em;transition:color 0.2s,background 0.2s;white-space:nowrap;}
-  .nav-dropdown-menu li a:hover{color:var(--gold);background:rgba(200,169,110,0.06);}
+  .nav-dropdown-menu li a:hover{color:var(--gold);background:rgba(255,106,26,0.06);}
   .dropdown-divider{border-top:1px solid var(--dim);margin:0.4rem 0;}
 
   /* HAMBURGER */
@@ -47,35 +47,35 @@
   .hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
   .hamburger.open span:nth-child(2){opacity:0;}
   .hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
-  .mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:rgba(5,11,24,0.98);backdrop-filter:blur(20px);border-bottom:1px solid var(--dim);z-index:99;padding:1.5rem 2rem;flex-direction:column;gap:0;}
+  .mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:rgba(11,13,18,0.98);backdrop-filter:blur(20px);border-bottom:1px solid var(--dim);z-index:99;padding:1.5rem 2rem;flex-direction:column;gap:0;}
   .mobile-menu.open{display:flex;}
   .mobile-menu a{color:var(--muted);font-size:0.9rem;letter-spacing:0.08em;text-transform:uppercase;padding:1rem 0;border-bottom:1px solid var(--dim);transition:color 0.2s;}
   .mobile-menu a:hover{color:var(--gold);}
   .mobile-menu a:last-child{border-bottom:none;}
-  .mobile-menu .nav-cta{background:linear-gradient(135deg,var(--gold),#a07840);color:var(--night)!important;text-align:center;padding:0.8rem;border-radius:2px;border-bottom:none!important;margin-top:0.5rem;}
+  .mobile-menu .nav-cta{background:linear-gradient(135deg,var(--gold),#C2470A);color:var(--night)!important;text-align:center;padding:0.8rem;border-radius:2px;border-bottom:none!important;margin-top:0.5rem;}
 
   /* PAGE HERO */
   .page-hero{padding:9rem 2rem 4rem;text-align:center;position:relative;z-index:1;}
-  .page-hero-label{font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.24em;text-transform:uppercase;color:var(--aurora);margin-bottom:1.2rem;}
+  .page-hero-label{font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;letter-spacing:0.24em;text-transform:uppercase;color:var(--aurora);margin-bottom:1.2rem;}
   .page-hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,7vw,5rem);font-weight:300;line-height:1.05;}
   .page-hero-title em{font-style:italic;color:var(--gold);}
   .page-hero-sub{margin-top:1.2rem;font-size:1rem;color:var(--muted);max-width:560px;margin-left:auto;margin-right:auto;line-height:1.75;}
 
   /* SECTION */
   .section-inner{max-width:1200px;margin:0 auto;padding:4rem 2rem;}
-  .section-label{font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--aurora);margin-bottom:1rem;display:flex;align-items:center;gap:0.8rem;}
+  .section-label{font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--aurora);margin-bottom:1rem;display:flex;align-items:center;gap:0.8rem;}
   .section-label::before{content:'';display:block;width:28px;height:1px;background:var(--aurora);flex-shrink:0;}
   .section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,4vw,3rem);font-weight:300;line-height:1.15;}
-  .section-title em{font-style:italic;color:var(--gold);}
+  .section-title em{font-style:italic;color:var(--star);}
 
   /* BUTTONS */
-  .btn-primary{background:linear-gradient(135deg,var(--gold),#a07840);color:var(--night);padding:0.85rem 2.2rem;border-radius:2px;font-size:0.88rem;font-weight:500;letter-spacing:0.06em;transition:opacity 0.2s,transform 0.2s;display:inline-block;}
+  .btn-primary{background:linear-gradient(135deg,var(--gold),#C2470A);color:var(--night);padding:0.85rem 2.2rem;border-radius:2px;font-size:0.88rem;font-weight:500;letter-spacing:0.06em;transition:opacity 0.2s,transform 0.2s;display:inline-block;}
   .btn-primary:hover{opacity:0.88;transform:translateY(-2px);}
   .btn-outline{border:1px solid var(--dim);color:var(--muted);padding:0.85rem 2.2rem;border-radius:2px;font-size:0.88rem;letter-spacing:0.06em;transition:border-color 0.2s,color 0.2s;display:inline-block;}
   .btn-outline:hover{border-color:var(--gold);color:var(--gold);}
 
   /* BACK BUTTON */
-  .back-btn{display:inline-flex;align-items:center;gap:0.5rem;color:var(--muted);font-size:0.85rem;letter-spacing:0.06em;border:1px solid var(--dim);padding:0.55rem 1.2rem;border-radius:2px;transition:color 0.2s,border-color 0.2s;background:none;cursor:pointer;font-family:'Outfit',sans-serif;}
+  .back-btn{display:inline-flex;align-items:center;gap:0.5rem;color:var(--muted);font-size:0.85rem;letter-spacing:0.06em;border:1px solid var(--dim);padding:0.55rem 1.2rem;border-radius:2px;transition:color 0.2s,border-color 0.2s;background:none;cursor:pointer;font-family:'Barlow',sans-serif;}
   .back-btn:hover{color:var(--gold);border-color:var(--gold);}
 
   /* CARDS */
@@ -83,12 +83,12 @@
   .loc-card:hover{border-color:var(--gold);}
   .loc-header{display:flex;align-items:center;gap:1rem;margin-bottom:1rem;}
   .loc-icon{font-size:2rem;flex-shrink:0;}
-  .loc-num{font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.18em;color:var(--gold);margin-bottom:0.2rem;}
+  .loc-num{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.18em;color:var(--gold);margin-bottom:0.2rem;}
   .loc-name{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:400;line-height:1.2;}
   .loc-desc{font-size:0.87rem;color:var(--muted);line-height:1.7;margin-bottom:1rem;}
   .loc-tags{display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1rem;}
-  .loc-tag{font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.1em;color:var(--aurora);border:1px solid rgba(79,196,160,0.25);padding:0.2rem 0.55rem;border-radius:1px;}
-  .loc-tip{font-size:0.82rem;color:var(--star);background:rgba(200,169,110,0.06);border-left:2px solid var(--gold);padding:0.7rem 0.9rem;line-height:1.6;border-radius:0 2px 2px 0;}
+  .loc-tag{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;letter-spacing:0.1em;color:var(--aurora);border:1px solid rgba(255,178,122,0.25);padding:0.2rem 0.55rem;border-radius:1px;}
+  .loc-tip{font-size:0.82rem;color:var(--star);background:rgba(255,106,26,0.06);border-left:2px solid var(--gold);padding:0.7rem 0.9rem;line-height:1.6;border-radius:0 2px 2px 0;}
   .loc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem;}
 
   /* FOOTER */
@@ -98,7 +98,7 @@
   .footer-links{display:flex;gap:2rem;list-style:none;flex-wrap:wrap;}
   .footer-links a{font-size:0.8rem;color:var(--muted);letter-spacing:0.06em;transition:color 0.2s;}
   .footer-links a:hover{color:var(--gold);}
-  .footer-copy{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;}
+  .footer-copy{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;}
 
   /* TOAST */
   .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--gold);color:var(--star);padding:1rem 2rem;border-radius:2px;font-size:0.88rem;z-index:999;transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 8px 40px rgba(0,0,0,0.5);}
@@ -110,22 +110,22 @@
   .lightbox-img{max-width:90vw;max-height:80vh;object-fit:contain;border-radius:2px;}
   .lightbox-caption{margin-top:1.2rem;text-align:center;}
   .lightbox-caption-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;}
-  .lightbox-caption-sub{font-size:0.8rem;color:var(--muted);margin-top:0.3rem;font-family:'DM Mono',monospace;letter-spacing:0.08em;}
+  .lightbox-caption-sub{font-size:0.8rem;color:var(--muted);margin-top:0.3rem;font-family:'Barlow Condensed',sans-serif;letter-spacing:0.08em;}
   .lightbox-close{position:absolute;top:1.5rem;right:1.5rem;color:var(--muted);font-size:1.8rem;cursor:pointer;background:none;border:none;transition:color 0.2s;line-height:1;}
   .lightbox-close:hover{color:var(--gold);}
   .lightbox-nav{display:flex;gap:1rem;margin-top:1.5rem;}
-  .lightbox-btn{background:none;border:1px solid var(--dim);color:var(--muted);padding:0.5rem 1.2rem;border-radius:2px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.82rem;letter-spacing:0.06em;transition:all 0.2s;}
+  .lightbox-btn{background:none;border:1px solid var(--dim);color:var(--muted);padding:0.5rem 1.2rem;border-radius:2px;cursor:pointer;font-family:'Barlow',sans-serif;font-size:0.82rem;letter-spacing:0.06em;transition:all 0.2s;}
   .lightbox-btn:hover{border-color:var(--gold);color:var(--gold);}
-  .lightbox-counter{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:0.1em;align-self:center;}
+  .lightbox-counter{font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;color:var(--muted);letter-spacing:0.1em;align-self:center;}
 
   /* PHOTO GRID */
   .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:2.5rem;}
   .photo-item{position:relative;aspect-ratio:1;overflow:hidden;background:var(--card);cursor:pointer;}
   .photo-item img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s,filter 0.3s;filter:brightness(0.9);}
   .photo-item:hover img{transform:scale(1.04);filter:brightness(1);}
-  .photo-item-overlay{position:absolute;inset:0;background:rgba(5,11,24,0.75);opacity:0;transition:opacity 0.3s;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;text-align:center;}
+  .photo-item-overlay{position:absolute;inset:0;background:rgba(11,13,18,0.75);opacity:0;transition:opacity 0.3s;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;text-align:center;}
   .photo-item:hover .photo-item-overlay{opacity:1;}
-  .photo-item-tag{font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.14em;color:var(--aurora);margin-bottom:0.5rem;}
+  .photo-item-tag{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;letter-spacing:0.14em;color:var(--aurora);margin-bottom:0.5rem;}
   .photo-item-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:300;line-height:1.3;}
   .photo-item-zoom{margin-top:0.8rem;font-size:1.2rem;}
 
@@ -135,7 +135,7 @@
   .portfolio-hub-card:hover{border-color:var(--gold);background:var(--mid);}
   .portfolio-hub-card:hover .hub-arrow{opacity:1;transform:translateX(4px);}
   .hub-emoji{font-size:2.5rem;margin-bottom:1rem;display:block;}
-  .hub-count{font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.18em;color:var(--gold);margin-bottom:0.4rem;}
+  .hub-count{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.18em;color:var(--gold);margin-bottom:0.4rem;}
   .hub-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:400;margin-bottom:0.6rem;}
   .hub-desc{font-size:0.85rem;color:var(--muted);line-height:1.65;}
   .hub-arrow{position:absolute;top:2rem;right:2rem;color:var(--gold);opacity:0;transition:opacity 0.2s,transform 0.2s;}
@@ -147,21 +147,21 @@
   .spot-hero-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-end;padding-right:4rem;font-size:10rem;opacity:0.07;pointer-events:none;}
   .spot-hero-content{position:relative;z-index:1;}
   .spot-meta{display:flex;flex-wrap:wrap;gap:0.6rem;margin-top:1.2rem;}
-  .spot-badge{background:rgba(200,169,110,0.10);border:1px solid rgba(200,169,110,0.25);color:var(--gold);font-family:'DM Mono',monospace;font-size:0.67rem;letter-spacing:0.12em;padding:0.3rem 0.8rem;border-radius:1px;}
+  .spot-badge{background:rgba(255,106,26,0.10);border:1px solid rgba(255,106,26,0.25);color:var(--gold);font-family:'Barlow Condensed',sans-serif;font-size:0.67rem;letter-spacing:0.12em;padding:0.3rem 0.8rem;border-radius:1px;}
 
   /* ARTICLE STYLE */
   .article-body{max-width:760px;margin:0 auto;}
   .article-body p{font-size:0.95rem;color:var(--muted);line-height:1.85;margin-bottom:1.4rem;}
   .article-body h2{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;margin:2.5rem 0 1rem;color:var(--star);}
   .article-body h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:400;margin:2rem 0 0.8rem;color:var(--gold);}
-  .article-tip{background:rgba(200,169,110,0.06);border-left:2px solid var(--gold);padding:1rem 1.2rem;border-radius:0 2px 2px 0;margin:1.5rem 0;font-size:0.88rem;color:var(--star);line-height:1.65;}
+  .article-tip{background:rgba(255,106,26,0.06);border-left:2px solid var(--gold);padding:1rem 1.2rem;border-radius:0 2px 2px 0;margin:1.5rem 0;font-size:0.88rem;color:var(--star);line-height:1.65;}
   .article-tip strong{color:var(--gold);}
 
   /* SEASON / STAT CARDS */
   .spot-intro{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start;padding:3rem 0;border-top:1px solid var(--dim);border-bottom:1px solid var(--dim);margin-bottom:3rem;}
   .spot-intro-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--dim);border:1px solid var(--dim);}
   .spot-stat-card{background:var(--card);padding:1.5rem;text-align:center;}
-  .spot-stat-num{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--gold);line-height:1;}
+  .spot-stat-num{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--star);line-height:1;}
   .spot-stat-label{font-size:0.75rem;color:var(--muted);margin-top:0.4rem;line-height:1.5;}
 
   /* RESPONSIVE */
@@ -228,7 +228,7 @@
 
 <!-- HERO -->
 <section id="hero" style="position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 2rem 4rem;z-index:2;">
-  <p style="font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.24em;text-transform:uppercase;color:var(--aurora);margin-bottom:1.6rem;opacity:0;animation:fadeUp 0.8s 0.2s forwards;">Landscape · Cityscape · Astro · Aerial Photography</p>
+  <p style="font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;letter-spacing:0.24em;text-transform:uppercase;color:var(--aurora);margin-bottom:1.6rem;opacity:0;animation:fadeUp 0.8s 0.2s forwards;">Landscape · Cityscape · Astro · Aerial Photography</p>
   <h1 style="font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,8vw,7rem);font-weight:300;line-height:1.05;opacity:0;animation:fadeUp 0.9s 0.4s forwards;">Where the <em style="font-style:italic;color:var(--gold);">sky</em> meets the earth</h1>
   <p style="margin-top:1.6rem;font-size:1.05rem;color:var(--muted);max-width:560px;line-height:1.7;opacity:0;animation:fadeUp 0.9s 0.6s forwards;">Chasing light from Atlanta's skyline to remote dark sky sanctuaries — capturing the world through long exposures, star trails, and bird's-eye perspectives.</p>
   <div style="margin-top:2.8rem;display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;opacity:0;animation:fadeUp 0.9s 0.8s forwards;">
@@ -248,10 +248,10 @@
     <h2 class="section-title">Four specialties,<br><em>one obsession</em></h2>
     <p style="margin-top:1rem;color:var(--muted);line-height:1.75;max-width:580px;font-size:0.95rem;">From Atlanta's glittering skyline to remote dark sky wilderness — each discipline demands different skills, patience, and timing.</p>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.5px;margin-top:3.5rem;border:1.5px solid var(--dim);">
-      <a href="specialties/landscape.html" class="cat-card reveal"><span style="font-size:2.4rem;margin-bottom:1.4rem;display:block;">🏔️</span><div style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);margin-bottom:0.6rem;">01 / 04</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:400;margin-bottom:0.8rem;">Landscape & Cityscape</div><div style="font-size:0.87rem;color:var(--muted);line-height:1.7;">Golden hours, long exposures, and Atlanta's skyline at blue hour.</div><div class="hub-arrow" style="position:absolute;top:2.5rem;right:2.5rem;color:var(--gold);opacity:0;transition:opacity 0.2s,transform 0.2s;">→</div></a>
-      <a href="specialties/astro.html" class="cat-card reveal"><span style="font-size:2.4rem;margin-bottom:1.4rem;display:block;">🌌</span><div style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);margin-bottom:0.6rem;">02 / 04</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:400;margin-bottom:0.8rem;">Astrophotography</div><div style="font-size:0.87rem;color:var(--muted);line-height:1.7;">Milky Way, moon phases, star trails, and DSO through the Dwarf 3.</div><div class="hub-arrow" style="position:absolute;top:2.5rem;right:2.5rem;color:var(--gold);opacity:0;transition:opacity 0.2s,transform 0.2s;">→</div></a>
-      <a href="specialties/aerial.html" class="cat-card reveal"><span style="font-size:2.4rem;margin-bottom:1.4rem;display:block;">🚁</span><div style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);margin-bottom:0.6rem;">03 / 04</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:400;margin-bottom:0.8rem;">Drone & Aerial</div><div style="font-size:0.87rem;color:var(--muted);line-height:1.7;">DJI Mavic 3 Pro perspectives that ground photography can't reach.</div><div class="hub-arrow" style="position:absolute;top:2.5rem;right:2.5rem;color:var(--gold);opacity:0;transition:opacity 0.2s,transform 0.2s;">→</div></a>
-      <a href="portfolio/index.html" class="cat-card reveal"><span style="font-size:2.4rem;margin-bottom:1.4rem;display:block;">📷</span><div style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);margin-bottom:0.6rem;">04 / 04</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:400;margin-bottom:0.8rem;">Portfolio</div><div style="font-size:0.87rem;color:var(--muted);line-height:1.7;">Atlanta, New York, London, and the night sky — all the work.</div><div class="hub-arrow" style="position:absolute;top:2.5rem;right:2.5rem;color:var(--gold);opacity:0;transition:opacity 0.2s,transform 0.2s;">→</div></a>
+      <a href="specialties/landscape.html" class="cat-card reveal"><span style="font-size:2.4rem;margin-bottom:1.4rem;display:block;">🏔️</span><div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);margin-bottom:0.6rem;">01 / 04</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:400;margin-bottom:0.8rem;">Landscape & Cityscape</div><div style="font-size:0.87rem;color:var(--muted);line-height:1.7;">Golden hours, long exposures, and Atlanta's skyline at blue hour.</div><div class="hub-arrow" style="position:absolute;top:2.5rem;right:2.5rem;color:var(--gold);opacity:0;transition:opacity 0.2s,transform 0.2s;">→</div></a>
+      <a href="specialties/astro.html" class="cat-card reveal"><span style="font-size:2.4rem;margin-bottom:1.4rem;display:block;">🌌</span><div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);margin-bottom:0.6rem;">02 / 04</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:400;margin-bottom:0.8rem;">Astrophotography</div><div style="font-size:0.87rem;color:var(--muted);line-height:1.7;">Milky Way, moon phases, star trails, and DSO through the Dwarf 3.</div><div class="hub-arrow" style="position:absolute;top:2.5rem;right:2.5rem;color:var(--gold);opacity:0;transition:opacity 0.2s,transform 0.2s;">→</div></a>
+      <a href="specialties/aerial.html" class="cat-card reveal"><span style="font-size:2.4rem;margin-bottom:1.4rem;display:block;">🚁</span><div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);margin-bottom:0.6rem;">03 / 04</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:400;margin-bottom:0.8rem;">Drone & Aerial</div><div style="font-size:0.87rem;color:var(--muted);line-height:1.7;">DJI Mavic 3 Pro perspectives that ground photography can't reach.</div><div class="hub-arrow" style="position:absolute;top:2.5rem;right:2.5rem;color:var(--gold);opacity:0;transition:opacity 0.2s,transform 0.2s;">→</div></a>
+      <a href="portfolio/index.html" class="cat-card reveal"><span style="font-size:2.4rem;margin-bottom:1.4rem;display:block;">📷</span><div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);margin-bottom:0.6rem;">04 / 04</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:400;margin-bottom:0.8rem;">Portfolio</div><div style="font-size:0.87rem;color:var(--muted);line-height:1.7;">Atlanta, New York, London, and the night sky — all the work.</div><div class="hub-arrow" style="position:absolute;top:2.5rem;right:2.5rem;color:var(--gold);opacity:0;transition:opacity 0.2s,transform 0.2s;">→</div></a>
     </div>
   </div>
 </section>
@@ -308,18 +308,18 @@
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;">
       <a href="learn/milky-way-guide.html" style="background:var(--card);border:1px solid var(--dim);padding:2.8rem;position:relative;overflow:hidden;display:block;color:inherit;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--dim)'">
         <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--aurora));"></div>
-        <div style="display:inline-block;background:rgba(79,196,160,0.1);border:1px solid rgba(79,196,160,0.25);color:var(--aurora);font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.14em;padding:0.25rem 0.65rem;margin-bottom:1.2rem;">FEATURED GUIDE</div>
+        <div style="display:inline-block;background:rgba(255,178,122,0.1);border:1px solid rgba(255,178,122,0.25);color:var(--aurora);font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.14em;padding:0.25rem 0.65rem;margin-bottom:1.2rem;">FEATURED GUIDE</div>
         <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:400;line-height:1.2;margin-bottom:0.9rem;">Milky Way Photography — Georgia Edition</div>
         <p style="font-size:0.87rem;color:var(--muted);line-height:1.7;">Dark sky escapes within driving distance of Atlanta, camera settings for the astro-modified A7RII, and the NPF rule explained.</p>
-        <div style="display:flex;gap:1.5rem;margin-top:1.5rem;font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);">
+        <div style="display:flex;gap:1.5rem;margin-top:1.5rem;font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;color:var(--muted);">
           <span>Astrophotography</span><span>12 min read</span>
         </div>
       </a>
       <div style="display:flex;flex-direction:column;gap:1rem;">
-        <a href="learn/moon-photography.html" style="background:var(--card);border:1px solid var(--dim);padding:1.5rem;display:block;color:inherit;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--dim)'"><div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--gold);margin-bottom:0.4rem;">MOON</div><div style="font-size:0.9rem;color:var(--star);">Moon Photography at 600mm</div></a>
-        <a href="learn/atlanta-blue-hour.html" style="background:var(--card);border:1px solid var(--dim);padding:1.5rem;display:block;color:inherit;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--dim)'"><div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--gold);margin-bottom:0.4rem;">CITYSCAPE</div><div style="font-size:0.9rem;color:var(--star);">Atlanta Blue Hour — Best Spots</div></a>
-        <a href="learn/nd-filter-guide.html" style="background:var(--card);border:1px solid var(--dim);padding:1.5rem;display:block;color:inherit;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--dim)'"><div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--gold);margin-bottom:0.4rem;">LONG EXPOSURE</div><div style="font-size:0.9rem;color:var(--star);">ND Filter Guide — Stops & Stacking</div></a>
-        <a href="learn/drone-atlanta.html" style="background:var(--card);border:1px solid var(--dim);padding:1.5rem;display:block;color:inherit;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--dim)'"><div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--gold);margin-bottom:0.4rem;">DRONE</div><div style="font-size:0.9rem;color:var(--star);">Flying Mavic 3 Pro Over Atlanta</div></a>
+        <a href="learn/moon-photography.html" style="background:var(--card);border:1px solid var(--dim);padding:1.5rem;display:block;color:inherit;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--dim)'"><div style="font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;color:var(--gold);margin-bottom:0.4rem;">MOON</div><div style="font-size:0.9rem;color:var(--star);">Moon Photography at 600mm</div></a>
+        <a href="learn/atlanta-blue-hour.html" style="background:var(--card);border:1px solid var(--dim);padding:1.5rem;display:block;color:inherit;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--dim)'"><div style="font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;color:var(--gold);margin-bottom:0.4rem;">CITYSCAPE</div><div style="font-size:0.9rem;color:var(--star);">Atlanta Blue Hour — Best Spots</div></a>
+        <a href="learn/nd-filter-guide.html" style="background:var(--card);border:1px solid var(--dim);padding:1.5rem;display:block;color:inherit;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--dim)'"><div style="font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;color:var(--gold);margin-bottom:0.4rem;">LONG EXPOSURE</div><div style="font-size:0.9rem;color:var(--star);">ND Filter Guide — Stops & Stacking</div></a>
+        <a href="learn/drone-atlanta.html" style="background:var(--card);border:1px solid var(--dim);padding:1.5rem;display:block;color:inherit;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--dim)'"><div style="font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;color:var(--gold);margin-bottom:0.4rem;">DRONE</div><div style="font-size:0.9rem;color:var(--star);">Flying Mavic 3 Pro Over Atlanta</div></a>
       </div>
     </div>
   </div>
@@ -328,7 +328,7 @@
 
 
 <!-- GEAR RECOMMENDER HOTLINK -->
-<section style="background:linear-gradient(135deg,rgba(200,169,110,0.08),rgba(200,169,110,0.03));border-top:1px solid rgba(200,169,110,0.2);border-bottom:1px solid rgba(200,169,110,0.2);position:relative;z-index:2;">
+<section style="background:linear-gradient(135deg,rgba(255,106,26,0.08),rgba(255,106,26,0.03));border-top:1px solid rgba(255,106,26,0.2);border-bottom:1px solid rgba(255,106,26,0.2);position:relative;z-index:2;">
   <div style="max-width:1200px;margin:0 auto;padding:1.8rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
     <div style="display:flex;align-items:center;gap:1rem;">
       <span style="font-size:1.6rem;">&#10024;</span>
@@ -337,7 +337,7 @@
         <div style="font-size:0.82rem;color:var(--muted);margin-top:0.1rem;">Describe your scene and get AI-powered camera &amp; lens recommendations — from my kit and beyond.</div>
       </div>
     </div>
-    <a href="projects/camera-recommender.html" style="background:linear-gradient(135deg,var(--gold),#a07840);color:var(--night);padding:0.7rem 1.6rem;border-radius:2px;font-size:0.85rem;font-weight:500;letter-spacing:0.04em;text-decoration:none;white-space:nowrap;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Try the Gear Recommender &#8594;</a>
+    <a href="projects/camera-recommender.html" style="background:linear-gradient(135deg,var(--gold),#C2470A);color:var(--night);padding:0.7rem 1.6rem;border-radius:2px;font-size:0.85rem;font-weight:500;letter-spacing:0.04em;text-decoration:none;white-space:nowrap;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Try the Gear Recommender &#8594;</a>
   </div>
 </section>
 <!-- WEEKLY SPOTLIGHT -->
@@ -352,7 +352,7 @@
       <div class="spotlight-img-wrap" onclick="window.open('https://www.instagram.com/wanderingskypixels/','_blank')">
         <img src="images/spotlight/week-2026-06-week2.jpg" alt="Downtown Atlanta at Sunset — Drone">
         <div class="spotlight-img-overlay">
-          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.12em;color:var(--star);">View on Instagram &rarr;</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;letter-spacing:0.12em;color:var(--star);">View on Instagram &rarr;</span>
         </div>
       </div>
       <div class="spotlight-content">
@@ -378,18 +378,18 @@
   .spotlight-img-wrap{position:relative;overflow:hidden;min-height:480px;cursor:pointer;}
   .spotlight-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform 0.5s;}
   .spotlight-img-wrap:hover img{transform:scale(1.03);}
-  .spotlight-img-overlay{position:absolute;inset:0;background:rgba(5,11,24,0.4);display:flex;align-items:flex-end;padding:1.5rem;opacity:0;transition:opacity 0.3s;}
+  .spotlight-img-overlay{position:absolute;inset:0;background:rgba(11,13,18,0.4);display:flex;align-items:flex-end;padding:1.5rem;opacity:0;transition:opacity 0.3s;}
   .spotlight-img-wrap:hover .spotlight-img-overlay{opacity:1;}
   .spotlight-content{padding:3rem;display:flex;flex-direction:column;justify-content:space-between;border-left:1px solid var(--dim);}
-  .spotlight-week{font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.22em;color:var(--aurora);text-transform:uppercase;margin-bottom:0.8rem;}
+  .spotlight-week{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.22em;color:var(--aurora);text-transform:uppercase;margin-bottom:0.8rem;}
   .spotlight-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;line-height:1.2;margin-bottom:1.2rem;}
   .spotlight-title em{font-style:italic;color:var(--gold);}
   .spotlight-story{font-size:0.9rem;color:var(--muted);line-height:1.85;}
   .spotlight-meta{margin-top:1.8rem;padding-top:1.5rem;border-top:1px solid var(--dim);display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
   .spotlight-meta-item{display:flex;flex-direction:column;gap:0.2rem;}
-  .spotlight-meta-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.16em;color:var(--muted);text-transform:uppercase;}
+  .spotlight-meta-label{font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;letter-spacing:0.16em;color:var(--muted);text-transform:uppercase;}
   .spotlight-meta-value{font-size:0.82rem;color:var(--star);}
-  .spotlight-ig-btn{display:inline-flex;align-items:center;gap:0.5rem;margin-top:1.5rem;padding:0.65rem 1.4rem;border:1px solid rgba(200,169,110,0.4);color:var(--gold);font-size:0.8rem;letter-spacing:0.08em;border-radius:2px;text-decoration:none;transition:background 0.2s,color 0.2s;width:fit-content;}
+  .spotlight-ig-btn{display:inline-flex;align-items:center;gap:0.5rem;margin-top:1.5rem;padding:0.65rem 1.4rem;border:1px solid rgba(255,106,26,0.4);color:var(--gold);font-size:0.8rem;letter-spacing:0.08em;border-radius:2px;text-decoration:none;transition:background 0.2s,color 0.2s;width:fit-content;}
   .spotlight-ig-btn:hover{background:var(--gold);color:var(--night);}
   @media(max-width:900px){
     .spotlight-card{grid-template-columns:1fr;}
@@ -402,10 +402,10 @@
   <div style="max-width:640px;margin:0 auto;text-align:center;padding:5rem 2rem;">
     <div class="section-label" style="justify-content:center;margin-bottom:1rem;">Stay in the loop</div>
     <h2 class="section-title" style="font-size:2.2rem;">Field notes, straight<br>to your <em>inbox</em></h2>
-    <div style="margin-top:2rem;padding:1.5rem 2rem;background:rgba(200,169,110,0.06);border:1px solid rgba(200,169,110,0.2);border-radius:2px;font-size:0.85rem;color:var(--muted);line-height:1.7;"><strong style="color:var(--gold);">📬 Newsletter launching soon!</strong> Drop your email below and you'll be first to receive monthly field notes, new images, and technique breakdowns.</div>
+    <div style="margin-top:2rem;padding:1.5rem 2rem;background:rgba(255,106,26,0.06);border:1px solid rgba(255,106,26,0.2);border-radius:2px;font-size:0.85rem;color:var(--muted);line-height:1.7;"><strong style="color:var(--gold);">📬 Newsletter launching soon!</strong> Drop your email below and you'll be first to receive monthly field notes, new images, and technique breakdowns.</div>
     <div style="display:flex;gap:0.8rem;margin-top:1.2rem;flex-wrap:wrap;justify-content:center;">
-      <input id="nl-email" type="email" placeholder="your@email.com" style="flex:1;min-width:260px;background:var(--night);border:1px solid var(--dim);border-radius:2px;padding:0.85rem 1.2rem;color:var(--star);font-family:'Outfit',sans-serif;font-size:0.88rem;outline:none;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--dim)'">
-      <button onclick="handleNewsletter()" style="background:linear-gradient(135deg,var(--gold),#a07840);color:var(--night);border:none;padding:0.85rem 2rem;font-family:'Outfit',sans-serif;font-size:0.88rem;font-weight:500;border-radius:2px;cursor:pointer;letter-spacing:0.04em;">Notify Me</button>
+      <input id="nl-email" type="email" placeholder="your@email.com" style="flex:1;min-width:260px;background:var(--night);border:1px solid var(--dim);border-radius:2px;padding:0.85rem 1.2rem;color:var(--star);font-family:'Barlow',sans-serif;font-size:0.88rem;outline:none;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--dim)'">
+      <button onclick="handleNewsletter()" style="background:linear-gradient(135deg,var(--gold),#C2470A);color:var(--night);border:none;padding:0.85rem 2rem;font-family:'Barlow',sans-serif;font-size:0.88rem;font-weight:500;border-radius:2px;cursor:pointer;letter-spacing:0.04em;">Notify Me</button>
     </div>
     <p style="margin-top:0.9rem;font-size:0.75rem;color:var(--muted);">No spam. Unsubscribe anytime.</p>
   </div>
@@ -417,8 +417,8 @@
   .cat-card:hover .hub-arrow{opacity:1!important;transform:translateX(4px)!important;}
   .photo-item:hover img{transform:scale(1.04);filter:brightness(1)!important;}
   .photo-item:hover .photo-item-overlay{opacity:1;}
-  .photo-item-overlay{position:absolute;inset:0;background:rgba(5,11,24,0.75);opacity:0;transition:opacity 0.3s;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;text-align:center;}
-  .photo-item-tag{font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.14em;color:var(--aurora);margin-bottom:0.5rem;}
+  .photo-item-overlay{position:absolute;inset:0;background:rgba(11,13,18,0.75);opacity:0;transition:opacity 0.3s;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;text-align:center;}
+  .photo-item-tag{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;letter-spacing:0.14em;color:var(--aurora);margin-bottom:0.5rem;}
   .photo-item-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:300;line-height:1.3;}
   @keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
   @keyframes pulse{0%,100%{opacity:0.3}50%{opacity:1}}
@@ -433,12 +433,12 @@
 const nebulaCanvas=document.getElementById('nebula-canvas');
 const nCtx=nebulaCanvas.getContext('2d');
 const BLOBS=[
-  {xr:0.18,yr:0.28,r:0.32,color:[123,140,222],speed:0.000011,phase:0.0},
-  {xr:0.72,yr:0.55,r:0.26,color:[79,196,160],speed:0.000008,phase:1.8},
-  {xr:0.50,yr:0.75,r:0.22,color:[180,100,210],speed:0.000013,phase:3.5},
-  {xr:0.85,yr:0.20,r:0.18,color:[200,169,110],speed:0.000009,phase:0.9},
-  {xr:0.30,yr:0.60,r:0.20,color:[100,160,220],speed:0.000010,phase:2.4},
-  {xr:0.62,yr:0.35,r:0.15,color:[200,90,160],speed:0.000014,phase:5.1},
+  {xr:0.18,yr:0.28,r:0.32,color:[138,148,166],speed:0.000011,phase:0.0},
+  {xr:0.72,yr:0.55,r:0.26,color:[255,106,26],speed:0.000008,phase:1.8},
+  {xr:0.50,yr:0.75,r:0.22,color:[70,80,100],speed:0.000013,phase:3.5},
+  {xr:0.85,yr:0.20,r:0.18,color:[110,120,140],speed:0.000009,phase:0.9},
+  {xr:0.30,yr:0.60,r:0.20,color:[90,100,120],speed:0.000010,phase:2.4},
+  {xr:0.62,yr:0.35,r:0.15,color:[90,100,120],speed:0.000014,phase:5.1},
 ];
 const starCanvas=document.getElementById('star-canvas');
 const sCtx=starCanvas.getContext('2d');
@@ -458,8 +458,8 @@ function animate(t){
     const cx=(b.xr+drift)*w,cy=(b.yr+drift*0.6)*h,rad=b.r*Math.min(w,h);
     const [r,g,bl]=b.color;
     const grd=nCtx.createRadialGradient(cx,cy,0,cx,cy,rad);
-    grd.addColorStop(0,`rgba(${r},${g},${bl},0.18)`);
-    grd.addColorStop(0.4,`rgba(${r},${g},${bl},0.10)`);
+    grd.addColorStop(0,`rgba(${r},${g},${bl},0.12)`);
+    grd.addColorStop(0.4,`rgba(${r},${g},${bl},0.06)`);
     grd.addColorStop(1,`rgba(${r},${g},${bl},0)`);
     nCtx.fillStyle=grd;nCtx.beginPath();nCtx.arc(cx,cy,rad,0,Math.PI*2);nCtx.fill();
   });
@@ -467,7 +467,7 @@ function animate(t){
   stars.forEach(s=>{
     const tw=s.alpha*(0.65+0.35*Math.sin(t*s.speed*0.001+s.phase));
     sCtx.beginPath();sCtx.arc(s.x,s.y,s.r,0,Math.PI*2);
-    sCtx.fillStyle=`rgba(232,224,204,${tw})`;sCtx.fill();
+    sCtx.fillStyle=`rgba(242,235,221,${tw})`;sCtx.fill();
   });
   requestAnimationFrame(animate);
 }
@@ -503,7 +503,7 @@ function gS(id){return document.getElementById(id);}
 // NAV scroll
 window.addEventListener('scroll',()=>{
   const n=document.querySelector('nav');
-  if(n)n.style.background=window.scrollY>60?'rgba(5,11,24,0.97)':'rgba(5,11,24,0.92)';
+  if(n)n.style.background=window.scrollY>60?'rgba(11,13,18,0.97)':'rgba(11,13,18,0.92)';
 });
 // Hamburger
 const hb=document.getElementById('hamburger');

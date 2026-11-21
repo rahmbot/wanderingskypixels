@@ -1,0 +1,52 @@
+/* WanderingSkyPixels — shared theme: "Midnight ember"
+   One place for site colors and fonts. Page-level <style> blocks
+   use the variable names below, so changing a value here recolors
+   every page. Legacy names (--gold, --star, etc.) are kept so the
+   existing markup keeps working. */
+
+:root {
+  /* Core palette */
+  --ink:        #0B0D12;  /* page background */
+  --ink-2:      #101319;  /* alternate section */
+  --ink-3:      #151922;  /* raised section */
+  --panel:      #1A1F2B;  /* cards */
+  --panel-2:    #232A38;  /* hover / highlight surfaces */
+  --line:       #262C38;  /* borders, dividers */
+  --sand:       #F2EBDD;  /* primary text, headlines */
+  --steel:      #8A94A6;  /* secondary text, labels */
+  --ember:      #FF6A1A;  /* the one accent: buttons, links, active states */
+  --ember-deep: #C2470A;  /* accent gradients, pressed states */
+  --ember-soft: #FFB27A;  /* tags, secondary highlights */
+
+  /* Legacy names mapped onto the new palette */
+  --night:   var(--ink);
+  --deep:    var(--ink-2);
+  --mid:     var(--ink-3);
+  --card:    var(--panel);
+  --horizon: var(--panel-2);
+  --dim:     var(--line);
+  --star:    var(--sand);
+  --muted:   var(--steel);
+  --gold:    var(--ember);
+  --aurora:  var(--ember-soft);
+  --nebula:  var(--steel);
+
+  /* Type */
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'Barlow', system-ui, sans-serif;
+  --font-label:   'Barlow Condensed', 'Barlow', sans-serif;
+}
+
+html { background: var(--ink); }
+body { color: var(--sand); }
+
+::selection { background: var(--ember); color: #1A0A00; }
+
+/* Labels were DM Mono at light weights; the condensed sans needs a
+   touch more weight to hold up at small sizes. */
+[style*="Barlow Condensed"] { font-weight: 500; }
+
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 3px;
+}
