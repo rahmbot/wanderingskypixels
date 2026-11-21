@@ -181,6 +181,17 @@
     .spot-hero{padding:2rem;min-height:220px;}
   }
 
+
+  /* HERO FILM — plays once over the hero, then fades to the static hero */
+  #hero-film{position:absolute;inset:0;z-index:5;background:var(--night);opacity:0;pointer-events:none;transition:opacity 0.9s ease;}
+  #hero-film.is-playing{opacity:1;pointer-events:auto;}
+  #hero-film video{width:100%;height:100%;object-fit:cover;display:block;}
+  #hero-film::after{content:"";position:absolute;inset:auto 0 0 0;height:30%;background:linear-gradient(to top,var(--night),transparent);pointer-events:none;}
+  .film-skip{position:absolute;right:2rem;bottom:2rem;z-index:6;font-family:'Barlow Condensed',sans-serif;font-weight:500;font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--star);background:rgba(11,13,18,0.55);border:1px solid rgba(242,235,221,0.35);padding:0.55rem 1.1rem;border-radius:2px;cursor:pointer;backdrop-filter:blur(6px);}
+  .film-skip:hover{border-color:var(--gold);color:var(--gold);}
+  .film-replay{margin-top:1.4rem;background:none;border:none;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:500;font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;display:none;}
+  .film-replay:hover{color:var(--gold);}
+  .film-replay.is-visible{display:inline-block;}
 </style>
 </head>
 <body>
@@ -228,6 +239,11 @@
 
 <!-- HERO -->
 <section id="hero" style="position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 2rem 4rem;z-index:2;">
+  <!-- HERO FILM: drop files into /video/ (see video/README.md). Until they exist this stays invisible. -->
+  <div id="hero-film" aria-hidden="true" data-src-mp4="/video/hero-film.mp4" data-src-webm="/video/hero-film.webm" data-poster="/video/hero-film-poster.jpg">
+    <button class="film-skip" type="button">Skip film</button>
+  </div>
+
   <p style="font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;letter-spacing:0.24em;text-transform:uppercase;color:var(--aurora);margin-bottom:1.6rem;opacity:0;animation:fadeUp 0.8s 0.2s forwards;">Landscape · Cityscape · Astro · Aerial Photography</p>
   <h1 style="font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,8vw,7rem);font-weight:300;line-height:1.05;opacity:0;animation:fadeUp 0.9s 0.4s forwards;">Where the <em style="font-style:italic;color:var(--gold);">sky</em> meets the earth</h1>
   <p style="margin-top:1.6rem;font-size:1.05rem;color:var(--muted);max-width:560px;line-height:1.7;opacity:0;animation:fadeUp 0.9s 0.6s forwards;">Chasing light from Atlanta's skyline to remote dark sky sanctuaries — capturing the world through long exposures, star trails, and bird's-eye perspectives.</p>
@@ -235,6 +251,7 @@
     <a href="portfolio/index.html" class="btn-primary">View Portfolio</a>
     <a href="portfolio/atlanta.html" class="btn-outline">Atlanta Work</a>
   </div>
+  <button class="film-replay" type="button">&#9654; Watch the film</button>
   <div style="position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0.5rem;color:var(--muted);font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;opacity:0;animation:fadeUp 1s 1.2s forwards;">
     <div style="width:1px;height:48px;background:linear-gradient(to bottom,var(--gold),transparent);animation:pulse 2s infinite;"></div>
     scroll
@@ -562,6 +579,59 @@ document.querySelectorAll('.reveal').forEach((el,i)=>{
   el.style.transition=`opacity 0.55s ease ${(i%4)*0.07}s,transform 0.55s ease ${(i%4)*0.07}s`;
   ro.observe(el);
 });
+</script>
+
+<script>
+/* Hero film: plays once per visit, muted, then fades away to reveal the hero.
+   Skipped for reduced-motion and data-saver visitors, and silently does nothing
+   if the video files aren't uploaded yet. */
+(function(){
+  const wrap=document.getElementById('hero-film'); if(!wrap) return;
+  const replay=document.querySelector('.film-replay');
+  const skipBtn=wrap.querySelector('.film-skip');
+  const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const saveData=navigator.connection&&navigator.connection.saveData;
+  let seen=false; try{seen=sessionStorage.getItem('wsp-film-seen')==='1';}catch(e){}
+  let video=null;
+
+  function finish(){
+    wrap.classList.remove('is-playing');
+    try{sessionStorage.setItem('wsp-film-seen','1');}catch(e){}
+    if(video){setTimeout(()=>{video.pause();},900);}
+    if(replay&&video&&video.dataset.ok) replay.classList.add('is-visible');
+  }
+  function build(){
+    if(video) return video;
+    video=document.createElement('video');
+    video.muted=true; video.playsInline=true; video.setAttribute('playsinline','');
+    video.preload='auto'; video.poster=wrap.dataset.poster||'';
+    [['webm','video/webm'],['mp4','video/mp4']].forEach(([k,t])=>{
+      const u=wrap.dataset['src'+k[0].toUpperCase()+k.slice(1)]; if(!u) return;
+      const src=document.createElement('source'); src.src=u; src.type=t; video.appendChild(src);
+    });
+    // If no source loads (files not uploaded yet), remove the film layer entirely.
+    const last=video.querySelector('source:last-of-type');
+    if(last) last.addEventListener('error',()=>{wrap.remove(); if(replay) replay.remove();});
+    video.addEventListener('playing',()=>{video.dataset.ok='1'; wrap.classList.add('is-playing');});
+    video.addEventListener('ended',finish);
+    wrap.insertBefore(video,skipBtn);
+    return video;
+  }
+  function play(){ const v=build(); v.currentTime=0; const p=v.play(); if(p&&p.catch) p.catch(()=>finish()); }
+
+  skipBtn.addEventListener('click',finish);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&wrap.classList.contains('is-playing')) finish();});
+  if(replay) replay.addEventListener('click',play);
+
+  if(reduce||saveData||seen){
+    // Don't autoplay; still offer the film if the files exist.
+    if(!reduce){ const probe=build(); probe.preload='metadata';
+      probe.addEventListener('loadedmetadata',()=>{probe.dataset.ok='1'; if(replay) replay.classList.add('is-visible');}); }
+    else if(replay){ replay.remove(); }
+    return;
+  }
+  play();
+})();
 </script>
 </body>
 </html>
